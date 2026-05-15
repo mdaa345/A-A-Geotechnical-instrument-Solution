@@ -15,7 +15,7 @@
             <div>
                 <div class="flex items-center gap-2 px-2 py-3 border-b border-slate-700">
                     <span class="text-lg font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">A&A GEOTECH</span>
-                    <span class="text-xs bg-cyan-500/10 text-cyan-400 px-1.5 py-0.5 rounded border border-cyan-500/20 font-mono">v2.0</span>
+                    <span class="text-xs bg-cyan-500/10 text-cyan-400 px-1.5 py-0.5 rounded border border-cyan-500/20 font-mono">v2.1</span>
                 </div>
                 <nav class="mt-6 space-y-1">
                     <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium bg-cyan-600/10 text-cyan-400 border border-cyan-500/20">
@@ -30,7 +30,7 @@
                 </nav>
             </div>
             <div class="text-xs text-slate-500 border-t border-slate-700 pt-4">
-                Advanced Database Connected Panel
+                Auto-Scaling Enabled Dashboard
             </div>
         </div>
 
@@ -39,7 +39,7 @@
             <header class="bg-[#1e293b]/50 backdrop-blur border-b border-slate-700 px-6 py-4 flex items-center justify-between sticky top-0 z-10">
                 <div>
                     <h1 class="text-lg font-semibold text-slate-200">Inclinometer Live Plotting Panel</h1>
-                    <p class="text-xs text-slate-400">Upload your field data below to process instantly</p>
+                    <p class="text-xs text-slate-400">Dynamic Auto-Scale View for Small Data Variations</p>
                 </div>
                 <button onclick="loadSampleData()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium px-3 py-2 rounded-lg border border-slate-700 transition">
                     🔄 Load Demo Sample
@@ -59,14 +59,14 @@
                     </div>
                     <div class="bg-[#1e293b] border border-rose-500/20 rounded-xl p-4 flex items-center justify-between shadow-xl">
                         <div><p class="text-xs text-slate-400 uppercase">Alarm Limit</p><h3 class="text-xl font-bold text-rose-400 mt-1">&gt; 25 mm</h3></div>
-                        <span class="h-3 w-3 rounded-full bg-rose-500 animate-ping"></span>
+                        <span class="h-3 w-3 rounded-full bg-rose-500"></span>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     
                     <div class="lg:col-span-2 bg-[#1e293b] border border-slate-700 rounded-xl p-4 h-[550px] shadow-2xl flex flex-col">
-                        <span class="text-xs font-semibold text-slate-400 mb-2">📊 Live Cumulative Displacement Profile</span>
+                        <span class="text-xs font-semibold text-slate-400 mb-2">📊 Live Cumulative Displacement Profile (Auto-Scale)</span>
                         <div class="flex-1 relative">
                             <canvas id="inclinometerChart"></canvas>
                         </div>
@@ -87,8 +87,8 @@
                         <div class="bg-[#1e293b] border border-slate-700 rounded-xl p-4 shadow-xl flex-1 flex flex-col overflow-hidden">
                             <h3 class="text-sm font-semibold text-slate-300 mb-2">✍️ Option 2: Manual Entry Table</h3>
                             <div class="flex gap-2 mb-2">
-                                <input type="number" id="inputDepth" placeholder="Depth (m)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs w-full focus:outline-none focus:border-cyan-500 text-slate-200">
-                                <input type="number" id="inputDisp" placeholder="Disp (mm)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs w-full focus:outline-none focus:border-cyan-500 text-slate-200">
+                                <input type="number" id="inputDepth" step="any" placeholder="Depth (m)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs w-full focus:outline-none focus:border-cyan-500 text-slate-200">
+                                <input type="number" id="inputDisp" step="any" placeholder="Disp (mm)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs w-full focus:outline-none focus:border-cyan-500 text-slate-200">
                                 <button onclick="addManualData()" class="bg-cyan-600 hover:bg-cyan-700 text-white text-xs px-3 py-1 rounded font-bold transition">Add</button>
                             </div>
                             
@@ -101,7 +101,7 @@
                                         </tbody>
                                 </table>
                             </div>
-                            <button onclick="plotCurrentData()" class="mt-3 w-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-xs py-2 rounded-lg transition shadow-lg shadow-cyan-500/10">
+                            <button onclick="plotCurrentData()" class="mt-3 w-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-xs py-2 rounded-lg transition">
                                 🚀 Plot Current Table Data
                             </button>
                         </div>
@@ -122,7 +122,7 @@
 
     <script>
         let currentChart = null;
-        let tableData = []; // Store current active table data
+        let tableData = [];
 
         window.onload = function() {
             initInclinometerChart([], []);
@@ -131,6 +131,9 @@
         function initInclinometerChart(depths, displacement) {
             const ctx = document.getElementById('inclinometerChart').getContext('2d');
             if (currentChart) { currentChart.destroy(); }
+
+            // Dynamic grid lines based on data size
+            const maxVal = displacement.length > 0 ? Math.max(...displacement, 5) : 35;
 
             currentChart = new Chart(ctx, {
                 type: 'line',
@@ -143,28 +146,37 @@
                             borderColor: '#22d3ee',
                             backgroundColor: 'rgba(34, 211, 238, 0.05)',
                             borderWidth: 2.5,
-                            tension: 0.3,
-                            pointRadius: 4,
+                            tension: 0.2,
+                            pointRadius: 3,
                             fill: true,
-                            indexAxis: 'y' // Inverts chart vertically
-                        },
-                        { label: 'Attention (10mm)', data: Array(depths.length).fill(10), borderColor: 'rgba(16, 185, 129, 0.4)', borderWidth: 1, borderDash: [4, 4], pointRadius: 0, indexAxis: 'y', fill: false },
-                        { label: 'Alarm (25mm)', data: Array(depths.length).fill(25), borderColor: 'rgba(245, 158, 11, 0.4)', borderWidth: 1, borderDash: [4, 4], pointRadius: 0, indexAxis: 'y', fill: false }
+                            indexAxis: 'y'
+                        }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        x: { type: 'linear', position: 'top', title: { display: true, text: 'Displacement (mm)', color: '#94a3b8' }, grid: { color: '#334155' }, ticks: { color: '#94a3b8' }, min: -5, max: 35 },
-                        y: { title: { display: true, text: 'Depth (meters)', color: '#94a3b8' }, grid: { color: '#334155' }, ticks: { color: '#94a3b8' }, reverse: true }
+                        x: { 
+                            type: 'linear', 
+                            position: 'top', 
+                            title: { display: true, text: 'Displacement (mm)', color: '#94a3b8' }, 
+                            grid: { color: '#334155' }, 
+                            ticks: { color: '#94a3b8' }
+                            // Fixed limits removed here for auto-scaling!
+                        },
+                        y: { 
+                            title: { display: true, text: 'Depth (meters)', color: '#94a3b8' }, 
+                            grid: { color: '#334155' }, 
+                            ticks: { color: '#94a3b8' }, 
+                            reverse: true 
+                        }
                     },
                     plugins: { legend: { display: false } }
                 }
             });
         }
 
-        // Handle CSV File Upload
         function handleFileUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -173,8 +185,7 @@
             reader.onload = function(e) {
                 const text = e.target.result;
                 const lines = text.split('\n');
-                
-                tableData = []; // Reset existing data
+                tableData = [];
                 
                 lines.forEach(line => {
                     const parts = line.split(',');
@@ -187,7 +198,6 @@
                     }
                 });
 
-                // Sort data by depth automatically
                 tableData.sort((a, b) => a.depth - b.depth);
                 updateTableUI();
                 plotCurrentData();
@@ -195,7 +205,6 @@
             reader.readAsText(file);
         }
 
-        // Add Manual Entry to Table
         function addManualData() {
             const depthInput = document.getElementById('inputDepth');
             const dispInput = document.getElementById('inputDisp');
@@ -203,21 +212,18 @@
             const disp = parseFloat(dispInput.value);
 
             if (isNaN(depth) || isNaN(disp)) {
-                alert("Please enter valid numeric values for Depth and Displacement.");
+                alert("Please enter valid numbers.");
                 return;
             }
 
             tableData.push({ depth, disp });
             tableData.sort((a, b) => a.depth - b.depth);
-            
             updateTableUI();
             
-            // Clear inputs for next entry
             depthInput.value = '';
             dispInput.value = '';
         }
 
-        // Update HTML Table Interface
         function updateTableUI() {
             const tbody = document.getElementById('dataTableBody');
             tbody.innerHTML = '';
@@ -229,7 +235,6 @@
             });
         }
 
-        // Process and Plot current table data onto Chart
         function plotCurrentData() {
             if (tableData.length === 0) return;
 
@@ -246,25 +251,24 @@
             maxDispTxt.innerText = `${maxDisp.toFixed(2)} mm`;
 
             if(maxDisp > 25) {
-                maxDispTxt.className = "font-bold text-rose-400 animate-pulse text-sm";
+                maxDispTxt.className = "font-bold text-rose-400 text-sm";
                 alertBox.className = "bg-rose-500/10 border border-rose-500/30 rounded-lg p-3 text-xs";
-                alertTxt.innerHTML = `🚨 <strong>ALARM CRITICAL:</strong> Deflection (${maxDisp.toFixed(2)}mm) exceeded safe trigger design threshold limits!`;
+                alertTxt.innerHTML = `🚨 <strong>ALARM CRITICAL:</strong> Displacement exceeded limits.`;
             } else if(maxDisp > 10) {
                 maxDispTxt.className = "font-bold text-amber-400 text-sm";
                 alertBox.className = "bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 text-xs";
-                alertTxt.innerHTML = `⚠️ <strong>Action Warning:</strong> Movement is within warning parameters. Accelerate tracking intervals.`;
+                alertTxt.innerHTML = `⚠️ <strong>Action Warning:</strong> Movement detected in warning zone.`;
             } else {
                 maxDispTxt.className = "font-bold text-emerald-400 text-sm";
                 alertBox.className = "bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-3 text-xs";
-                alertTxt.innerHTML = `✅ <strong>System Stable:</strong> Current calculated active profiles are safe within design baseline limits.`;
+                alertTxt.innerHTML = `✅ <strong>System Stable:</strong> Current data is within safe limits.`;
             }
         }
 
-        // Load Sample Parabolic Demo Data
         function loadSampleData() {
             tableData = [];
-            for (let d = 0; d <= 30; d += 1.5) {
-                let disp = Math.sin((d / 30) * Math.PI) * 26.4 + (Math.random() * 0.5);
+            for (let d = 0; d <= 20; d += 0.5) {
+                let disp = Math.sin((d / 20) * Math.PI) * 1.4 + (Math.random() * 0.2);
                 tableData.push({ depth: d, disp: parseFloat(disp.toFixed(2)) });
             }
             updateTableUI();
