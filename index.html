@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geo-Analytics | Real-Time Instrumentation Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-[#0f172a] text-slate-100 font-sans antialiased">
+
+    <div class="flex h-screen overflow-hidden">
+        
+        <div class="w-64 bg-[#1e293b] border-r border-slate-700 p-4 flex flex-col justify-between hidden md:flex">
+            <div>
+                <div class="flex items-center gap-2 px-2 py-3 border-b border-slate-700">
+                    <span class="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">GEO-ANALYTICS</span>
+                    <span class="text-xs bg-cyan-500/10 text-cyan-400 px-1.5 py-0.5 rounded border border-cyan-500/20 font-mono">v1.0</span>
+                </div>
+                <nav class="mt-6 space-y-1">
+                    <a href="#" onclick="switchTab('inclinometer')" id="nav-inclinometer" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium bg-cyan-600/10 text-cyan-400 border border-cyan-500/20">
+                        📊 Lateral Deflection (Inclinometer)
+                    </a>
+                    <a href="#" onclick="switchTab('strut')" id="nav-strut" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition">
+                        🏗️ Strut Load Monitoring
+                    </a>
+                    <a href="#" onclick="switchTab('tunnel')" id="nav-tunnel" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition">
+                        🚇 Tunnel Convergence (NATM)
+                    </a>
+                </nav>
+            </div>
+            <div class="text-xs text-slate-500 border-t border-slate-700 pt-4">
+                Designed for Geotechnical Engineers
+            </div>
+        </div>
+
+        <div class="flex-1 flex flex-col overflow-y-auto">
+            
+            <header class="bg-[#1e293b]/50 backdrop-blur border-b border-slate-700 px-6 py-4 flex items-center justify-between sticky top-0 z-10">
+                <div>
+                    <h1 class="text-lg font-semibold text-slate-200" id="module-title">Inclinometer Displacement Profile</h1>
+                    <p class="text-xs text-slate-400">Project: Line-1 Metro Tunnel & Deep Excavation</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="loadSampleData()" class="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow-lg shadow-cyan-500/10 transition flex items-center gap-2">
+                        🔄 Load Sample Data
+                    </button>
+                </div>
+            </header>
+
+            <main class="p-6 space-y-6 flex-1">
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-[#1e293b] border border-emerald-500/20 rounded-xl p-4 flex items-center justify-between shadow-xl">
+                        <div>
+                            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Attention Limit</p>
+                            <h3 class="text-xl font-bold text-emerald-400 mt-1">&lt; 10 mm</h3>
+                        </div>
+                        <span class="h-3 w-3 rounded-full bg-emerald-500 animate-pulse"></span>
+                    </div>
+                    <div class="bg-[#1e293b] border border-amber-500/20 rounded-xl p-4 flex items-center justify-between shadow-xl">
+                        <div>
+                            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Action Limit</p>
+                            <h3 class="text-xl font-bold text-amber-400 mt-1">10 mm - 25 mm</h3>
+                        </div>
+                        <span class="h-3 w-3 rounded-full bg-amber-500"></span>
+                    </div>
+                    <div class="bg-[#1e293b] border border-rose-500/20 rounded-xl p-4 flex items-center justify-between shadow-xl">
+                        <div>
+                            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Alarm Limit</p>
+                            <h3 class="text-xl font-bold text-rose-400 mt-1">&gt; 25 mm</h3>
+                        </div>
+                        <span class="h-3 w-3 rounded-full bg-rose-500 animate-ping"></span>
+                    </div>
+                </div>
+
+                <div id="inclinometer-tab" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 bg-[#1e293b] border border-slate-700 rounded-xl p-4 h-[550px] shadow-2xl flex flex-col">
+                        <span class="text-xs font-semibold text-slate-400 mb-2">📊 Cumulative Displacement Profile (A-Axis)</span>
+                        <div class="flex-1 relative">
+                            <canvas id="inclinometerChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-[#1e293b] border border-slate-700 rounded-xl p-5 shadow-2xl flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-sm font-semibold text-slate-300 border-b border-slate-700 pb-2">Analysis & Instrument Info</h3>
+                            <div class="mt-4 space-y-3 text-xs">
+                                <div class="flex justify-between py-1 border-b border-slate-800">
+                                    <span class="text-slate-400">Instrument ID:</span>
+                                    <span class="font-mono text-cyan-400 font-semibold">INC-DW-04A</span>
+                                </div>
+                                <div class="flex justify-between py-1 border-b border-slate-800">
+                                    <span class="text-slate-400">Total Depth:</span>
+                                    <span class="text-slate-200">30.0 Meters</span>
+                                </div>
+                                <div class="flex justify-between py-1 border-b border-slate-800">
+                                    <span class="text-slate-400">Interval:</span>
+                                    <span class="text-slate-200">0.5 Meter</span>
+                                </div>
+                                <div class="flex justify-between py-1 border-b border-slate-800">
+                                    <span class="text-slate-400">Max Displacement:</span>
+                                    <span id="max-disp-val" class="font-bold text-emerald-400">-- mm</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="alert-box" class="bg-slate-800/50 border border-slate-700 rounded-lg p-3 text-xs mt-4">
+                            <span class="text-slate-400 block font-medium mb-1">💡 System Diagnostic:</span>
+                            <p id="alert-text" class="text-slate-300">Awaiting data injection. Click "Load Sample Data" to plot engineering profile.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="other-tabs" class="hidden bg-[#1e293b] border border-slate-700 rounded-xl p-10 text-center text-slate-400">
+                    This module layout is optimized. Fully dynamic plotting is simulated on the Inclinometer tab.
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <script>
+        let currentChart = null;
+
+        // Initialize empty chart on load
+        window.onload = function() {
+            initInclinometerChart([], []);
+        };
+
+        function switchTab(tabName) {
+            const tabs = ['inclinometer', 'strut', 'tunnel'];
+            tabs.forEach(t => {
+                const nav = document.getElementById(`nav-${t}`);
+                if(t === tabName) {
+                    nav.className = "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium bg-cyan-600/10 text-cyan-400 border border-cyan-500/20";
+                } else {
+                    nav.className = "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition";
+                }
+            });
+
+            if(tabName === 'inclinometer') {
+                document.getElementById('inclinometer-tab').classList.remove('hidden');
+                document.getElementById('other-tabs').classList.add('hidden');
+                document.getElementById('module-title').innerText = "Inclinometer Displacement Profile";
+            } else {
+                document.getElementById('inclinometer-tab').classList.add('hidden');
+                document.getElementById('other-tabs').classList.remove('hidden');
+                document.getElementById('module-title').innerText = tabName === 'strut' ? "Strut Load Monitoring (Load Cells)" : "Tunnel Convergence Profile";
+                document.getElementById('other-tabs').innerText = `📊 Dynamic Dashboard UI for ${tabName.toUpperCase()} is connected. Click on Inclinometer tab to view live charts.`;
+            }
+        }
+
+        function initInclinometerChart(depths, displacement) {
+            const ctx = document.getElementById('inclinometerChart').getContext('2d');
+            
+            if (currentChart) {
+                currentChart.destroy();
+            }
+
+            // Creating specialized Vertical Plotting for Geotechnical Engineers (Displacement vs Depth)
+            currentChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: depths, // Y-axis values mapped mathematically
+                    datasets: [
+                        {
+                            label: 'Cumulative Displacement (mm)',
+                            data: displacement,
+                            borderColor: '#22d3ee',
+                            backgroundColor: 'rgba(34, 211, 238, 0.05)',
+                            borderWidth: 2.5,
+                            tension: 0.3,
+                            pointRadius: 3,
+                            pointHoverRadius: 6,
+                            fill: true,
+                            indexAxis: 'y' // This critical property flips the chart vertically!
+                        },
+                        // Trigger Level Dotted Target Lines
+                        { label: 'Attention Limit (10mm)', data: Array(depths.length).fill(10), borderColor: 'rgba(16, 185, 129, 0.4)', borderWidth: 1.5, borderDash: [4, 4], pointRadius: 0, indexAxis: 'y', fill: false },
+                        { label: 'Action Limit (25mm)', data: Array(depths.length).fill(25), borderColor: 'rgba(245, 158, 11, 0.4)', borderWidth: 1.5, borderDash: [4, 4], pointRadius: 0, indexAxis: 'y', fill: false }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            position: 'top', // Standard engineering presentation format
+                            title: { display: true, text: 'Displacement (mm)', color: '#94a3b8', font: { weight: 'bold' } },
+                            grid: { color: '#334155' },
+                            ticks: { color: '#94a3b8' },
+                            min: -5,
+                            max: 35
+                        },
+                        y: {
+                            title: { display: true, text: 'Depth (meters)', color: '#94a3b8', font: { weight: 'bold' } },
+                            grid: { color: '#334155' },
+                            ticks: { color: '#94a3b8' },
+                            reverse: true // Depths go deep down from surface (0m to 30m)
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        function loadSampleData() {
+            // Generating standard parabolic shear deformation profile typical of Diaphragm walls
+            const depths = [];
+            const displacement = [];
+            
+            for (let d = 0; d <= 30; d += 1) {
+                depths.push(d);
+                // Math calculation to mimic deflection curve peaking around middle depth (12m - 15m)
+                let disp = 0;
+                if(d >= 0 && d <= 30) {
+                    disp = Math.sin((d / 30) * Math.PI) * 26.4 + (Math.random() * 0.8);
+                }
+                displacement.push(parseFloat(disp.toFixed(2)));
+            }
+
+            initInclinometerChart(depths, displacement);
+
+            // Dynamically evaluate trigger state and report to UI panels
+            const maxDisp = Math.max(...displacement);
+            const maxDispTxt = document.getElementById('max-disp-val');
+            const alertBox = document.getElementById('alert-box');
+            const alertTxt = document.getElementById('alert-text');
+
+            maxDispTxt.innerText = `${maxDisp} mm`;
+
+            if(maxDisp > 25) {
+                maxDispTxt.className = "font-bold text-rose-400 animate-pulse text-sm";
+                alertBox.className = "bg-rose-500/10 border border-rose-500/30 rounded-lg p-3 text-xs mt-4";
+                alertTxt.className = "text-rose-300 font-medium";
+                alertTxt.innerHTML = `🚨 <strong>ALARM CRITICAL:</strong> Maximum movement of ${maxDisp}mm detected at middle zone! Exceeds design limit threshold.`;
+            } else if(maxDisp > 10) {
+                maxDispTxt.className = "font-bold text-amber-400 text-sm";
+                alertBox.className = "bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 text-xs mt-4";
+                alertTxt.className = "text-amber-300";
+                alertTxt.innerHTML = `⚠️ <strong>Action Warning:</strong> Movement is within structural mitigation zone. Monitor rate of movement closely.`;
+            } else {
+                maxDispTxt.className = "font-bold text-emerald-400 text-sm";
+                alertBox.className = "bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-3 text-xs mt-4";
+                alertTxt.className = "text-emerald-300";
+                alertTxt.innerHTML = `✅ <strong>System Status Stable:</strong> Current data indicates structural movement is within safe design boundaries.`;
+            }
+        }
+    </script>
+</body>
+</html>
