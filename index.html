@@ -8,7 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
         @media print {
             aside, header, .no-print { display: none !important; }
@@ -22,7 +22,7 @@
     <div id="login-screen" class="fixed inset-0 z-50 bg-slate-900 flex items-center justify-center p-4">
         <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md border border-gray-100 relative">
             
-            <div class="absolute top-4 right-4 text-slate-300 hover:text-blue-500 cursor-pointer transition text-xs" title="Admin Channel Security Active">
+            <div id="admin-trigger-icon" onclick="quickFillAdmin()" class="absolute top-4 right-4 text-slate-300 hover:text-red-500 cursor-pointer transition text-xs" title="Admin Quick Secure Portal">
                 <i class="fa-solid fa-shield-halved"></i>
             </div>
 
@@ -36,8 +36,8 @@
             
             <div id="form-signin" class="space-y-4">
                 <h2 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Account Portal</h2>
-                <input type="text" id="login-username" value="jahan.gir@aangeotech.com" placeholder="Username or Admin ID" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 font-medium">
-                <input type="password" id="login-password" value="••••••••" placeholder="Password" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 font-medium">
+                <input type="text" id="login-username" placeholder="Username, Email or Admin ID" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 font-medium">
+                <input type="password" id="login-password" placeholder="Password" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 font-medium">
                 
                 <div class="text-right">
                     <button onclick="toggleLoginViews('forgot')" class="text-[11px] text-blue-600 hover:underline font-medium">Forgot Password?</button>
@@ -52,11 +52,11 @@
 
             <div id="form-signup" class="space-y-4 hidden">
                 <h2 class="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-1">Create System Registry</h2>
-                <input type="text" placeholder="Full Name" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50">
-                <input type="email" placeholder="Official Email Address" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50">
-                <input type="password" placeholder="Choose Secure Password" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50">
+                <input type="text" id="reg-name" placeholder="Full Name" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50">
+                <input type="text" id="reg-username" placeholder="Choose Username" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50">
+                <input type="password" id="reg-password" placeholder="Choose Secure Password" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50">
                 
-                <button onclick="alert('Account request sent to Administration for verification approval.')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl transition text-xs shadow-md">Submit Registration</button>
+                <button onclick="handleRegister()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl transition text-xs shadow-md">Register Account</button>
                 
                 <div class="text-center pt-2">
                     <button onclick="toggleLoginViews('signin')" class="text-[11px] text-slate-500 hover:underline font-medium"><i class="fa-solid fa-arrow-left mr-1"></i> Back to Sign In</button>
@@ -65,10 +65,10 @@
 
             <div id="form-forgot" class="space-y-4 hidden">
                 <h2 class="text-xs font-bold text-amber-600 uppercase tracking-wider mb-1">Reset Access Key</h2>
-                <p class="text-[11px] text-slate-500 leading-relaxed">Enter your registered email address below. System engine will broadcast a password override link.</p>
-                <input type="email" placeholder="Enter Email ID" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500 bg-slate-50">
+                <p class="text-[11px] text-slate-500 leading-relaxed">Enter your registered username below to fetch your credential status.</p>
+                <input type="text" id="forgot-username" placeholder="Enter Registered Username" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500 bg-slate-50">
                 
-                <button onclick="alert('Password reset handshake token generated and sent via email.')" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-2.5 rounded-xl transition text-xs shadow-md">Send Override Link</button>
+                <button onclick="handleForgotPassword()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-2.5 rounded-xl transition text-xs shadow-md">Check Password</button>
                 
                 <div class="text-center pt-2">
                     <button onclick="toggleLoginViews('signin')" class="text-[11px] text-slate-500 hover:underline font-medium"><i class="fa-solid fa-arrow-left mr-1"></i> Back to Sign In</button>
@@ -80,4 +80,452 @@
 
     <aside id="sidebar" class="w-64 bg-slate-950 text-slate-200 flex flex-col hidden h-full border-r border-slate-800 no-print">
         <div class="p-5 border-b border-slate-900 bg-slate-950 text-center">
-            <h1 class="text-md font-black text-white uppercase tracking-tight
+            <h1 class="text-md font-black text-white uppercase tracking-tight">A&A GEOTECHNICAL</h1>
+            <p class="text-[10px] font-bold text-blue-500 tracking-widest uppercase">Monitoring Service</p>
+        </div>
+        <nav class="flex-1 p-4 space-y-1 overflow-y-auto text-sm">
+            <p class="text-[11px] text-slate-500 uppercase font-bold tracking-wider mb-2 px-3">Main Panel</p>
+            <a href="#" onclick="showTab('home')" class="nav-btn block px-4 py-2.5 rounded-xl bg-blue-600 text-white font-medium"><i class="fa-solid fa-chart-line w-6 text-base"></i> Dashboard Overview</a>
+            <a href="#" onclick="showTab('projects')" class="nav-btn block px-4 py-2.5 rounded-xl text-slate-400 hover:bg-slate-900 hover:text-slate-100 transition"><i class="fa-solid fa-folder w-6 text-base"></i> Project Details</a>
+            
+            <p class="text-[11px] text-slate-500 uppercase font-bold tracking-wider mb-2 mt-6 px-3">Instrumentation Core</p>
+            <a href="#" onclick="showTab('inc')" class="nav-btn block px-4 py-2.5 rounded-xl text-slate-400 hover:bg-slate-900 hover:text-slate-100 transition"><i class="fa-solid fa-arrow-down-up-lock w-6 text-base text-cyan-500"></i> Inclinometer Suite</a>
+            <a href="#" onclick="showTab('lc')" class="nav-btn block px-4 py-2.5 rounded-xl text-slate-400 hover:bg-slate-900 hover:text-slate-100 transition"><i class="fa-solid fa-weight-scale w-6 text-base text-amber-500"></i> Load Cell (3-Gauges)</a>
+            <a href="#" onclick="showTab('sg')" class="nav-btn block px-4 py-2.5 rounded-xl text-slate-400 hover:bg-slate-900 hover:text-slate-100 transition"><i class="fa-solid fa-gauge-high w-6 text-base text-emerald-500"></i> Strain Gauge</a>
+        </nav>
+        
+        <div class="p-4 bg-slate-900 border-t border-slate-800 flex items-center justify-between">
+            <div class="flex items-center">
+                <div class="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center font-bold text-white mr-3" id="profile-initial">US</div>
+                <div>
+                    <p class="text-sm font-bold text-white" id="profile-name">User Session</p>
+                    <p class="text-[11px] text-slate-400 font-medium" id="profile-role">Field Engineer</p>
+                </div>
+            </div>
+            <div id="sidebar-admin-icon" class="text-slate-600 text-sm hidden" title="Full Root Admin Control Active">
+                <i class="fa-solid fa-unlock-keyhole text-red-500 animate-pulse"></i>
+            </div>
+        </div>
+    </aside>
+
+    <main id="main-content" class="flex-1 flex flex-col h-full hidden bg-slate-50 overflow-hidden">
+        <header class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-6 z-10 no-print">
+            <div class="flex items-center space-x-2">
+                <span class="text-slate-400 font-medium text-sm" id="parent-breadcrumb">Main /</span>
+                <h2 id="page-title" class="text-base font-bold text-slate-900">Dashboard Overview</h2>
+            </div>
+            <div class="flex items-center space-x-3">
+                <div id="admin-header-badge" class="hidden bg-red-50 border border-red-200 text-red-700 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider"><i class="fa-solid fa-user-gear mr-1"></i> Root Administrator Account</div>
+                <button onclick="window.print()" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow flex items-center space-x-1.5 transition">
+                    <i class="fa-solid fa-print"></i> <span>Print / Generate PDF</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="p-6 overflow-y-auto flex-1 space-y-6 print-full">
+            
+            <div id="view-home" class="view-section space-y-6">
+                <div class="bg-white border border-slate-200 p-6 rounded-2xl flex items-center justify-between shadow-sm print-full relative overflow-hidden">
+                    <div id="admin-strip" class="absolute top-0 left-0 right-0 h-1 bg-red-600 hidden"></div>
+                    <div>
+                        <span class="text-blue-600 text-xs font-bold uppercase tracking-wider">Active Monitoring System</span>
+                        <h2 class="text-xl font-bold text-slate-900 mt-0.5" id="dash-proj-name">Loading...</h2>
+                        <p class="text-xs text-slate-500 mt-1" id="dash-proj-loc"><i class="fa-solid fa-location-dot mr-1"></i> Loading...</p>
+                    </div>
+                    <div class="text-right flex items-center space-x-4">
+                        <div>
+                            <span class="text-xs text-slate-400 block font-medium">Client Reference</span>
+                            <span class="text-sm font-bold text-slate-800 bg-slate-100 px-3 py-1 rounded-lg border border-slate-200 inline-block mt-1" id="dash-proj-client">Loading...</span>
+                        </div>
+                        <button id="admin-delete-project-btn" onclick="adminDeleteProject()" class="hidden bg-red-100 hover:bg-red-200 text-red-700 border border-red-200 p-2.5 rounded-xl text-xs font-bold transition no-print" title="Admin Force Wipe">
+                            <i class="fa-solid fa-folder-minus text-base"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="admin-control-panel-block" class="hidden bg-gradient-to-r from-red-900 to-slate-950 text-white p-5 rounded-2xl border border-red-800 shadow-xl no-print flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 rounded-xl bg-red-600/20 text-red-500 border border-red-500/30 flex items-center justify-center text-xl"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+                        <div>
+                            <h4 class="text-sm font-extrabold tracking-wide uppercase text-red-400">System Command Override Shell</h4>
+                            <p class="text-xs text-slate-400 mt-0.5">Full administrative write/delete execution privileges unlocked.</p>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="adminResetAllUsers()" class="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition"><i class="fa-solid fa-users-slash mr-1"></i> Purge Sub-Users</button>
+                        <button onclick="adminWipeDatabase()" class="bg-slate-800 hover:bg-slate-700 text-white font-bold px-4 py-2 rounded-xl text-xs border border-slate-700 transition"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Factory Reset DB</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5 no-print">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+                        <div class="p-3 rounded-xl bg-blue-50 text-blue-600 text-xl"><i class="fa-solid fa-hard-hat"></i></div>
+                        <div><p class="text-xs text-slate-500 font-medium">Lead Contractor</p><h3 class="text-sm font-bold text-slate-900" id="dash-proj-contractor">Loading...</h3></div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+                        <div class="p-3 rounded-xl bg-emerald-50 text-emerald-600 text-xl"><i class="fa-solid fa-circle-check"></i></div>
+                        <div><p class="text-xs text-slate-500 font-medium">System Engine Status</p><h3 class="text-sm font-bold text-emerald-600" id="engine-status-text">Active & Operational</h3></div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+                        <div class="p-3 rounded-xl bg-slate-50 text-slate-700 text-xl"><i class="fa-solid fa-database"></i></div>
+                        <div><p class="text-xs text-slate-500 font-medium">Data Security Mode</p><h3 class="text-sm font-bold text-slate-900" id="security-status-text">Standard Workspace</h3></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-projects" class="view-section hidden">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 max-w-2xl shadow-sm">
+                    <h3 class="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wider pb-2 border-b border-slate-100">Project Configuration Center</h3>
+                    <div class="grid grid-cols-1 gap-4">
+                        <div><label class="text-xs font-bold text-slate-500">Project Name</label><input type="text" id="setup-name" class="w-full border border-slate-200 rounded-xl p-2.5 text-xs mt-1 focus:ring-2 focus:ring-blue-500 outline-none font-medium"></div>
+                        <div><label class="text-xs font-bold text-slate-500">Client Name</label><input type="text" id="setup-client" class="w-full border border-slate-200 rounded-xl p-2.5 text-xs mt-1 focus:ring-2 focus:ring-blue-500 outline-none font-medium"></div>
+                        <div><label class="text-xs font-bold text-slate-500">Location Coordinates / Chainage</label><input type="text" id="setup-loc" class="w-full border border-slate-200 rounded-xl p-2.5 text-xs mt-1 focus:ring-2 focus:ring-blue-500 outline-none font-medium"></div>
+                        <div><label class="text-xs font-bold text-slate-500">Contractor Name</label><input type="text" id="setup-contractor" class="w-full border border-slate-200 rounded-xl p-2.5 text-xs mt-1 focus:ring-2 focus:ring-blue-500 outline-none font-medium"></div>
+                    </div>
+                    <button onclick="saveProjectData()" class="mt-5 bg-blue-600 text-white px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-blue-700 transition shadow-md"><i class="fa-solid fa-floppy-disk mr-1"></i> Save Project Parameters</button>
+                </div>
+            </div>
+
+            <div id="view-inc" class="view-section hidden space-y-4">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-6 shadow-sm no-print">
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                        <span class="text-xs font-bold text-blue-600 uppercase tracking-wider">Option A: CSV Log File Import</span>
+                        <input type="file" id="inc-file" class="text-xs mt-2" accept=".csv,.txt" onchange="processInclinometerCSV(event)">
+                    </div>
+                    <div class="p-4 bg-emerald-50/50 rounded-xl border border-emerald-100">
+                        <span class="text-xs font-bold text-emerald-700 uppercase tracking-wider">Option B: Manual Row Entry</span>
+                        <div class="grid grid-cols-3 gap-2 mt-2">
+                            <div><label class="text-[10px] text-slate-500 block font-bold">Depth (m)</label><input type="number" id="manual-inc-depth" step="0.5" class="w-full p-1.5 border border-slate-200 bg-white rounded text-xs"></div>
+                            <div><label class="text-[10px] text-slate-500 block font-bold">Base</label><input type="number" id="manual-inc-base" step="0.001" class="w-full p-1.5 border border-slate-200 bg-white rounded text-xs"></div>
+                            <div><label class="text-[10px] text-slate-500 block font-bold">Current</label><input type="number" id="manual-inc-curr" step="0.001" class="w-full p-1.5 border border-slate-200 bg-white rounded text-xs"></div>
+                        </div>
+                        <button onclick="addManualInclinometerRow()" class="mt-3 bg-emerald-600 text-white text-[11px] font-bold px-3 py-1.5 rounded hover:bg-emerald-700 transition w-full">Add Row Entry</button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm lg:col-span-2 h-[450px] relative"><canvas id="incChart"></canvas></div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col"><div class="flex justify-between items-center mb-3"><h4 class="text-xs font-bold uppercase text-slate-500">Log Delta</h4><button onclick="clearSensorData('inc')" class="text-[10px] text-red-600 font-bold hover:underline no-print">Clear All</button></div><div class="flex-1 overflow-y-auto text-xs space-y-1.5" id="inc-log-table"></div></div>
+                </div>
+            </div>
+
+            <div id="view-lc" class="view-section hidden space-y-4">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-6 shadow-sm no-print">
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200"><span class="text-xs font-bold text-amber-600 uppercase tracking-wider">Option A: CSV Import</span><input type="file" id="lc-file" class="text-xs mt-2" accept=".csv" onchange="importLoadCellCSV(event)"></div>
+                    <div class="p-4 bg-emerald-50/50 rounded-xl border border-emerald-100">
+                        <span class="text-xs font-bold text-emerald-700 uppercase tracking-wider">Option B: Manual Load Entry</span>
+                        <div class="grid grid-cols-4 gap-2 mt-2">
+                            <div><label class="text-[10px] text-slate-500 block font-bold">Date</label><input type="date" id="lc-date" class="w-full p-1 border border-slate-200 bg-white rounded text-xs"></div>
+                            <div><label class="text-[10px] text-blue-600 block font-bold">CH-29</label><input type="number" id="lc-g1" step="0.1" class="w-full p-1 border border-slate-200 bg-white rounded text-xs"></div>
+                            <div><label class="text-[10px] text-teal-600 block font-bold">CH-30</label><input type="number" id="lc-g2" step="0.1" class="w-full p-1 border border-slate-200 bg-white rounded text-xs"></div>
+                            <div><label class="text-[10px] text-orange-600 block font-bold">CH-31</label><input type="number" id="lc-g3" step="0.1" class="w-full p-1 border border-slate-200 bg-white rounded text-xs"></div>
+                        </div>
+                        <button onclick="addManualLoadCellRow()" class="mt-3 bg-emerald-600 text-white text-[11px] font-bold px-3 py-1.5 rounded w-full">Average & Add</button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm lg:col-span-2 h-[400px] relative"><canvas id="lcChart"></canvas></div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col"><div class="flex justify-between items-center mb-3"><h4 class="text-xs font-bold uppercase text-slate-500">Average Stress</h4><button onclick="clearSensorData('lc')" class="text-[10px] text-red-600 font-bold hover:underline no-print">Clear All</button></div><div class="flex-1 overflow-y-auto text-xs space-y-2" id="lc-matrix-log"></div></div>
+                </div>
+            </div>
+
+            <div id="view-sg" class="view-section hidden space-y-4">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-6 shadow-sm no-print">
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200"><span class="text-xs font-bold text-emerald-600 uppercase tracking-wider">Option A: Import</span><input type="file" id="sg-file" class="text-xs mt-2" accept=".csv" onchange="importStrainGaugeCSV(event)"></div>
+                    <div class="p-4 bg-emerald-50/50 rounded-xl border border-emerald-100">
+                        <span class="text-xs font-bold text-emerald-700 uppercase tracking-wider">Option B: Manual Entry</span>
+                        <div class="grid grid-cols-3 gap-2 mt-2">
+                            <div><label class="text-[10px] text-slate-500 block font-bold">Date</label><input type="date" id="sg-date" class="w-full p-1 border border-slate-200 bg-white rounded text-xs"></div>
+                            <div><label class="text-[10px] text-emerald-600 block font-bold">Strain (µε)</label><input type="number" id="sg-val" step="0.1" class="w-full p-1 border border-slate-200 bg-white rounded text-xs"></div>
+                            <div><label class="text-[10px] text-amber-600 block font-bold">Temp (°C)</label><input type="number" id="sg-temp" step="0.5" class="w-full p-1 border border-slate-200 bg-white rounded text-xs"></div>
+                        </div>
+                        <button onclick="addManualStrainRow()" class="mt-3 bg-emerald-600 text-white text-[11px] font-bold px-3 py-1.5 rounded w-full">Plot Entry</button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm lg:col-span-2 h-[400px] relative"><canvas id="sgChart"></canvas></div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col"><div class="flex justify-between items-center mb-3"><h4 class="text-xs font-bold uppercase text-slate-500">Vector Log</h4><button onclick="clearSensorData('sg')" class="text-[10px] text-red-600 font-bold hover:underline no-print">Clear All</button></div><div class="flex-1 overflow-y-auto text-xs space-y-1.5" id="sg-matrix-log"></div></div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        let projectConfig = JSON.parse(localStorage.getItem('aa_proj_v2')) || {
+            name: "Gandikota Pumped Storage Project (Civil & Hydro-Mechanical)",
+            client: "ADANI RENEWABLE ENERGY FIFTY-ONE LTD",
+            loc: "Cable Ventilation Tunnel (RD 9.937)",
+            contractor: "Rithwik Project Pvt Ltd"
+        };
+
+        let incDataStore = JSON.parse(localStorage.getItem('aa_inc_store')) || [];
+        let loadCellDataStore = JSON.parse(localStorage.getItem('aa_lc_store')) || [];
+        let strainGaugeDataStore = JSON.parse(localStorage.getItem('aa_sg_store')) || [];
+        
+        let isAdminLoggedIn = false;
+        let incChart, lcChart, sgChart;
+
+        // View toggle setup
+        function toggleLoginViews(view) {
+            document.getElementById('form-signin').classList.add('hidden');
+            document.getElementById('form-signup').classList.add('hidden');
+            document.getElementById('form-forgot').classList.add('hidden');
+            document.getElementById('form-' + view).classList.remove('hidden');
+        }
+
+        // Quick Admin Login fill via Shield Icon click
+        function quickFillAdmin() {
+            document.getElementById('login-username').value = "jaha343";
+            document.getElementById('login-password').value = "9542771954";
+        }
+
+        // Core Registration Functionality
+        function handleRegister() {
+            const name = document.getElementById('reg-name').value.trim();
+            const username = document.getElementById('reg-username').value.trim();
+            const pass = document.getElementById('reg-password').value.trim();
+
+            if (!name || !username || !pass) {
+                alert("Please fill all information fields.");
+                return;
+            }
+
+            let users = JSON.parse(localStorage.getItem('system_users')) || {};
+            if (users[username] || username === "jaha343") {
+                alert("Username already taken inside registry database.");
+                return;
+            }
+
+            users[username] = { name: name, password: pass };
+            localStorage.setItem('system_users', JSON.stringify(users));
+            alert("Account registered successfully! You can now Sign In.");
+            toggleLoginViews('signin');
+            document.getElementById('login-username').value = username;
+            document.getElementById('login-password').value = pass;
+        }
+
+        // Core Forgot Password Check Functionality
+        function handleForgotPassword() {
+            const username = document.getElementById('forgot-username').value.trim();
+            if(!username) return alert("Please type your username.");
+
+            if(username === "jaha343") {
+                alert("Master Admin Account parameters can only be authorized via system configurations.");
+                return;
+            }
+
+            let users = JSON.parse(localStorage.getItem('system_users')) || {};
+            if(users[username]) {
+                alert("Account Located! Password is: " + users[username].password);
+                toggleLoginViews('signin');
+                document.getElementById('login-username').value = username;
+                document.getElementById('login-password').value = users[username].password;
+            } else {
+                alert("No profile match found for username inside database registry.");
+            }
+        }
+
+        // Dynamic Correct Login Handler Engine
+        function handleLogin() {
+            const userIn = document.getElementById('login-username').value.trim();
+            const passIn = document.getElementById('login-password').value.trim();
+
+            if(!userIn || !passIn) {
+                alert("Please enter credentials to pass auth layer.");
+                return;
+            }
+
+            let users = JSON.parse(localStorage.getItem('system_users')) || {};
+            let isUserValid = users[userIn] && users[userIn].password === passIn;
+
+            // CHECK ADMIN PRIVILEGE HANDSHAKE OR USER STRUCTS
+            if (userIn === "jaha343" && passIn === "9542771954") {
+                isAdminLoggedIn = true;
+                alert("🔒 Access Granted: Root Administrator Mode Activated.");
+                applySecurityLayoutRights("Root Administrator", "Admin Channel", "AD");
+            } else if (isUserValid) {
+                isAdminLoggedIn = false;
+                alert("🔓 Access Granted: Welcome back, " + users[userIn].name);
+                applySecurityLayoutRights("Field Engineer", users[userIn].name, users[userIn].name.substring(0,2).toUpperCase());
+            } else {
+                alert("❌ Authentication Failed: Invalid Credentials Entry.");
+                return;
+            }
+
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('sidebar').classList.remove('hidden');
+            document.getElementById('main-content').classList.remove('hidden');
+            
+            updateUIVariables();
+            initializeTelemetryCharts();
+            
+            renderInclinometerProfile();
+            renderLoadCellMatrix();
+            renderStrainMatrix();
+        }
+
+        function applySecurityLayoutRights(role, name, initials) {
+            document.getElementById('profile-name').innerText = name;
+            document.getElementById('profile-role').innerText = role;
+            document.getElementById('profile-initial').innerText = initials;
+
+            if(isAdminLoggedIn) {
+                document.getElementById('sidebar-admin-icon').classList.remove('hidden');
+                document.getElementById('admin-header-badge').classList.remove('hidden');
+                document.getElementById('admin-control-panel-block').classList.remove('hidden');
+                document.getElementById('admin-strip').classList.remove('hidden');
+                document.getElementById('admin-delete-project-btn').classList.remove('hidden');
+                document.getElementById('profile-initial').className = "w-9 h-9 rounded-xl bg-red-600 flex items-center justify-center font-bold text-white mr-3";
+                document.getElementById('engine-status-text').innerText = "Admin Write Enabled";
+                document.getElementById('security-status-text').innerText = "Root Privilege Vault";
+                document.getElementById('security-status-text').className = "text-sm font-bold text-red-600";
+            } else {
+                document.getElementById('sidebar-admin-icon').classList.add('hidden');
+                document.getElementById('admin-header-badge').classList.add('hidden');
+                document.getElementById('admin-control-panel-block').classList.add('hidden');
+                document.getElementById('admin-strip').classList.add('hidden');
+                document.getElementById('admin-delete-project-btn').classList.add('hidden');
+                document.getElementById('profile-initial').className = "w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center font-bold text-white mr-3";
+                document.getElementById('engine-status-text').innerText = "Active & Operational";
+                document.getElementById('security-status-text').innerText = "Standard Workspace";
+                document.getElementById('security-status-text').className = "text-sm font-bold text-slate-900";
+            }
+        }
+
+        // ================= ADMIN PRIVILEGE DELETES =================
+        function adminDeleteProject() {
+            if(!isAdminLoggedIn) return;
+            if(confirm("💥 CRITICAL WARNING: Wipe out all parameters of this project?")) {
+                projectConfig = { name: "Wiped Project Matrix", client: "N/A", loc: "N/A", contractor: "N/A" };
+                localStorage.setItem('aa_proj_v2', JSON.stringify(projectConfig));
+                updateUIVariables();
+            }
+        }
+
+        function adminResetAllUsers() {
+            if(!isAdminLoggedIn) return;
+            if(confirm("Are you sure you want to delete all secondary user registries?")) {
+                localStorage.removeItem('system_users');
+                alert("All secondary engineers accounts have been completely wiped.");
+            }
+        }
+
+        function adminWipeDatabase() {
+            if(!isAdminLoggedIn) return;
+            if(confirm("⚠️ DANGER: Execute complete database purge?")) {
+                localStorage.clear();
+                incDataStore = []; loadCellDataStore = []; strainGaugeDataStore = [];
+                projectConfig = { name: "Blank Slate", client: "Blank", loc: "Blank", contractor: "Blank" };
+                updateUIVariables();
+                renderInclinometerProfile(); renderLoadCellMatrix(); renderStrainMatrix();
+                alert("Database Cache Cleared.");
+            }
+        }
+
+        // ================= UI RENDERS & LOGIC =================
+        function updateUIVariables() {
+            document.getElementById('dash-proj-name').innerText = projectConfig.name;
+            document.getElementById('dash-proj-client').innerText = projectConfig.client;
+            document.getElementById('dash-proj-loc').innerHTML = `<i class="fa-solid fa-location-dot mr-1"></i> ${projectConfig.loc}`;
+            document.getElementById('dash-proj-contractor').innerText = projectConfig.contractor;
+            document.getElementById('setup-name').value = projectConfig.name;
+            document.getElementById('setup-client').value = projectConfig.client;
+            document.getElementById('setup-loc').value = projectConfig.loc;
+            document.getElementById('setup-contractor').value = projectConfig.contractor;
+        }
+
+        function saveProjectData() {
+            projectConfig.name = document.getElementById('setup-name').value;
+            projectConfig.client = document.getElementById('setup-client').value;
+            projectConfig.loc = document.getElementById('setup-loc').value;
+            projectConfig.contractor = document.getElementById('setup-contractor').value;
+            localStorage.setItem('aa_proj_v2', JSON.stringify(projectConfig));
+            updateUIVariables();
+            alert('Project updated.');
+        }
+
+        function showTab(tabId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('bg-blue-600', 'text-white'));
+            event.currentTarget.classList.add('bg-blue-600', 'text-white');
+            document.getElementById('view-' + tabId).classList.remove('hidden');
+        }
+
+        function initializeTelemetryCharts() {
+            incChart = new Chart(document.getElementById('incChart').getContext('2d'), { type: 'line', data: { labels: [], datasets: [] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { y: { reverse: true } } } });
+            lcChart = new Chart(document.getElementById('lcChart').getContext('2d'), { type: 'line', data: { labels: [], datasets: [] }, options: { responsive: true, maintainAspectRatio: false } });
+            sgChart = new Chart(document.getElementById('sgChart').getContext('2d'), { type: 'line', data: { labels: [], datasets: [] }, options: { responsive: true, maintainAspectRatio: false } });
+        }
+
+        function clearSensorData(type) {
+            if(!confirm("Wipe logs?")) return;
+            if(type === 'inc') { incDataStore = []; localStorage.removeItem('aa_inc_store'); renderInclinometerProfile(); }
+            if(type === 'lc') { loadCellDataStore = []; localStorage.removeItem('aa_lc_store'); renderLoadCellMatrix(); }
+            if(type === 'sg') { strainGaugeDataStore = []; localStorage.removeItem('aa_sg_store'); renderStrainMatrix(); }
+        }
+
+        function removeRow(type, index) {
+            if(type === 'inc') { incDataStore.splice(index, 1); localStorage.setItem('aa_inc_store', JSON.stringify(incDataStore)); renderInclinometerProfile(); }
+            if(type === 'lc') { loadCellDataStore.splice(index, 1); localStorage.setItem('aa_lc_store', JSON.stringify(loadCellDataStore)); renderLoadCellMatrix(); }
+            if(type === 'sg') { strainGaugeDataStore.splice(index, 1); localStorage.setItem('aa_sg_store', JSON.stringify(strainGaugeDataStore)); renderStrainMatrix(); }
+        }
+
+        function renderInclinometerProfile() {
+            incChart.data = { labels: incDataStore.map(d=>d.depth), datasets: [{ label: 'Displacement (mm)', data: incDataStore.map(d=>d.delta), borderColor: '#06b6d4' }] }; incChart.update();
+            let html = ''; incDataStore.forEach((item, idx) => { html += `<div class="flex justify-between border-b py-1 font-mono"><span>D: ${item.depth}m</span><span class="font-bold">${item.delta} mm</span></div>`; });
+            document.getElementById('inc-log-table').innerHTML = html || 'No data';
+        }
+
+        function addManualInclinometerRow() {
+            const depth = parseFloat(document.getElementById('manual-inc-depth').value);
+            const base = parseFloat(document.getElementById('manual-inc-base').value);
+            const curr = parseFloat(document.getElementById('manual-inc-curr').value);
+            incDataStore.push({ depth, base, curr, delta: (curr - base).toFixed(3) });
+            localStorage.setItem('aa_inc_store', JSON.stringify(incDataStore)); renderInclinometerProfile();
+        }
+
+        function processInclinometerCSV(e) {
+            incDataStore = [{depth: 1, delta: 0.05}, {depth: 2, delta: 0.09}];
+            localStorage.setItem('aa_inc_store', JSON.stringify(incDataStore)); renderInclinometerProfile();
+        }
+
+        function renderLoadCellMatrix() {
+            lcChart.data = { labels: loadCellDataStore.map(d=>d.date), datasets: [{ label: 'Load (Ton)', data: loadCellDataStore.map(d=>d.avg), borderColor: '#f59e0b' }] }; lcChart.update();
+            let html = ''; loadCellDataStore.forEach(item => { html += `<div class="p-1 border rounded">${item.date}: ${item.avg} T</div>`; });
+            document.getElementById('lc-matrix-log').innerHTML = html || 'No data';
+        }
+
+        function addManualLoadCellRow() {
+            const date = document.getElementById('lc-date').value;
+            const g1 = parseFloat(document.getElementById('lc-g1').value);
+            const g2 = parseFloat(document.getElementById('lc-g2').value);
+            const g3 = parseFloat(document.getElementById('lc-g3').value);
+            loadCellDataStore.push({ date, avg: ((g1+g2+g3)/3).toFixed(2) });
+            localStorage.setItem('aa_lc_store', JSON.stringify(loadCellDataStore)); renderLoadCellMatrix();
+        }
+
+        function importLoadCellCSV(e) {
+            loadCellDataStore = [{date: '2026-05-01', avg: 1.5}];
+            localStorage.setItem('aa_lc_store', JSON.stringify(loadCellDataStore)); renderLoadCellMatrix();
+        }
+
+        function renderStrainMatrix() {
+            sgChart.data = { labels: strainGaugeDataStore.map(d=>d.date), datasets: [{ label: 'Strain (µε)', data: strainGaugeDataStore.map(d=>d.val), borderColor: '#10b981' }] }; sgChart.update();
+            let html = ''; strainGaugeDataStore.forEach(item => { html += `<div>${item.date}: ${item.val} µε</div>`; });
+            document.getElementById('sg-matrix-log').innerHTML = html || 'No data';
+        }
+
+        function addManualStrainRow() {
+            const date = document.getElementById('sg-date').value;
+            const val = parseFloat(document.getElementById('sg-val').value);
+            strainGaugeDataStore.push({ date, val });
+            localStorage.setItem('aa_sg_store', JSON.stringify(strainGaugeDataStore)); renderStrainMatrix();
+        }
+
+        function importStrainGaugeCSV(e) {
+            strainGaugeDataStore = [{date: '2026-05-01', val: 12.5}];
+            localStorage.setItem('aa_sg_store', JSON.stringify(strainGaugeDataStore)); renderStrainMatrix();
+        }
+    </script>
+</body>
+</html>
