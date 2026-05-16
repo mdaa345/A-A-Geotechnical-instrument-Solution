@@ -3,260 +3,299 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A&A Geotech | Pro Dashboard</title>
+    <title>A&A Geotech | Monitoring Suite</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Custom scrollbar for a pro look */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #0f172a; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        ::-webkit-scrollbar-track { background: #e5e7eb; }
+        ::-webkit-scrollbar-thumb { background: #9ca3af; border-radius: 3px; }
     </style>
 </head>
-<body class="bg-[#0f172a] text-slate-200 font-sans h-screen overflow-hidden">
+<body class="text-gray-800 h-screen overflow-hidden flex">
 
-    <div id="login-screen" class="fixed inset-0 z-50 bg-[#0f172a] flex items-center justify-center">
-        <div class="bg-[#1e293b] p-8 rounded-xl shadow-2xl border border-slate-700 w-96">
-            <div class="text-center mb-6">
-                <h1 class="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">A&A GEOTECH</h1>
-                <p class="text-xs text-slate-400 mt-1">Advanced Instrumentation Portal</p>
-            </div>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-medium text-slate-400 mb-1">Username / Engineer ID</label>
-                    <input type="text" value="admin" class="w-full bg-[#0f172a] border border-slate-600 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-cyan-500 text-white">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-400 mb-1">Password</label>
-                    <input type="password" value="password" class="w-full bg-[#0f172a] border border-slate-600 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-cyan-500 text-white">
-                </div>
-                <button onclick="handleLogin()" class="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold py-2 rounded-lg transition shadow-lg mt-4">
-                    Secure Login
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <div id="main-app" class="flex h-screen hidden">
-        
-        <aside class="w-64 bg-[#1e293b] border-r border-slate-700 flex flex-col">
-            <div class="p-4 border-b border-slate-700">
-                <h2 class="text-lg font-bold text-cyan-400"><i class="fa-solid fa-earth-americas mr-2"></i>A&A GEOTECH</h2>
-            </div>
-            <nav class="flex-1 p-4 space-y-2 overflow-y-auto text-sm">
-                <a href="#" onclick="showSection('home-section')" class="nav-link block px-4 py-2 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20"><i class="fa-solid fa-house w-6"></i> Home Dashboard</a>
-                <a href="#" onclick="showSection('inc-section')" class="nav-link block px-4 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition"><i class="fa-solid fa-ruler-vertical w-6"></i> Inclinometer</a>
-                <a href="#" onclick="showSection('lc-section')" class="nav-link block px-4 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition"><i class="fa-solid fa-weight-hanging w-6"></i> Load Cell</a>
-                <a href="#" onclick="showSection('sg-section')" class="nav-link block px-4 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition"><i class="fa-solid fa-compress w-6"></i> Strain Gauge</a>
-                <a href="#" onclick="showSection('mpbx-section')" class="nav-link block px-4 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition"><i class="fa-solid fa-arrows-down-to-line w-6"></i> MPBX</a>
-                <a href="#" onclick="showSection('pz-section')" class="nav-link block px-4 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition"><i class="fa-solid fa-water w-6"></i> Piezometer</a>
-            </nav>
-            <div class="p-4 border-t border-slate-700 text-xs text-slate-500 text-center">
-                User: Shivam Pandey
-            </div>
-        </aside>
-
-        <div class="flex-1 flex flex-col bg-[#0f172a]">
+    <div id="login-screen" class="fixed inset-0 z-50 bg-gray-100 flex items-center justify-center">
+        <div class="bg-white p-10 rounded-2xl shadow-2xl w-96 border border-gray-200">
+            <img src="logo.png" alt="A&A Geotechnical Logo" class="h-24 mx-auto mb-4" onerror="this.src='https://via.placeholder.com/150x80?text=A%26A+Logo'">
             
-            <header class="h-16 bg-[#1e293b] border-b border-slate-700 flex items-center justify-between px-6 shadow-sm z-10">
-                <h2 id="page-title" class="text-xl font-semibold text-slate-200">Home Dashboard</h2>
-                <div class="flex items-center gap-3">
-                    <button class="px-3 py-1.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 hover:bg-amber-500/20 rounded text-sm transition font-medium">
-                        <i class="fa-solid fa-pen-to-square mr-1"></i> Edit Data
-                    </button>
-                    <button class="px-3 py-1.5 bg-cyan-600 text-white rounded text-sm hover:bg-cyan-500 transition shadow font-medium">
-                        <i class="fa-solid fa-file-pdf mr-1"></i> Generate Report
-                    </button>
+            <div id="login-form">
+                <h2 class="text-xl font-bold text-center text-blue-900 mb-6">System Login</h2>
+                <input type="text" placeholder="Email / User ID" class="w-full mb-4 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-blue-500">
+                <input type="password" placeholder="Password" class="w-full mb-4 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-blue-500">
+                <button onclick="handleLogin()" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-2 rounded-lg transition shadow">Login</button>
+                <div class="mt-4 text-center">
+                    <button onclick="toggleSignup()" class="text-xs text-blue-600 hover:underline">Request New Account</button>
                 </div>
-            </header>
+            </div>
 
-            <main class="flex-1 overflow-y-auto p-6">
-
-                <div id="home-section" class="app-section">
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                        <div class="bg-[#1e293b] p-4 rounded-xl border border-slate-700 shadow-lg">
-                            <p class="text-xs text-slate-400">Total Instruments</p>
-                            <h3 class="text-2xl font-bold text-white mt-1">124</h3>
-                        </div>
-                        <div class="bg-[#1e293b] p-4 rounded-xl border border-slate-700 shadow-lg">
-                            <p class="text-xs text-slate-400">Active Sites</p>
-                            <h3 class="text-2xl font-bold text-blue-400 mt-1">3</h3>
-                        </div>
-                        <div class="bg-[#1e293b] p-4 rounded-xl border border-rose-500/30 shadow-lg">
-                            <p class="text-xs text-rose-400 font-bold">Critical Alarms</p>
-                            <h3 class="text-2xl font-bold text-rose-500 mt-1">2</h3>
-                        </div>
-                        <div class="bg-[#1e293b] p-4 rounded-xl border border-slate-700 shadow-lg">
-                            <p class="text-xs text-slate-400">System Status</p>
-                            <h3 class="text-xl font-bold text-emerald-400 mt-1 mt-2"><i class="fa-solid fa-circle-check"></i> Online</h3>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-[#1e293b] border border-slate-700 rounded-xl p-5 shadow-lg">
-                        <h3 class="text-md font-semibold mb-4 border-b border-slate-700 pb-2">Recent Activities & Alerts</h3>
-                        <ul class="space-y-3 text-sm">
-                            <li class="flex items-center justify-between"><span class="text-slate-300"><i class="fa-solid fa-triangle-exclamation text-amber-500 mr-2"></i> Inclinometer INC-04 crossed Attention Limit (12mm)</span> <span class="text-slate-500 text-xs">10 mins ago</span></li>
-                            <li class="flex items-center justify-between"><span class="text-slate-300"><i class="fa-solid fa-file-arrow-up text-blue-400 mr-2"></i> Load Cell LC-12 data uploaded successfully</span> <span class="text-slate-500 text-xs">1 hour ago</span></li>
-                            <li class="flex items-center justify-between"><span class="text-slate-300"><i class="fa-solid fa-check text-emerald-500 mr-2"></i> MPBX-01 weekly report generated</span> <span class="text-slate-500 text-xs">Yesterday</span></li>
-                        </ul>
-                    </div>
+            <div id="signup-form" class="hidden">
+                <h2 class="text-xl font-bold text-center text-blue-900 mb-4">Request Access</h2>
+                <p class="text-xs text-red-500 mb-4 text-center">Requires Admin Approval</p>
+                <input type="email" placeholder="Generate Email ID" class="w-full mb-4 border border-gray-300 rounded-lg px-4 py-2 text-sm">
+                <input type="password" placeholder="Create Password" class="w-full mb-4 border border-gray-300 rounded-lg px-4 py-2 text-sm">
+                <button onclick="requestAdminApproval()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-lg transition shadow">Submit for Approval</button>
+                <div class="mt-4 text-center">
+                    <button onclick="toggleSignup()" class="text-xs text-gray-500 hover:underline">Back to Login</button>
                 </div>
-
-                <div id="inc-section" class="app-section hidden h-full flex flex-col">
-                    <div class="flex justify-between items-end mb-4">
-                        <div>
-                            <h3 class="text-lg font-bold text-white">MAIN ACCESS TUNNEL-01-INC-01</h3>
-                            <p class="text-xs text-slate-400">Multi-Line Tracking (Base vs Current Dates)</p>
-                        </div>
-                        <div class="text-xs bg-slate-800 border border-slate-700 p-2 rounded flex gap-4">
-                            <label><input type="checkbox" checked class="mr-1"> Base Reading</label>
-                            <label><input type="checkbox" checked class="mr-1"> 10-May</label>
-                            <label><input type="checkbox" checked class="mr-1"> 15-May</label>
-                        </div>
-                    </div>
-                    <div class="bg-white p-4 rounded-xl flex-1 relative min-h-[500px]"> <canvas id="multiLineInclinometer"></canvas>
-                    </div>
-                </div>
-
-                <div id="lc-section" class="app-section hidden h-full flex flex-col">
-                    <h3 class="text-lg font-bold text-white mb-4">Load Cell Tracking (Time vs Load)</h3>
-                    <div class="bg-[#1e293b] p-4 rounded-xl flex-1 relative min-h-[400px] border border-slate-700"><canvas id="lcChart"></canvas></div>
-                </div>
-
-                <div id="sg-section" class="app-section hidden h-full flex flex-col">
-                    <h3 class="text-lg font-bold text-white mb-4">Strain Gauge (Microstrain Tracking)</h3>
-                    <div class="bg-[#1e293b] p-4 rounded-xl flex-1 relative min-h-[400px] border border-slate-700"><canvas id="sgChart"></canvas></div>
-                </div>
-
-                <div id="mpbx-section" class="app-section hidden h-full flex flex-col">
-                    <h3 class="text-lg font-bold text-white mb-4">MPBX (Multi-Point Displacement)</h3>
-                    <div class="bg-[#1e293b] p-4 rounded-xl flex-1 relative min-h-[400px] border border-slate-700"><canvas id="mpbxChart"></canvas></div>
-                </div>
-
-                <div id="pz-section" class="app-section hidden h-full flex flex-col">
-                    <h3 class="text-lg font-bold text-white mb-4">Piezometer (Water Pressure/Elevation)</h3>
-                    <div class="bg-[#1e293b] p-4 rounded-xl flex-1 relative min-h-[400px] border border-slate-700"><canvas id="pzChart"></canvas></div>
-                </div>
-
-            </main>
+            </div>
         </div>
     </div>
+
+    <aside id="sidebar" class="w-64 bg-[#0f172a] text-white flex flex-col hidden h-full">
+        <div class="p-4 border-b border-gray-700 bg-white text-center">
+            <img src="logo.png" alt="A&A Logo" class="h-12 mx-auto" onerror="this.style.display='none'">
+            <h1 class="text-blue-900 font-bold text-sm mt-2">MONITORING SERVICE</h1>
+        </div>
+        <nav class="flex-1 p-4 space-y-1 overflow-y-auto text-sm">
+            <p class="text-xs text-gray-500 uppercase font-bold mb-2 mt-4">Main</p>
+            <a href="#" onclick="showTab('home')" class="nav-btn block px-4 py-2 rounded bg-blue-600 text-white"><i class="fa-solid fa-chart-pie w-6"></i> Dashboard</a>
+            <a href="#" onclick="showTab('projects')" class="nav-btn block px-4 py-2 rounded text-gray-400 hover:bg-gray-800"><i class="fa-solid fa-folder-open w-6"></i> Project Details</a>
+            <a href="#" onclick="showTab('alarms')" class="nav-btn block px-4 py-2 rounded text-gray-400 hover:bg-gray-800"><i class="fa-solid fa-bell w-6"></i> Critical Alarms</a>
+            
+            <p class="text-xs text-gray-500 uppercase font-bold mb-2 mt-6">Instruments</p>
+            <a href="#" onclick="showTab('inc')" class="nav-btn block px-4 py-2 rounded text-gray-400 hover:bg-gray-800"><i class="fa-solid fa-ruler w-6"></i> Inclinometer (Auto)</a>
+            <a href="#" onclick="showTab('lc')" class="nav-btn block px-4 py-2 rounded text-gray-400 hover:bg-gray-800"><i class="fa-solid fa-weight-hanging w-6"></i> Load Cell (Manual)</a>
+            <a href="#" onclick="showTab('mpbx')" class="nav-btn block px-4 py-2 rounded text-gray-400 hover:bg-gray-800"><i class="fa-solid fa-arrows-down-to-line w-6"></i> MPBX (Manual)</a>
+            <a href="#" onclick="showTab('sg')" class="nav-btn block px-4 py-2 rounded text-gray-400 hover:bg-gray-800"><i class="fa-solid fa-compress w-6"></i> Strain Gauge (Manual)</a>
+            <a href="#" onclick="showTab('pz')" class="nav-btn block px-4 py-2 rounded text-gray-400 hover:bg-gray-800"><i class="fa-solid fa-water w-6"></i> Piezometer (Manual)</a>
+        </nav>
+        <div class="p-4 bg-gray-900 border-t border-gray-700 flex items-center">
+            <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center font-bold mr-3">JG</div>
+            <div>
+                <p class="text-sm font-bold">Jahan Gir</p>
+                <p class="text-xs text-gray-400">Senior Engineer</p>
+            </div>
+        </div>
+    </aside>
+
+    <main id="main-content" class="flex-1 flex flex-col h-full hidden bg-gray-50">
+        <header class="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-6 shadow-sm">
+            <h2 id="page-title" class="text-xl font-bold text-gray-800">Dashboard Overview</h2>
+            <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium shadow transition">
+                <i class="fa-solid fa-file-pdf mr-1"></i> Generate Report
+            </button>
+        </header>
+
+        <div class="p-6 overflow-y-auto flex-1">
+            
+            <div id="view-home" class="view-section">
+                <div class="grid grid-cols-3 gap-6 mb-6">
+                    <div class="bg-white p-5 rounded-xl shadow border border-gray-100 border-l-4 border-l-blue-500">
+                        <p class="text-sm text-gray-500">Active Projects</p>
+                        <h3 class="text-3xl font-bold text-gray-800">4</h3>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl shadow border border-gray-100 border-l-4 border-l-green-500">
+                        <p class="text-sm text-gray-500">Total Instruments Online</p>
+                        <h3 class="text-3xl font-bold text-gray-800">142</h3>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl shadow border border-gray-100 border-l-4 border-l-red-500">
+                        <p class="text-sm text-gray-500">Alarms Triggered</p>
+                        <h3 class="text-3xl font-bold text-red-600">2</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-projects" class="view-section hidden">
+                <div class="bg-white p-6 rounded-xl shadow border border-gray-100 max-w-3xl">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Add New Project</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="text-xs font-bold text-gray-500">Project Name</label><input type="text" class="w-full border rounded p-2 text-sm mt-1"></div>
+                        <div><label class="text-xs font-bold text-gray-500">Client</label><input type="text" class="w-full border rounded p-2 text-sm mt-1"></div>
+                        <div><label class="text-xs font-bold text-gray-500">Location</label><input type="text" class="w-full border rounded p-2 text-sm mt-1"></div>
+                        <div><label class="text-xs font-bold text-gray-500">Project Type</label><input type="text" class="w-full border rounded p-2 text-sm mt-1"></div>
+                    </div>
+                    <button class="mt-4 bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700">Save Project Details</button>
+                </div>
+            </div>
+
+            <div id="view-alarms" class="view-section hidden">
+                <div class="bg-red-50 border border-red-200 p-6 rounded-xl shadow">
+                    <h3 class="text-xl font-bold text-red-700 mb-4"><i class="fa-solid fa-triangle-exclamation"></i> Active Critical Alarms</h3>
+                    <div class="bg-white p-4 rounded border-l-4 border-red-600 shadow-sm mb-3">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h4 class="font-bold text-gray-800">INC-04 (Main Tunnel)</h4>
+                                <p class="text-sm text-gray-600">Displacement exceeded Action Limit. Current: 27.17mm (Base: 0mm)</p>
+                            </div>
+                            <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded font-bold">CRITICAL</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-inc" class="view-section hidden flex flex-col h-full">
+                <div class="bg-white p-4 rounded-xl shadow mb-4 flex justify-between items-center border border-gray-100">
+                    <div>
+                        <h3 class="font-bold text-gray-800">Inclinometer Auto-Plotter</h3>
+                        <p class="text-xs text-gray-500">Upload CSV file to automatically compare Current reading with Base reading.</p>
+                    </div>
+                    <button onclick="autoPlotInclinometer()" class="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 font-bold"><i class="fa-solid fa-cloud-arrow-up mr-1"></i> Auto Extract & Plot Data</button>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow flex-1 relative min-h-[500px] border border-gray-100">
+                    <canvas id="incChart"></canvas>
+                </div>
+            </div>
+
+            <div id="view-lc" class="view-section hidden">
+                <div class="bg-white p-4 rounded-xl shadow mb-4 border border-gray-100">
+                    <h3 class="font-bold text-gray-800 mb-2">Manual Data Entry (3 Gauges)</h3>
+                    <div class="flex gap-4 items-end">
+                        <div><label class="text-xs font-bold">Date</label><input type="date" id="lc-date" class="border rounded p-1.5 w-32 text-sm block"></div>
+                        <div><label class="text-xs font-bold text-blue-600">Gauge 1 (kN)</label><input type="number" id="lc-g1" class="border rounded p-1.5 w-24 text-sm block"></div>
+                        <div><label class="text-xs font-bold text-green-600">Gauge 2 (kN)</label><input type="number" id="lc-g2" class="border rounded p-1.5 w-24 text-sm block"></div>
+                        <div><label class="text-xs font-bold text-orange-600">Gauge 3 (kN)</label><input type="number" id="lc-g3" class="border rounded p-1.5 w-24 text-sm block"></div>
+                        <button onclick="plotLoadCell()" class="bg-blue-900 text-white px-4 py-1.5 rounded text-sm hover:bg-blue-800 font-bold h-9">Add & Plot</button>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-2">* Note: First entry will be considered as Base Reading automatically.</p>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow relative h-[400px] border border-gray-100">
+                    <canvas id="lcChart"></canvas>
+                </div>
+            </div>
+
+            <div id="view-generic" class="view-section hidden">
+                <div class="bg-white p-4 rounded-xl shadow mb-4 border border-gray-100">
+                    <h3 id="gen-title" class="font-bold text-gray-800 mb-2">Manual Data Entry</h3>
+                    <div class="flex gap-4 items-end">
+                        <div><label class="text-xs font-bold">Date</label><input type="date" id="gen-date" class="border rounded p-1.5 w-32 text-sm block"></div>
+                        <div><label class="text-xs font-bold text-blue-600">Reading Value</label><input type="number" id="gen-val" class="border rounded p-1.5 w-32 text-sm block"></div>
+                        <button onclick="plotGeneric()" class="bg-blue-900 text-white px-4 py-1.5 rounded text-sm hover:bg-blue-800 font-bold h-9">Add & Plot</button>
+                    </div>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow relative h-[400px] border border-gray-100">
+                    <canvas id="genChart"></canvas>
+                </div>
+            </div>
+
+        </div>
+    </main>
 
     <script>
-        // 1. Login Function
+        // --- Navigation & Login Logic ---
+        function toggleSignup() {
+            document.getElementById('login-form').classList.toggle('hidden');
+            document.getElementById('signup-form').classList.toggle('hidden');
+        }
+
+        function requestAdminApproval() {
+            alert('Request sent successfully! Pending Admin Approval to generate your account.');
+            toggleSignup();
+        }
+
         function handleLogin() {
             document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('main-app').classList.remove('hidden');
-            initCharts(); // Load charts after login
+            document.getElementById('sidebar').classList.remove('hidden');
+            document.getElementById('main-content').classList.remove('hidden');
+            initCharts();
         }
 
-        // 2. Navigation Function
-        function showSection(sectionId) {
-            // Hide all sections
-            document.querySelectorAll('.app-section').forEach(sec => sec.classList.add('hidden'));
-            // Reset nav links styling
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.className = "nav-link block px-4 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition";
+        let currentActiveTab = 'home';
+        const titles = { 'home':'Dashboard', 'projects':'Project Details', 'alarms':'Critical Alarms', 'inc':'Inclinometer (Auto)', 'lc':'Load Cell (3 Gauges)', 'mpbx':'MPBX', 'sg':'Strain Gauge', 'pz':'Piezometer' };
+        
+        function showTab(tabId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-600', 'text-white');
+                btn.classList.add('text-gray-400');
             });
+            event.currentTarget.classList.remove('text-gray-400');
+            event.currentTarget.classList.add('bg-blue-600', 'text-white');
+            document.getElementById('page-title').innerText = titles[tabId];
 
-            // Show selected section
-            document.getElementById(sectionId).classList.remove('hidden');
-            
-            // Highlight clicked nav link
-            const clickedLink = event.currentTarget;
-            clickedLink.className = "nav-link block px-4 py-2 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20";
+            currentActiveTab = tabId;
 
-            // Update Header Title
-            const titles = {
-                'home-section': 'Home Dashboard',
-                'inc-section': 'Inclinometer Analysis Panel',
-                'lc-section': 'Load Cell Tracking',
-                'sg-section': 'Strain Gauge Data',
-                'mpbx-section': 'MPBX Monitoring',
-                'pz-section': 'Piezometer Records'
-            };
-            document.getElementById('page-title').innerText = titles[sectionId];
+            if(['mpbx', 'sg', 'pz'].includes(tabId)) {
+                document.getElementById('view-generic').classList.remove('hidden');
+                document.getElementById('gen-title').innerText = titles[tabId] + " Manual Entry";
+            } else {
+                document.getElementById('view-' + tabId).classList.remove('hidden');
+            }
         }
 
-        // 3. Initialize All Charts
+        // --- Chart Logic ---
+        let incChartInst, lcChartInst, genChartInst;
+        let lcData = { labels: [], g1: [], g2: [], g3: [] };
+        let genData = { labels: [], vals: [] };
+
         function initCharts() {
-            initInclinometerChart();
-            initTimeChart('lcChart', 'Load (kN)', 'Load Trend Over Time', '#f59e0b');
-            initTimeChart('sgChart', 'Microstrain (με)', 'Strain Variations', '#10b981');
-            initTimeChart('mpbxChart', 'Displacement (mm)', 'Anchor Movements', '#8b5cf6');
-            initTimeChart('pzChart', 'Pressure (kPa)', 'Pore Water Pressure', '#3b82f6');
+            // Setup Empty Charts
+            const ctxInc = document.getElementById('incChart').getContext('2d');
+            incChartInst = new Chart(ctxInc, { type: 'line', data: { labels: [], datasets: [] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false } });
+
+            const ctxLc = document.getElementById('lcChart').getContext('2d');
+            lcChartInst = new Chart(ctxLc, { type: 'line', data: { labels: [], datasets: [] }, options: { responsive: true, maintainAspectRatio: false } });
+
+            const ctxGen = document.getElementById('genChart').getContext('2d');
+            genChartInst = new Chart(ctxGen, { type: 'line', data: { labels: [], datasets: [] }, options: { responsive: true, maintainAspectRatio: false } });
         }
 
-        // 4. Advanced Gandikota Style Inclinometer (Multi-line, Vertical)
-        function initInclinometerChart() {
-            const ctx = document.getElementById('multiLineInclinometer').getContext('2d');
+        // 1. Inclinometer Auto Plot (Base vs Current)
+        function autoPlotInclinometer() {
+            const depths = Array.from({length: 21}, (_, i) => i);
+            const base = depths.map(() => 0); // Base reading is always 0
+            const current = depths.map(d => Math.sin(d/3) * 15 + Math.random()*2); // Simulated new data
             
-            // Mock Depth Data (0 to 20 meters)
-            const depths = Array.from({length: 41}, (_, i) => i * 0.5);
-
-            // Mock tracking data for 3 different dates
-            const baseData = depths.map(() => 0); // Straight line at 0
-            const reading1 = depths.map(d => Math.sin(d/5) * 1.5 + (Math.random()*0.2));
-            const reading2 = depths.map(d => Math.sin(d/5) * 3.0 + (Math.random()*0.4));
-
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: depths,
-                    datasets: [
-                        { label: 'Base Reading', data: baseData, borderColor: '#000000', borderWidth: 2, tension: 0.1 },
-                        { label: 'Reading 10-May', data: reading1, borderColor: '#3b82f6', borderWidth: 1.5, tension: 0.3, pointRadius: 2 },
-                        { label: 'Reading 15-May', data: reading2, borderColor: '#ef4444', borderWidth: 2, tension: 0.3, pointRadius: 3 }
-                    ]
-                },
-                options: {
-                    indexAxis: 'y', // Makes it vertical (Depth on Y axis)
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: { 
-                            position: 'top', // Axis on top like screenshot
-                            title: { display: true, text: 'Cumulative Displacement (mm)', color: '#333', font: {weight: 'bold'} },
-                            grid: { color: '#e5e7eb' },
-                            ticks: { color: '#333' }
-                        },
-                        y: { 
-                            reverse: true, // Depth goes down
-                            title: { display: true, text: 'Depth (meters)', color: '#333', font: {weight: 'bold'} },
-                            grid: { color: '#e5e7eb' },
-                            ticks: { color: '#333' }
-                        }
-                    },
-                    plugins: {
-                        legend: { position: 'right', labels: { color: '#333' } }
-                    }
-                }
-            });
+            incChartInst.data = {
+                labels: depths,
+                datasets: [
+                    { label: 'Base Reading (0mm)', data: base, borderColor: '#111827', borderWidth: 3, borderDash: [5, 5] },
+                    { label: 'Current Auto-Reading', data: current, borderColor: '#ef4444', borderWidth: 2, pointRadius: 3, backgroundColor: '#ef4444' }
+                ]
+            };
+            incChartInst.options.scales = {
+                x: { position: 'top', title: {display: true, text: 'Displacement (mm)'} },
+                y: { reverse: true, title: {display: true, text: 'Depth (m)'} }
+            };
+            incChartInst.update();
+            alert("CSV Data Extracted Successfully! Chart plotted comparing with Base Reading.");
         }
 
-        // 5. Generic Time-Series Chart for other instruments
-        function initTimeChart(canvasId, yAxisLabel, title, colorColor) {
-            const ctx = document.getElementById(canvasId).getContext('2d');
-            const dates = ['May 1', 'May 4', 'May 7', 'May 10', 'May 13', 'May 16'];
-            const data = dates.map(() => Math.random() * 50 + 100);
+        // 2. Load Cell Manual Plot (3 Gauges)
+        function plotLoadCell() {
+            const date = document.getElementById('lc-date').value;
+            const g1 = document.getElementById('lc-g1').value;
+            const g2 = document.getElementById('lc-g2').value;
+            const g3 = document.getElementById('lc-g3').value;
 
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: dates,
-                    datasets: [{ label: yAxisLabel, data: data, borderColor: colorColor, backgroundColor: colorColor + '20', fill: true, tension: 0.3 }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    scales: {
-                        y: { title: { display: true, text: yAxisLabel, color: '#94a3b8' }, grid: {color: '#334155'}, ticks: {color: '#94a3b8'} },
-                        x: { grid: {color: '#334155'}, ticks: {color: '#94a3b8'} }
-                    },
-                    plugins: { legend: { display: false } }
-                }
-            });
+            if(!date || !g1 || !g2 || !g3) return alert("Please fill all Load Cell fields");
+
+            lcData.labels.push(date);
+            lcData.g1.push(g1);
+            lcData.g2.push(g2);
+            lcData.g3.push(g3);
+
+            lcChartInst.data = {
+                labels: lcData.labels,
+                datasets: [
+                    { label: 'Gauge 1', data: lcData.g1, borderColor: '#2563eb', tension: 0.3 },
+                    { label: 'Gauge 2', data: lcData.g2, borderColor: '#16a34a', tension: 0.3 },
+                    { label: 'Gauge 3', data: lcData.g3, borderColor: '#ea580c', tension: 0.3 }
+                ]
+            };
+            lcChartInst.update();
+            // clear inputs
+            document.getElementById('lc-g1').value = ''; document.getElementById('lc-g2').value = ''; document.getElementById('lc-g3').value = '';
+        }
+
+        // 3. Generic Manual Plot (MPBX/SG/PZ)
+        function plotGeneric() {
+            const date = document.getElementById('gen-date').value;
+            const val = document.getElementById('gen-val').value;
+
+            if(!date || !val) return alert("Please enter Date and Value");
+
+            genData.labels.push(date);
+            genData.vals.push(val);
+
+            genChartInst.data = {
+                labels: genData.labels,
+                datasets: [{ label: 'Recorded Value', data: genData.vals, borderColor: '#6366f1', backgroundColor: '#6366f130', fill: true, tension: 0.3 }]
+            };
+            genChartInst.update();
+            document.getElementById('gen-val').value = '';
         }
     </script>
 </body>
