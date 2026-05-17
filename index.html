@@ -24,58 +24,85 @@
 <body class="text-gray-800 h-screen overflow-hidden flex">
 
     <div id="login-screen" class="fixed inset-0 z-50 bg-slate-950 flex items-center justify-center p-4">
-        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md border border-gray-100 relative">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden grid grid-cols-1 md:grid-cols-12 border border-gray-100 relative">
             
-            <div id="admin-trigger-icon" onclick="quickFillAdmin()" class="absolute top-5 right-5 text-slate-300 hover:text-blue-600 cursor-pointer transition text-sm" title="Admin Quick Secure Portal">
-                <i class="fa-solid fa-shield-halved"></i>
-            </div>
-
-            <div class="text-center mb-6">
-                <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 text-3xl mb-3 border border-blue-100 shadow-sm">
-                    <i class="fa-solid fa-compass-drafting"></i>
+            <div class="md:col-span-5 bg-gradient-to-br from-slate-900 to-blue-950 p-8 text-white flex flex-col justify-between border-r border-slate-800">
+                <div>
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-500/10 text-blue-400 text-2xl mb-4 border border-blue-500/20">
+                        <i class="fa-solid fa-gears"></i>
+                    </div>
+                    <h3 class="font-bold text-sm uppercase tracking-wider text-blue-400">Portal Mode Selection</h3>
+                    <p class="text-[11px] text-slate-400 mt-1 leading-relaxed">Select specialized tunnel monitoring privilege profile for precise mathematical telemetry tracking.</p>
+                    
+                    <div class="mt-6 space-y-3">
+                        <label onclick="setLoginMode('standard')" class="flex items-center p-3 rounded-xl border bg-slate-900/40 border-slate-800 hover:border-slate-700 cursor-pointer transition" id="mode-card-standard">
+                            <input type="radio" name="login_mode" id="radio-standard" checked class="text-blue-600 focus:ring-0 mr-3">
+                            <div>
+                                <p class="text-xs font-bold text-white">Standard Mode</p>
+                                <p class="text-[10px] text-slate-400">Data entry & telemetry logging view</p>
+                            </div>
+                        </label>
+                        <label onclick="setLoginMode('advanced')" class="flex items-center p-3 rounded-xl border bg-slate-900/20 border-slate-800 hover:border-slate-700 cursor-pointer transition" id="mode-card-advanced">
+                            <input type="radio" name="login_mode" id="radio-advanced" class="text-blue-600 focus:ring-0 mr-3">
+                            <div>
+                                <p class="text-xs font-bold text-slate-300 flex items-center">Advanced Portal <span class="ml-1.5 px-1.5 py-0.2 bg-blue-500/20 text-blue-300 rounded text-[8px] tracking-widest font-black uppercase">Tunnel Engine</span></p>
+                                <p class="text-[10px] text-slate-500">Formulas execution & analytical plots reports</p>
+                            </div>
+                        </label>
+                    </div>
                 </div>
-                <h1 class="text-xl font-black text-slate-950 uppercase tracking-tight">A&A Geotechnical</h1>
-                <p class="text-[11px] font-bold text-blue-600 tracking-widest uppercase mt-0.5">Instrumentation & Monitoring Service</p>
-            </div>
-            
-            <div id="form-signin" class="space-y-4">
-                <h2 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Account Portal</h2>
-                <input type="text" id="login-username" placeholder="Username, Email or Admin ID" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 font-medium transition">
-                <input type="password" id="login-password" placeholder="Password" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 font-medium transition">
-                
-                <div class="text-right">
-                    <button onclick="toggleLoginViews('forgot')" class="text-[11px] text-blue-600 hover:underline font-semibold">Forgot Password?</button>
-                </div>
-
-                <button onclick="handleLogin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition shadow-lg shadow-blue-200 text-xs tracking-wide">Sign In to Dashboard</button>
-                
-                <div class="text-center pt-3 border-t border-slate-100">
-                    <p class="text-[11px] text-slate-500">New to system? <button onclick="toggleLoginViews('signup')" class="text-blue-600 font-bold hover:underline">Create Account</button></p>
-                </div>
-            </div>
-
-            <div id="form-signup" class="space-y-4 hidden">
-                <h2 class="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-1">Create System Registry</h2>
-                <input type="text" id="reg-name" placeholder="Full Name" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50">
-                <input type="text" id="reg-username" placeholder="Choose Username" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50">
-                <input type="password" id="reg-password" placeholder="Choose Secure Password" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50">
-                
-                <button onclick="handleRegister()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition text-xs shadow-md tracking-wide">Register Account</button>
-                
-                <div class="text-center pt-2">
-                    <button onclick="toggleLoginViews('signin')" class="text-[11px] text-slate-500 hover:underline font-medium"><i class="fa-solid fa-arrow-left mr-1"></i> Back to Sign In</button>
+                <div class="text-[10px] text-slate-500 border-t border-slate-900 pt-4 mt-6">
+                    <p><i class="fa-solid fa-server mr-1"></i> Core Version: v2.4.0 (Stable)</p>
                 </div>
             </div>
 
-            <div id="form-forgot" class="space-y-4 hidden">
-                <h2 class="text-xs font-bold text-amber-600 uppercase tracking-wider mb-1">Reset Access Key</h2>
-                <p class="text-[11px] text-slate-500 leading-relaxed">Enter your registered username below to fetch your credential status.</p>
-                <input type="text" id="forgot-username" placeholder="Enter Registered Username" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500 bg-slate-50">
+            <div class="md:col-span-7 p-8 flex flex-col justify-center relative bg-white">
+                <div id="admin-trigger-icon" onclick="quickFillAdmin()" class="absolute top-6 right-6 text-slate-300 hover:text-blue-600 cursor-pointer transition text-sm" title="Admin Quick Secure Portal">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+
+                <div class="mb-6">
+                    <h1 class="text-lg font-black text-slate-950 uppercase tracking-tight">A&A Geotechnical</h1>
+                    <p class="text-[11px] font-bold text-blue-600 tracking-widest uppercase mt-0.5">Instrumentation & Monitoring Service</p>
+                </div>
                 
-                <button onclick="handleForgotPassword()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 rounded-xl transition text-xs shadow-md">Check Password</button>
-                
-                <div class="text-center pt-2">
-                    <button onclick="toggleLoginViews('signin')" class="text-[11px] text-slate-500 hover:underline font-medium"><i class="fa-solid fa-arrow-left mr-1"></i> Back to Sign In</button>
+                <div id="form-signin" class="space-y-4">
+                    <input type="text" id="login-username" placeholder="Username, Email or Admin ID" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 font-medium transition">
+                    <input type="password" id="login-password" placeholder="Password" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 font-medium transition">
+                    
+                    <div class="text-right">
+                        <button onclick="toggleLoginViews('forgot')" class="text-[11px] text-blue-600 hover:underline font-semibold">Forgot Password?</button>
+                    </div>
+
+                    <button onclick="handleLogin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition shadow-lg shadow-blue-200 text-xs tracking-wide">Sign In to Dashboard</button>
+                    
+                    <div class="text-center pt-3 border-t border-slate-100">
+                        <p class="text-[11px] text-slate-500">New to system? <button onclick="toggleLoginViews('signup')" class="text-blue-600 font-bold hover:underline">Create Account</button></p>
+                    </div>
+                </div>
+
+                <div id="form-signup" class="space-y-4 hidden">
+                    <h2 class="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-1">Create System Registry</h2>
+                    <input type="text" id="reg-name" placeholder="Full Name" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50">
+                    <input type="text" id="reg-username" placeholder="Choose Username" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50">
+                    <input type="password" id="reg-password" placeholder="Choose Secure Password" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50">
+                    
+                    <button onclick="handleRegister()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition text-xs shadow-md tracking-wide">Register Account</button>
+                    
+                    <div class="text-center pt-2">
+                        <button onclick="toggleLoginViews('signin')" class="text-[11px] text-slate-500 hover:underline font-medium"><i class="fa-solid fa-arrow-left mr-1"></i> Back to Sign In</button>
+                    </div>
+                </div>
+
+                <div id="form-forgot" class="space-y-4 hidden">
+                    <h2 class="text-xs font-bold text-amber-600 uppercase tracking-wider mb-1">Reset Access Key</h2>
+                    <input type="text" id="forgot-username" placeholder="Enter Registered Username" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500 bg-slate-50">
+                    
+                    <button onclick="handleForgotPassword()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 rounded-xl transition text-xs shadow-md">Check Password</button>
+                    
+                    <div class="text-center pt-2">
+                        <button onclick="toggleLoginViews('signin')" class="text-[11px] text-slate-500 hover:underline font-medium"><i class="fa-solid fa-arrow-left mr-1"></i> Back to Sign In</button>
+                    </div>
                 </div>
             </div>
 
@@ -107,7 +134,7 @@
                     <p class="text-[10px] text-slate-400 font-medium mt-0.5" id="profile-role">Field Engineer</p>
                 </div>
             </div>
-            <div id="sidebar-admin-icon" class="text-slate-600 text-sm hidden" title="Full Root Admin Control Active">
+            <div id="sidebar-admin-icon" class="text-slate-600 text-sm hidden">
                 <i class="fa-solid fa-unlock-keyhole text-red-500 animate-pulse"></i>
             </div>
         </div>
@@ -142,7 +169,7 @@
                             <span class="text-[10px] text-slate-400 block font-bold uppercase tracking-wider">Client Authority</span>
                             <span class="text-xs font-bold text-slate-800 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 inline-block mt-1" id="dash-proj-client">Loading...</span>
                         </div>
-                        <button id="admin-delete-project-btn" onclick="adminDeleteProject()" class="hidden bg-red-50 hover:bg-red-100 text-red-600 border border-red-100 p-2.5 rounded-xl text-xs font-bold transition no-print" title="Admin Force Wipe">
+                        <button id="admin-delete-project-btn" onclick="adminDeleteProject()" class="hidden bg-red-50 hover:bg-red-100 text-red-600 border border-red-100 p-2.5 rounded-xl text-xs font-bold transition no-print">
                             <i class="fa-solid fa-folder-minus text-base"></i>
                         </button>
                     </div>
@@ -157,7 +184,7 @@
                         </div>
                     </div>
                     <div class="flex space-x-2">
-                        <button onclick="adminResetAllUsers()" class="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition shadow-md shadow-red-900/20"><i class="fa-solid fa-users-slash mr-1"></i> Purge Sub-Users</button>
+                        <button onclick="adminResetAllUsers()" class="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition><i class="fa-solid fa-users-slash mr-1"></i> Purge Sub-Users</button>
                         <button onclick="adminWipeDatabase()" class="bg-slate-800 hover:bg-slate-700 text-white font-bold px-4 py-2 rounded-xl text-xs border border-slate-700 transition"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Reset DB Caches</button>
                     </div>
                 </div>
@@ -177,7 +204,7 @@
                     </div>
                     <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
                         <div class="p-3.5 rounded-xl bg-rose-50 text-rose-600 text-xl"><i class="fa-solid fa-triangle-exclamation"></i></div>
-                        <div><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Trigger Alarm Levels</p><h3 class="text-xs font-extrabold text-slate-900 mt-0.5"><span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded border border-emerald-200">All Within Limits</span></h3></div>
+                        <div><p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Tunnel Safety Limit</p><h3 class="text-xs font-extrabold text-slate-900 mt-0.5"><span id="safety-alert-badge" class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded border border-emerald-200">All Within Limits</span></h3></div>
                     </div>
                 </div>
             </div>
@@ -187,11 +214,11 @@
                     <h3 class="text-xs font-bold text-slate-900 mb-4 uppercase tracking-widest pb-2 border-b border-slate-100">Project Parameters Setup</h3>
                     <div class="grid grid-cols-1 gap-4 text-xs">
                         <div><label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Project Structural Name</label><input type="text" id="setup-name" class="w-full border border-slate-200 rounded-xl p-3 mt-1.5 focus:ring-2 focus:ring-blue-500 outline-none font-semibold text-slate-800 bg-slate-50"></div>
-                        <div><label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Client Authority / Executive Agency</label><input type="text" id="setup-client" class="w-full border border-slate-200 rounded-xl p-3 mt-1.5 focus:ring-2 focus:ring-blue-500 outline-none font-semibold text-slate-800 bg-slate-50"></div>
-                        <div><label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Site Location / Coordinates Matrix / Chainage</label><input type="text" id="setup-loc" class="w-full border border-slate-200 rounded-xl p-3 mt-1.5 focus:ring-2 focus:ring-blue-500 outline-none font-semibold text-slate-800 bg-slate-50"></div>
-                        <div><label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Lead Infrastructure Contractor</label><input type="text" id="setup-contractor" class="w-full border border-slate-200 rounded-xl p-3 mt-1.5 focus:ring-2 focus:ring-blue-500 outline-none font-semibold text-slate-800 bg-slate-50"></div>
+                        <div><label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Client Authority</label><input type="text" id="setup-client" class="w-full border border-slate-200 rounded-xl p-3 mt-1.5 focus:ring-2 focus:ring-blue-500 outline-none font-semibold text-slate-800 bg-slate-50"></div>
+                        <div><label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Site Location / RD Chainage</label><input type="text" id="setup-loc" class="w-full border border-slate-200 rounded-xl p-3 mt-1.5 focus:ring-2 focus:ring-blue-500 outline-none font-semibold text-slate-800 bg-slate-50"></div>
+                        <div><label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Lead Contractor</label><input type="text" id="setup-contractor" class="w-full border border-slate-200 rounded-xl p-3 mt-1.5 focus:ring-2 focus:ring-blue-500 outline-none font-semibold text-slate-800 bg-slate-50"></div>
                     </div>
-                    <button onclick="saveProjectData()" class="mt-6 bg-blue-600 text-white px-5 py-3 rounded-xl text-xs font-bold hover:bg-blue-700 transition shadow-md shadow-blue-200 tracking-wide"><i class="fa-solid fa-floppy-disk mr-1"></i> Save Parameters Configuration</button>
+                    <button onclick="saveProjectData()" class="mt-6 bg-blue-600 text-white px-5 py-3 rounded-xl text-xs font-bold hover:bg-blue-700 transition shadow-md tracking-wide"><i class="fa-solid fa-floppy-disk mr-1"></i> Save Configuration</button>
                 </div>
             </div>
 
@@ -205,43 +232,86 @@
                         <span class="bg-cyan-100 text-cyan-800 text-[10px] font-black px-2.5 py-1 rounded-xl border border-cyan-200 uppercase tracking-wider animate-pulse"><i class="fa-solid fa-bolt mr-1"></i> Live Stream Active</span>
                     </div>
                     <div class="flex-1 w-full bg-slate-50">
-                        <iframe 
-                            src="https://inclinometer-system-252uudkljhfrguvmkxmyxs.streamlit.app/?embed=true" 
-                            width="100%" 
-                            height="100%" 
-                            style="border: none; min-height: 720px;"
-                        ></iframe>
+                        <iframe src="https://inclinometer-system-252uudkljhfrguvmkxmyxs.streamlit.app/?embed=true" width="100%" height="100%" style="border: none; min-height: 720px;"></iframe>
                     </div>
                 </div>
             </div>
 
             <div id="view-lc" class="view-section hidden space-y-4">
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-6 shadow-sm no-print">
-                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col justify-between"><span class="text-xs font-bold text-amber-600 uppercase tracking-wider"><i class="fa-solid fa-file-csv mr-1"></i> CSV Import Core</span><input type="file" id="lc-file" class="text-xs mt-3 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100" accept=".csv" onchange="importLoadCellCSV(event)"></div>
-                    <div class="p-4 bg-emerald-50/40 rounded-xl border border-emerald-100">
-                        <span class="text-xs font-bold text-emerald-800 uppercase tracking-wider"><i class="fa-solid fa-pen-to-square mr-1"></i> Manual Stress Verification Entry</span>
-                        <div class="grid grid-cols-4 gap-2 mt-3 text-xs">
-                            <div><label class="text-[10px] text-slate-400 block font-bold uppercase">Date</label><input type="date" id="lc-date" class="w-full p-2 border border-slate-200 bg-white rounded-lg mt-1 font-medium"></div>
-                            <div><label class="text-[10px] text-blue-600 block font-bold uppercase">CH-29 (T)</label><input type="number" id="lc-g1" step="0.1" class="w-full p-2 border border-slate-200 bg-white rounded-lg mt-1 font-mono"></div>
-                            <div><label class="text-[10px] text-teal-600 block font-bold uppercase">CH-30 (T)</label><input type="number" id="lc-g2" step="0.1" class="w-full p-2 border border-slate-200 bg-white rounded-lg mt-1 font-mono"></div>
-                            <div><label class="text-[10px] text-orange-600 block font-bold uppercase">CH-31 (T)</label><input type="number" id="lc-g3" step="0.1" class="w-full p-2 border border-slate-200 bg-white rounded-lg mt-1 font-mono"></div>
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 grid grid-cols-1 md:grid-cols-12 gap-6 shadow-sm no-print">
+                    
+                    <div class="md:col-span-8 bg-slate-50 p-5 rounded-xl border border-slate-200">
+                        <span class="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center"><i class="fa-solid fa-calculator text-amber-500 mr-2"></i> Real-time Load Cell Mathematical Entry Panel</span>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4 text-xs">
+                            <div>
+                                <label class="text-[10px] text-slate-500 block font-bold uppercase">Select Load Cell Target Location</label>
+                                <select id="lc-position" class="w-full p-2.5 border border-slate-200 bg-white rounded-xl mt-1.5 font-bold text-slate-800 focus:ring-2 focus:ring-amber-500 outline-none">
+                                    <option value="LHS">LHS Location (CH 29-30-31)</option>
+                                    <option value="CROWN">CROWN Location (CH 32-33-34)</option>
+                                    <option value="RHS">RHS Location (CH 35-36-37)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-500 block font-bold uppercase">Logging Date</label>
+                                <input type="date" id="lc-date" class="w-full p-2 border border-slate-200 bg-white rounded-xl mt-1.5 font-medium text-slate-800">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-500 block font-bold uppercase">Calibration Factor (k)</label>
+                                <input type="number" id="lc-factor" value="1.0" step="0.001" class="w-full p-2 border border-slate-200 bg-white rounded-xl mt-1.5 font-mono font-bold text-amber-700">
+                            </div>
                         </div>
-                        <button onclick="addManualLoadCellRow()" class="mt-4 bg-emerald-600 text-white text-xs font-bold px-4 py-2 rounded-xl hover:bg-emerald-700 transition w-full shadow-sm tracking-wide">Compute Mathematical Average & Plot</button>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3 text-xs">
+                            <div>
+                                <label class="text-[10px] text-blue-600 block font-bold uppercase font-mono" id="lbl-g1">Sensor 1 (Gauge A)</label>
+                                <input type="number" id="lc-g1" step="0.01" class="w-full p-2.5 border border-slate-200 bg-white rounded-xl mt-1.5 font-mono font-semibold" placeholder="0.00">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-teal-600 block font-bold uppercase font-mono" id="lbl-g2">Sensor 2 (Gauge B)</label>
+                                <input type="number" id="lc-g2" step="0.01" class="w-full p-2.5 border border-slate-200 bg-white rounded-xl mt-1.5 font-mono font-semibold" placeholder="0.00">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-rose-600 block font-bold uppercase font-mono" id="lbl-g3">Sensor 3 (Gauge C)</label>
+                                <input type="number" id="lc-g3" step="0.01" class="w-full p-2.5 border border-slate-200 bg-white rounded-xl mt-1.5 font-mono font-semibold" placeholder="0.00">
+                            </div>
+                        </div>
+
+                        <div class="mt-4 flex space-x-2">
+                            <button onclick="addManualLoadCellRow()" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold py-3 rounded-xl transition shadow-md tracking-wide"><i class="fa-solid fa-plus mr-1"></i> Compute Average & Update Dashboard Plot</button>
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-4 bg-slate-900 text-white p-5 rounded-xl flex flex-col justify-between border border-slate-950">
+                        <div>
+                            <span class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center"><i class="fa-solid fa-file-excel mr-2"></i> Professional Reporting Engine</span>
+                            <p class="text-[11px] text-slate-400 mt-2 leading-relaxed">Generate structural audit statements. Exports full weekly/monthly time-series parameters with applied multi-gauge calibration matrices directly into client-ready sheets.</p>
+                        </div>
+                        <button onclick="exportLoadCellReport()" class="mt-4 bg-white text-slate-950 hover:bg-slate-100 text-xs font-black py-3 rounded-xl transition w-full shadow text-center tracking-wide"><i class="fa-solid fa-file-arrow-down mr-1"></i> Download Professional Report (.csv)</button>
                     </div>
                 </div>
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm lg:col-span-2 h-[400px] relative shadow-sm"><canvas id="lcChart"></canvas></div>
-                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col"><div class="flex justify-between items-center mb-3 border-b pb-2"><h4 class="text-xs font-bold uppercase text-slate-500 tracking-wider">Average Anchor Load Log</h4><button onclick="clearSensorData('lc')" class="text-[10px] text-red-600 font-bold hover:underline no-print">Purge Records</button></div><div class="flex-1 overflow-y-auto text-xs space-y-2 font-mono" id="lc-matrix-log"></div></div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm lg:col-span-8 h-[460px] relative">
+                        <canvas id="lcChart"></canvas>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col lg:col-span-4">
+                        <div class="flex justify-between items-center mb-3 border-b pb-2">
+                            <h4 class="text-xs font-black uppercase text-slate-900 tracking-wider">Structural Stress Logs</h4>
+                            <button onclick="clearSensorData('lc')" class="text-[10px] text-red-600 font-bold hover:underline no-print">Clear All</button>
+                        </div>
+                        <div class="flex-1 overflow-y-auto text-xs space-y-2 font-mono" id="lc-matrix-log"></div>
+                    </div>
                 </div>
             </div>
 
             <div id="view-sg" class="view-section hidden space-y-4">
                 <div class="bg-white p-5 rounded-2xl border border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-6 shadow-sm no-print">
-                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col justify-between"><span class="text-xs font-bold text-emerald-600 uppercase tracking-wider"><i class="fa-solid fa-file-csv mr-1"></i> File Registry Import</span><input type="file" id="sg-file" class="text-xs mt-3 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100" accept=".csv" onchange="importStrainGaugeCSV(event)"></div>
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col justify-between"><span class="text-xs font-bold text-emerald-600 uppercase tracking-wider"><i class="fa-solid fa-file-csv mr-1"></i> File Registry Import</span><input type="file" id="sg-file" class="text-xs mt-3" accept=".csv" onchange="importStrainGaugeCSV(event)"></div>
                     <div class="p-4 bg-emerald-50/40 rounded-xl border border-emerald-100">
                         <span class="text-xs font-bold text-emerald-800 uppercase tracking-wider"><i class="fa-solid fa-plus mr-1"></i> Manual Microstrain Row Entry</span>
                         <div class="grid grid-cols-3 gap-2 mt-3 text-xs">
-                            <div><label class="text-[10px] text-slate-400 block font-bold uppercase">Plot Date</label><input type="date" id="sg-date" class="w-full p-2 border border-slate-200 bg-white rounded-lg mt-1 font-medium"></div>
+                            <div><label class="text-[10px] text-slate-400 block font-bold uppercase">Plot Date</label><input type="date" id="sg-date" class="w-full p-2 border border-slate-200 bg-white rounded-lg mt-1"></div>
                             <div><label class="text-[10px] text-emerald-600 block font-bold uppercase">Strain (µε)</label><input type="number" id="sg-val" step="0.1" class="w-full p-2 border border-slate-200 bg-white rounded-lg mt-1 font-mono"></div>
                             <div><label class="text-[10px] text-amber-600 block font-bold uppercase">Temp (°C)</label><input type="number" id="sg-temp" step="0.5" class="w-full p-2 border border-slate-200 bg-white rounded-lg mt-1 font-mono"></div>
                         </div>
@@ -250,14 +320,13 @@
                 </div>
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm lg:col-span-2 h-[400px] relative"><canvas id="sgChart"></canvas></div>
-                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col"><div class="flex justify-between items-center mb-3 border-b pb-2"><h4 class="text-xs font-bold uppercase text-slate-500 tracking-wider">Vector Strain Log</h4><button onclick="clearSensorData('sg')" class="text-[10px] text-red-600 font-bold hover:underline no-print">Purge Records</button></div><div class="flex-1 overflow-y-auto text-xs space-y-1.5 font-mono" id="sg-matrix-log"></div></div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col"><div class="flex justify-between items-center mb-3 border-b pb-2"><h4 class="text-xs font-bold uppercase text-slate-500 tracking-wider">Vector Strain Log</h4><button onclick="clearSensorData('sg')" class="text-[10px] text-red-600 font-bold hover:underline no-print">Purge</button></div><div class="flex-1 overflow-y-auto text-xs space-y-1.5 font-mono" id="sg-matrix-log"></div></div>
                 </div>
             </div>
 
             <div id="view-ot" class="view-section hidden space-y-4">
                 <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm max-w-4xl">
                     <h3 class="text-xs font-black text-slate-950 uppercase tracking-wider mb-2"><i class="fa-solid fa-bullseye text-purple-500 mr-1"></i> Optical Target / Prism 3D Monitoring</h3>
-                    <p class="text-[11px] text-slate-500 mb-4">Total station monitoring vector coordinates registry for monitoring line structural settlement parameters.</p>
                     <div class="grid grid-cols-5 gap-2 text-xs mb-4">
                         <div><label class="text-[10px] text-slate-400 block font-bold uppercase">Prism ID</label><input type="text" id="ot-id" value="PR-01" class="w-full p-2 border border-slate-200 rounded-lg mt-1"></div>
                         <div><label class="text-[10px] text-slate-400 block font-bold uppercase">Δ Northing (mm)</label><input type="number" id="ot-n" value="0.4" step="0.1" class="w-full p-2 border border-slate-200 rounded-lg mt-1 font-mono"></div>
@@ -296,16 +365,31 @@
     <script>
         let projectConfig = JSON.parse(localStorage.getItem('aa_proj_v2')) || {
             name: "Gandikota Pumped Storage Project (Civil & Hydro-Mechanical)",
-            client: "ADANI RENEWABLE ARENERGY FIFTY-ONE LTD",
+            client: "ADANI RENEWABLE ENERGY FIFTY-ONE LTD",
             loc: "Cable Ventilation Tunnel (RD 9.937)",
             contractor: "Rithwik Project Pvt Ltd"
         };
 
-        let loadCellDataStore = JSON.parse(localStorage.getItem('aa_lc_store')) || [];
-        let strainGaugeDataStore = JSON.parse(localStorage.getItem('aa_sg_store')) || [];
+        // Advanced Multi-Position Load Cell Storage Matrix
+        let loadCellDataStore = JSON.parse(localStorage.getItem('aa_lc_store_v3')) || [
+            { date: "2026-02-10", position: "LHS", g1: 1.2, g2: 2.1, g3: 1.6, avg: 1.63, load: 1.63 },
+            { date: "2026-02-14", position: "LHS", g1: 1.2, g2: 3.0, g3: 1.6, avg: 1.93, load: 1.93 },
+            { date: "2026-02-10", position: "CROWN", g1: 1.1, g2: 0.9, g3: 0.8, avg: 0.93, load: 0.93 },
+            { date: "2026-02-10", position: "RHS", g1: 1.0, g2: 0.7, g3: 1.0, avg: 0.90, load: 0.90 }
+        ];
         
+        let strainGaugeDataStore = JSON.parse(localStorage.getItem('aa_sg_store')) || [];
+        let selectedLoginMode = "standard";
         let isAdminLoggedIn = false;
         let lcChart, sgChart;
+
+        function setLoginMode(mode) {
+            selectedLoginMode = mode;
+            document.getElementById('mode-card-standard').className = mode === 'standard' ? 'flex items-center p-3 rounded-xl border bg-slate-900/40 border-slate-700 cursor-pointer transition' : 'flex items-center p-3 rounded-xl border bg-slate-900/10 border-slate-800 hover:border-slate-700 cursor-pointer transition';
+            document.getElementById('mode-card-advanced').className = mode === 'advanced' ? 'flex items-center p-3 rounded-xl border bg-slate-900/40 border-slate-700 cursor-pointer transition' : 'flex items-center p-3 rounded-xl border bg-slate-900/10 border-slate-800 hover:border-slate-700 cursor-pointer transition';
+            document.getElementById('radio-standard').checked = mode === 'standard';
+            document.getElementById('radio-advanced').checked = mode === 'advanced';
+        }
 
         function toggleLoginViews(view) {
             document.getElementById('form-signin').classList.add('hidden');
@@ -323,41 +407,23 @@
             const name = document.getElementById('reg-name').value.trim();
             const username = document.getElementById('reg-username').value.trim();
             const pass = document.getElementById('reg-password').value.trim();
-
-            if (!name || !username || !pass) {
-                alert("Please fill all information fields.");
-                return;
-            }
+            if (!name || !username || !pass) return alert("Please fill all information fields.");
 
             let users = JSON.parse(localStorage.getItem('system_users')) || {};
-            if (users[username] || username === "jaha343") {
-                alert("Username already taken inside registry database.");
-                return;
-            }
+            if (users[username] || username === "jaha343") return alert("Username already taken inside registry database.");
 
             users[username] = { name: name, password: pass };
             localStorage.setItem('system_users', JSON.stringify(users));
             alert("Account registered successfully! You can now Sign In.");
             toggleLoginViews('signin');
-            document.getElementById('login-username').value = username;
-            document.getElementById('login-password').value = pass;
         }
 
         function handleForgotPassword() {
             const username = document.getElementById('forgot-username').value.trim();
             if(!username) return alert("Please type your username.");
-
-            if(username === "jaha343") {
-                alert("Master Admin Account parameters can only be authorized via system configurations.");
-                return;
-            }
-
             let users = JSON.parse(localStorage.getItem('system_users')) || {};
             if(users[username]) {
                 alert("Account Located! Password is: " + users[username].password);
-                toggleLoginViews('signin');
-                document.getElementById('login-username').value = username;
-                document.getElementById('login-password').value = users[username].password;
             } else {
                 alert("No profile match found for username inside database registry.");
             }
@@ -366,21 +432,17 @@
         function handleLogin() {
             const userIn = document.getElementById('login-username').value.trim();
             const passIn = document.getElementById('login-password').value.trim();
-
-            if(!userIn || !passIn) {
-                alert("Please enter credentials to pass auth layer.");
-                return;
-            }
+            if(!userIn || !passIn) return alert("Please enter credentials to pass auth layer.");
 
             let users = JSON.parse(localStorage.getItem('system_users')) || {};
             let isUserValid = users[userIn] && users[userIn].password === passIn;
 
             if (userIn === "jaha343" && passIn === "9542771954") {
                 isAdminLoggedIn = true;
-                applySecurityLayoutRights("Root Administrator", "Admin Channel", "AD");
+                applySecurityLayoutRights("Root Administrator", "Admin Channel (" + selectedLoginMode.toUpperCase() + ")", "AD");
             } else if (isUserValid) {
                 isAdminLoggedIn = false;
-                applySecurityLayoutRights("Field Engineer", users[userIn].name, users[userIn].name.substring(0,2).toUpperCase());
+                applySecurityLayoutRights("Field Engineer", users[userIn].name + " (" + selectedLoginMode.toUpperCase() + ")", users[userIn].name.substring(0,2).toUpperCase());
             } else {
                 alert("❌ Authentication Failed: Invalid Credentials Entry.");
                 return;
@@ -392,7 +454,6 @@
             
             updateUIVariables();
             initializeTelemetryCharts();
-            
             renderLoadCellMatrix();
             renderStrainMatrix();
         }
@@ -408,49 +469,12 @@
                 document.getElementById('admin-control-panel-block').classList.remove('hidden');
                 document.getElementById('admin-strip').classList.remove('hidden');
                 document.getElementById('admin-delete-project-btn').classList.remove('hidden');
-                document.getElementById('profile-initial').className = "w-10 h-10 rounded-xl bg-red-600 flex items-center justify-center font-bold text-white mr-3 shadow-md";
-                document.getElementById('engine-status-text').innerText = "Admin privileges connected";
                 document.getElementById('security-status-text').innerText = "Root Privilege Vault";
                 document.getElementById('security-status-text').className = "text-xs font-extrabold text-red-600 mt-0.5";
-            } else {
-                document.getElementById('sidebar-admin-icon').classList.add('hidden');
-                document.getElementById('admin-header-badge').classList.add('hidden');
-                document.getElementById('admin-control-panel-block').classList.add('hidden');
-                document.getElementById('admin-strip').classList.add('hidden');
-                document.getElementById('admin-delete-project-btn').classList.add('hidden');
-                document.getElementById('profile-initial').className = "w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center font-bold text-white mr-3 shadow-md";
-                document.getElementById('engine-status-text').innerText = "Active & Operational";
-                document.getElementById('security-status-text').innerText = "Standard Workspace";
-                document.getElementById('security-status-text').className = "text-xs font-extrabold text-slate-900 mt-0.5";
             }
-        }
-
-        function adminDeleteProject() {
-            if(!isAdminLoggedIn) return;
-            if(confirm("💥 CRITICAL WARNING: Wipe out all parameters of this project?")) {
-                projectConfig = { name: "Wiped Project Matrix", client: "N/A", loc: "N/A", contractor: "N/A" };
-                localStorage.setItem('aa_proj_v2', JSON.stringify(projectConfig));
-                updateUIVariables();
-            }
-        }
-
-        function adminResetAllUsers() {
-            if(!isAdminLoggedIn) return;
-            if(confirm("Are you sure you want to delete all secondary user registries?")) {
-                localStorage.removeItem('system_users');
-                alert("All secondary accounts have been completely wiped.");
-            }
-        }
-
-        function adminWipeDatabase() {
-            if(!isAdminLoggedIn) return;
-            if(confirm("⚠️ DANGER: Execute complete database purge?")) {
-                localStorage.clear();
-                loadCellDataStore = []; strainGaugeDataStore = [];
-                projectConfig = { name: "Blank Slate", client: "Blank", loc: "Blank", contractor: "Blank" };
-                updateUIVariables();
-                renderLoadCellMatrix(); renderStrainMatrix();
-                alert("Database Cache Cleared.");
+            if(selectedLoginMode === "advanced") {
+                document.getElementById('security-status-text').innerText = "Advanced Engine Mode";
+                document.getElementById('security-status-text').className = "text-xs font-extrabold text-blue-600 mt-0.5";
             }
         }
 
@@ -477,82 +501,188 @@
 
         function showTab(tabId) {
             document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('bg-blue-600', 'text-white', 'shadow-md');
-                btn.classList.add('text-slate-400');
-            });
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('bg-blue-600', 'text-white', 'shadow-md'));
             
             const activeBtn = document.getElementById('btn-' + tabId);
-            if(activeBtn) {
-                activeBtn.classList.add('bg-blue-600', 'text-white', 'shadow-md');
-                activeBtn.classList.remove('text-slate-400');
-            }
+            if(activeBtn) activeBtn.classList.add('bg-blue-600', 'text-white', 'shadow-md');
             document.getElementById('view-' + tabId).classList.remove('hidden');
             document.getElementById('page-title').innerText = document.getElementById('btn-'+tabId).innerText.trim();
         }
 
         function initializeTelemetryCharts() {
-            lcChart = new Chart(document.getElementById('lcChart').getContext('2d'), { type: 'line', data: { labels: [], datasets: [] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { font: { family: 'Inter', weight: 600 } } } } } });
-            sgChart = new Chart(document.getElementById('sgChart').getContext('2d'), { type: 'line', data: { labels: [], datasets: [] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { font: { family: 'Inter', weight: 600 } } } } } });
+            lcChart = new Chart(document.getElementById('lcChart').getContext('2d'), { 
+                type: 'line', 
+                data: { labels: [], datasets: [] }, 
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { 
+                        legend: { position: 'top', labels: { font: { family: 'Inter', weight: 700, size: 11 } } },
+                        title: { display: true, text: 'LOAD CELL TREND ANALYSIS MATRIX (TONS)', font: { size: 12, weight: 'bold' } }
+                    },
+                    scales: { y: { title: { display: true, text: 'Load Value (Ton)' } } }
+                } 
+            });
+            sgChart = new Chart(document.getElementById('sgChart').getContext('2d'), { type: 'line', data: { labels: [], datasets: [] }, options: { responsive: true, maintainAspectRatio: false } });
         }
 
         function clearSensorData(type) {
             if(!confirm("Wipe structural telemetry data logs?")) return;
-            if(type === 'lc') { loadCellDataStore = []; localStorage.removeItem('aa_lc_store'); renderLoadCellMatrix(); }
-            if(type === 'sg') { strainGaugeDataStore = []; localStorage.removeItem('aa_sg_store'); renderStrainMatrix(); }
+            if(type === 'lc') { loadCellDataStore = []; localStorage.removeItem('aa_lc_store_v3'); renderLoadCellMatrix(); }
         }
 
+        // ================= ADVANCED LOAD CELL MULTI-AXIS ENGINE =================
         function renderLoadCellMatrix() {
-            lcChart.data = { labels: loadCellDataStore.map(d=>d.date), datasets: [{ label: 'Computed Load Average (Ton)', data: loadCellDataStore.map(d=>d.avg), borderColor: '#f59e0b', backgroundColor: 'rgba(245, 158, 11, 0.05)', fill: true, tension: 0.2 }] }; lcChart.update();
-            let html = ''; loadCellDataStore.forEach(item => { html += `<div class="p-2 bg-slate-50 border rounded-lg flex justify-between items-center"><span>📅 ${item.date}</span><span class="font-bold text-amber-600">${item.avg} T</span></div>`; });
-            document.getElementById('lc-matrix-log').innerHTML = html || '<p class="text-slate-400 italic">No sensor telemetry loaded</p>';
+            // Filter unique chronological dates for X-Axis
+            let uniqueDates = [...new Set(loadCellDataStore.map(d => d.date))].sort((a,b) => new Date(a) - new Date(b));
+            
+            // Map data streams for LHS, Crown, RHS parameters
+            let mapPositionData = (pos) => {
+                return uniqueDates.map(date => {
+                    let entry = loadCellDataStore.find(d => d.date === date && d.position === pos);
+                    return entry ? entry.load : null;
+                });
+            };
+
+            lcChart.data = { 
+                labels: uniqueDates, 
+                datasets: [
+                    { label: 'LHS (CH 29-31)', data: mapPositionData('LHS'), borderColor: '#3b82f6', backgroundColor: '#3b82f6', fill: false, tension: 0.2, borderWidth: 2.5, pointRadius: 4 },
+                    { label: 'CROWN (CH 32-34)', data: mapPositionData('CROWN'), borderColor: '#10b981', backgroundColor: '#10b981', fill: false, tension: 0.2, borderWidth: 2.5, pointRadius: 4 },
+                    { label: 'RHS (CH 35-37)', data: mapPositionData('RHS'), borderColor: '#f59e0b', backgroundColor: '#f59e0b', fill: false, tension: 0.2, borderWidth: 2.5, pointRadius: 4 }
+                ] 
+            }; 
+            lcChart.update();
+            
+            // Render Live Grid Data List
+            let html = ''; 
+            // Sort combined store for UI feed logs
+            let sortedStore = [...loadCellDataStore].sort((a,b) => new Date(b.date) - new Date(a.date));
+            
+            let currentCriticalStatus = "All Within Limits";
+            let statusClass = "bg-emerald-100 text-emerald-800 border-emerald-200";
+
+            sortedStore.forEach(item => {
+                let limitBadge = '<span class="text-[9px] bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded">Normal</span>';
+                if (parseFloat(item.load) >= 15.0) {
+                    limitBadge = '<span class="text-[9px] bg-red-600 text-white font-black px-1.5 py-0.5 rounded animate-pulse">ACTION LIMIT</span>';
+                    currentCriticalStatus = "ACTION LIMIT BREACHED";
+                    statusClass = "bg-red-600 text-white border-transparent";
+                } else if (parseFloat(item.load) >= 12.0) {
+                    limitBadge = '<span class="text-[9px] bg-rose-100 text-rose-700 font-bold px-1.5 py-0.5 rounded">ALARM</span>';
+                    if(currentCriticalStatus !== "ACTION LIMIT BREACHED") { currentCriticalStatus = "ALARM LIMIT TRIGGERED"; statusClass = "bg-rose-500 text-white border-transparent"; }
+                } else if (parseFloat(item.load) >= 7.5) {
+                    limitBadge = '<span class="text-[9px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded">ALERT</span>';
+                    if(currentCriticalStatus === "All Within Limits") { currentCriticalStatus = "ALERT LOGS ACTIVE"; statusClass = "bg-amber-500 text-white border-transparent"; }
+                }
+
+                html += `<div class="p-3 bg-slate-50 border rounded-xl flex flex-col">
+                            <div class="flex justify-between items-center border-b pb-1.5 mb-1.5">
+                                <span class="font-bold text-slate-900 text-[11px]">${item.position} Axis Zone</span>
+                                <span class="font-black text-slate-950">${item.load} Ton</span>
+                            </div>
+                            <div class="flex justify-between items-center text-[10px] text-slate-500">
+                                <span>📅 ${item.date}</span>
+                                ${limitBadge}
+                            </div>
+                         </div>`; 
+            });
+            
+            document.getElementById('lc-matrix-log').innerHTML = html || '<p class="text-slate-400 italic text-xs">No entries verified.</p>';
+            
+            // Set Overall Dashboard Safety Header Notification Alert
+            let safetyBadge = document.getElementById('safety-alert-badge');
+            if(safetyBadge) {
+                safetyBadge.innerText = currentCriticalStatus;
+                safetyBadge.className = `${statusClass} text-[10px] font-black px-2 py-0.5 rounded border`;
+            }
         }
 
         function addManualLoadCellRow() {
+            const pos = document.getElementById('lc-position').value;
             const date = document.getElementById('lc-date').value;
+            const factor = parseFloat(document.getElementById('lc-factor').value) || 1;
             const g1 = parseFloat(document.getElementById('lc-g1').value) || 0;
             const g2 = parseFloat(document.getElementById('lc-g2').value) || 0;
             const g3 = parseFloat(document.getElementById('lc-g3').value) || 0;
-            if(!date) return alert("Select valid logging timeline.");
-            loadCellDataStore.push({ date, avg: ((g1+g2+g3)/3).toFixed(2) });
-            localStorage.setItem('aa_lc_store', JSON.stringify(loadCellDataStore)); renderLoadCellMatrix();
+            
+            if(!date) return alert("Select valid Date timeline parameters.");
+            
+            // Standard Tunnel Formula Application: Avg = (G1+G2+G3)/3 * k
+            const avg = (g1 + g2 + g3) / 3;
+            const load = (avg * factor).toFixed(3);
+            
+            // Overwrite duplicate entries for same day + position to avoid plotting noise
+            let matchIndex = loadCellDataStore.findIndex(d => d.date === date && d.position === pos);
+            let payload = { date, position: pos, g1, g2, g3, avg: avg.toFixed(3), factor, load: parseFloat(load) };
+            
+            if(matchIndex > -1) {
+                loadCellDataStore[matchIndex] = payload;
+            } else {
+                loadCellDataStore.push(payload);
+            }
+            
+            localStorage.setItem('aa_lc_store_v3', JSON.stringify(loadCellDataStore)); 
+            renderLoadCellMatrix();
+            
+            // Reset numerical inputs fields for next entry log
+            document.getElementById('lc-g1').value = '';
+            document.getElementById('lc-g2').value = '';
+            document.getElementById('lc-g3').value = '';
         }
 
-        function importLoadCellCSV(e) {
-            loadCellDataStore = [{date: '2026-05-01', avg: 145.50}, {date: '2026-05-10', avg: 142.20}];
-            localStorage.setItem('aa_lc_store', JSON.stringify(loadCellDataStore)); renderLoadCellMatrix();
+        function exportLoadCellReport() {
+            if(loadCellDataStore.length === 0) return alert("No valid time-series matrix compiled yet.");
+            
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Project Statement,A&A Geotechnical Core Logging Systems Audit\n";
+            csvContent += `Structure,${projectConfig.name}\n`;
+            csvContent += `Location Chainage,${projectConfig.loc}\n\n`;
+            csvContent += "Date,Load Cell Position,Sensor CH-A,Sensor CH-B,Sensor CH-C,Mathematical Average,Calibration Factor (k),Total Applied Load (Tons),Safety Assessment Status\n";
+            
+            let sortedReportStore = [...loadCellDataStore].sort((a,b) => new Date(a.date) - new Date(b.date));
+            sortedReportStore.forEach(r => {
+                let status = "NORMAL";
+                if(r.load >= 15.0) status = "ACTION BREACH";
+                else if(r.load >= 12.0) status = "ALARM WARNING";
+                else if(r.load >= 7.5) status = "ALERT LEVEL";
+                
+                csvContent += `${r.date},${r.position},${r.g1},${r.g2},${r.g3},${r.avg},${r.factor},${r.load},${status}\n`;
+            });
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `Load_Cell_Professional_Report_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
+        // Generic Strain Gauge Modules Controls
         function renderStrainMatrix() {
-            sgChart.data = { labels: strainGaugeDataStore.map(d=>d.date), datasets: [{ label: 'Microstrain Plot (µε)', data: strainGaugeDataStore.map(d=>d.val), borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.05)', fill: true, tension: 0.2 }] }; sgChart.update();
-            let html = ''; strainGaugeDataStore.forEach(item => { html += `<div class="p-2 bg-slate-50 border rounded-lg flex justify-between items-center"><span>📅 ${item.date}</span><span class="font-bold text-emerald-600">${item.val} µε</span></div>`; });
-            document.getElementById('sg-matrix-log').innerHTML = html || '<p class="text-slate-400 italic">No sensor telemetry loaded</p>';
+            sgChart.data = { labels: strainGaugeDataStore.map(d=>d.date), datasets: [{ label: 'Microstrain (µε)', data: strainGaugeDataStore.map(d=>d.val), borderColor: '#10b981', fill: false }] }; sgChart.update();
+            let html = ''; strainGaugeDataStore.forEach(item => { html += `<div class="p-2 bg-slate-50 border rounded-lg flex justify-between"><span>📅 ${item.date}</span><span class="font-bold">${item.val} µε</span></div>`; });
+            document.getElementById('sg-matrix-log').innerHTML = html;
         }
-
         function addManualStrainRow() {
             const date = document.getElementById('sg-date').value;
             const val = parseFloat(document.getElementById('sg-val').value);
-            if(!date || isNaN(val)) return alert("Fill strain dataset parameters.");
-            strainGaugeDataStore.push({ date, val });
+            if(!date || isNaN(val)) return; strainGaugeDataStore.push({ date, val });
             localStorage.setItem('aa_sg_store', JSON.stringify(strainGaugeDataStore)); renderStrainMatrix();
         }
-
         function importStrainGaugeCSV(e) {
             strainGaugeDataStore = [{date: '2026-05-01', val: 12.5}, {date: '2026-05-15', val: 18.9}];
-            localStorage.setItem('aa_sg_store', JSON.stringify(strainGaugeDataStore)); renderStrainMatrix();
+            renderStrainMatrix();
         }
-
         function addManualPrismRow() {
             const id = document.getElementById('ot-id').value;
             const n = parseFloat(document.getElementById('ot-n').value).toFixed(3);
             const e = parseFloat(document.getElementById('ot-e').value).toFixed(3);
             const z = parseFloat(document.getElementById('ot-z').value).toFixed(3);
-            
-            const tbody = document.getElementById('ot-tbody-log');
-            const row = document.createElement('tr');
-            row.className = "border-b font-mono text-slate-700";
-            row.innerHTML = `<td class="p-3 font-semibold">${id}</td><td class="p-3">${n > 0 ? '+'+n : n}</td><td class="p-3">${e > 0 ? '+'+e : e}</td><td class="p-3 text-rose-600 font-bold">${z}</td><td class="p-3"><span class="bg-emerald-100 text-emerald-800 font-bold text-[10px] px-2 py-0.5 rounded border border-emerald-200">Stable Condition</span></td>`;
-            tbody.appendChild(row);
+            const row = document.createElement('tr'); row.className = "border-b font-mono text-slate-700";
+            row.innerHTML = `<td class="p-3 font-semibold">${id}</td><td class="p-3">${n}</td><td class="p-3">${e}</td><td class="p-3 text-rose-600 font-bold">${z}</td><td class="p-3"><span class="bg-emerald-100 text-emerald-800 font-bold text-[10px] px-2 py-0.5 rounded border border-emerald-200">Stable</span></td>`;
+            document.getElementById('ot-tbody-log').appendChild(row);
         }
     </script>
 </body>
