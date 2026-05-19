@@ -522,15 +522,15 @@ canvas{display:block}
 <!-- ========== ADD SENSOR MODAL ========== -->
 <div class="modal-bg" id="addSensorModal">
   <div class="modal">
-    <div class="modal-title">Add New Sensor <button class="modal-close" onclick="closeModal('addSensorModal')">×</button></div>
+    <div class="modal-title"><span id="addSensorModalTitle">Add New Sensor</span> <button class="modal-close" onclick="closeModal('addSensorModal')">×</button></div>
     <div class="form-grid">
-      <div class="fg"><label class="fl">Sensor Type</label><select class="fs" id="newSensorType"><option>Load Cell (Rib)</option><option>Load Cell (Rock Bolt)</option><option>Strain Gauge</option><option>Inclinometer</option><option>Piezometer</option></select></div>
-      <div class="fg"><label class="fl">Instrument Code</label><input class="fi" placeholder="e.g. 4424"/></div>
-      <div class="fg"><label class="fl">Location</label><input class="fi" placeholder="e.g. MAT - LHS"/></div>
-      <div class="fg"><label class="fl">Channel No.</label><input class="fi" placeholder="e.g. 38-39-40"/></div>
-      <div class="fg"><label class="fl">RD (m)</label><input class="fi" placeholder="12.812"/></div>
-      <div class="fg"><label class="fl">Date of Installation</label><input class="fi" type="date"/></div>
-      <div class="fg span2"><label class="fl">Project</label><input class="fi" placeholder="Project name"/></div>
+      <div class="fg"><label class="fl">Sensor Type</label><select class="fs" id="newSensorType"><option>Load Cell (Rib)</option><option>Load Cell (Rock Bolt)</option><option>Strain Gauge</option><option>Inclinometer</option><option>Piezometer</option><option>CVT</option><option>Settlement Gauge</option><option>Extensometer</option><option>Crack Meter</option><option>Tiltmeter</option><option>Vibration Sensor</option><option>Temperature Sensor</option><option>Other</option></select></div>
+      <div class="fg"><label class="fl">Instrument Code</label><input class="fi" id="newSensorCode" placeholder="e.g. 4424"/></div>
+      <div class="fg"><label class="fl">Location</label><input class="fi" id="newSensorLocation" placeholder="e.g. MAT - LHS"/></div>
+      <div class="fg"><label class="fl">Channel No.</label><input class="fi" id="newSensorChannel" placeholder="e.g. 38-39-40"/></div>
+      <div class="fg"><label class="fl">RD (m)</label><input class="fi" id="newSensorRD" placeholder="12.812"/></div>
+      <div class="fg"><label class="fl">Date of Installation</label><input class="fi" type="date" id="newSensorDate"/></div>
+      <div class="fg span2"><label class="fl">Project</label><input class="fi" id="newSensorProject" placeholder="Project name"/></div>
     </div>
     <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('addSensorModal')">Cancel</button><button class="btn btn-p" onclick="saveSensor()">Save Sensor</button></div>
   </div>
@@ -561,7 +561,7 @@ canvas{display:block}
       <div class="fg"><label class="fl">Project</label><select class="fs" id="sgProject"><option>Gandikota PSP</option><option>Project B</option><option>Project C</option></select></div>
       <div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="sgDate"/></div>
       <div class="fg"><label class="fl">Reading (με)</label><input class="fi" type="number" id="sgVal" placeholder="0"/></div>
-      <div class="fg span2"><label class="fl">Notes</label><input class="fi" placeholder="Optional notes"/></div>
+      <div class="fg span2"><label class="fl">Notes</label><input class="fi" id="sgNotes" placeholder="Optional notes"/></div>
     </div>
     <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('sgDataModal')">Cancel</button><button class="btn btn-p" onclick="saveSGData()">Save Reading</button></div>
   </div>
@@ -724,7 +724,7 @@ canvas{display:block}
         <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 2a4 4 0 014 4v3l1 1H2L3 9V6a4 4 0 014-4zM5.5 12a1.5 1.5 0 003 0"/></svg>
         <span class="notif-dot" id="notifDot"></span>
       </button>
-      <button class="btn btn-ghost" onclick="openModal('addSensorModal')">+ Add Sensor</button>
+      <button class="btn btn-ghost" onclick="openAddSensorModal()">+ Add Sensor</button>
       <button class="btn btn-p" onclick="printReport()">
         <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 2h7l3 3v7H2V2z"/><path d="M8 2v3h3M4 7h6M4 9h4"/></svg>
         Print PDF
@@ -780,6 +780,24 @@ canvas{display:block}
         <div class="panel">
           <div class="ph"><span class="pt">Instrument Summary</span></div>
           <div class="pb"><div class="ch" style="height:190px"><canvas id="donutChart"></canvas></div></div>
+        </div>
+      </div>
+      <!-- SENSOR REGISTRY -->
+      <div class="panel" style="margin-bottom:14px">
+        <div class="ph">
+          <span class="pt">Registered Sensors</span>
+          <span class="ptag i" id="sensorCount">0 Sensors</span>
+          <div class="pa no-print">
+            <button class="btn btn-ghost" onclick="openAddSensorModal()">+ Add Sensor</button>
+          </div>
+        </div>
+        <div class="pb" style="padding:0">
+          <table class="tbl" id="sensorTable">
+            <thead><tr><th>Code</th><th>Type</th><th>Location</th><th>Channel</th><th>RD (m)</th><th>Install Date</th><th class="no-print">Actions</th></tr></thead>
+            <tbody id="sensorTbody">
+              <tr><td colspan="7" style="text-align:center;color:var(--txt3);font-family:var(--mono);font-size:10px;padding:20px">No sensors registered. Click "+ Add Sensor" to add.</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -1382,6 +1400,7 @@ function initApp(){
   renderIncBoreholes();renderIncTable();
   updateReportCounts();updateEntryStats();
   kimiInit();
+  renderSensorTable();
   setTimeout(()=>{
     initOverviewCharts();renderLCCharts();renderSGCharts();renderIncCharts();
   },100);
@@ -1467,7 +1486,18 @@ function renderLCTable(){
   }).join('');
   document.getElementById('lcRowCount').textContent=rows.length+' Entries';
 }
-function openLCModal(id=null){editingLC=id;document.getElementById('lcModalTitle').textContent=id?'Edit Load Cell Reading':'Add Load Cell Reading';if(!id){['lcSensor1','lcSensor2','lcSensor3','lcAvg'].forEach(x=>{document.getElementById(x).value='';});}openModal('lcDataModal');}
+function openLCModal(id=null){
+  editingLC=id;
+  document.getElementById('lcModalTitle').textContent=id?'Edit Load Cell Reading':'Add Load Cell Reading';
+  // Populate dropdown with default + dynamically added Load Cell sensors
+  const sel=document.getElementById('lcSelect');
+  const defaultOpts=['LC MAT-LHS (4421)','LC MAT-CROWN (4422)','LC MAT-RHS (4423)'];
+  const addedLC=sensorData.filter(s=>s.type.startsWith('Load Cell')).map(s=>`${s.code} – ${s.location}`);
+  const allOpts=[...defaultOpts,...addedLC.filter(o=>!defaultOpts.includes(o))];
+  sel.innerHTML=allOpts.map(o=>`<option>${o}</option>`).join('');
+  if(!id){['lcSensor1','lcSensor2','lcSensor3','lcAvg'].forEach(x=>{document.getElementById(x).value='';});}
+  openModal('lcDataModal');
+}
 function editLC(id){const r=lcData.find(x=>x.id===id);if(!r)return;editingLC=id;document.getElementById('lcModalTitle').textContent='Edit Load Cell Reading';document.getElementById('lcSelect').value=r.lc;document.getElementById('lcDate').value=r.date;document.getElementById('lcSensor1').value=r.ch1;document.getElementById('lcSensor2').value=r.ch2;document.getElementById('lcSensor3').value=r.ch3;document.getElementById('lcAvg').value=r.avg;openModal('lcDataModal');}
 function deleteLC(id){if(confirm('Delete this reading?')){lcData=lcData.filter(x=>x.id!==id);renderLCTable();renderLCCharts();updateReportCounts();}}
 function saveLCData(){
@@ -1599,7 +1629,95 @@ function loadUserTable(){const tbody=document.getElementById('userTable');tbody.
 function approveUser(id){const u=USERS.find(x=>x.id===id);if(u){u.status='active';loadUserTable();notifyAdmin('User "'+u.displayName+'" has been approved.');}}
 function deleteUser(id){if(confirm('Remove user?')){const i=USERS.findIndex(x=>x.id===id);if(i>-1)USERS.splice(i,1);loadUserTable();}}
 function addUserPrompt(){const name=prompt('Username:');if(!name)return;const pass=prompt('Password:');if(!pass)return;const role=confirm('Admin role? OK=Admin, Cancel=User')?'admin':'user';USERS.push({id:Date.now(),name,pass,role,status:'active',displayName:name,email:name+'@aa-geo.com'});loadUserTable();}
-function saveSensor(){showToast('Sensor added!');closeModal('addSensorModal');}
+// ================================================================
+// SENSOR REGISTRY
+// ================================================================
+let sensorData = [];
+let editingSensor = null;
+
+function saveSensor(){
+  const type = document.getElementById('newSensorType').value.trim();
+  const code = document.getElementById('newSensorCode').value.trim();
+  const location = document.getElementById('newSensorLocation').value.trim();
+  const channel = document.getElementById('newSensorChannel').value.trim();
+  const rd = document.getElementById('newSensorRD').value.trim();
+  const installDate = document.getElementById('newSensorDate').value;
+  const project = document.getElementById('newSensorProject').value.trim();
+
+  if(!code) return alert('Instrument Code is required');
+  if(!location) return alert('Location is required');
+
+  if(editingSensor !== null){
+    sensorData[editingSensor] = {id: sensorData[editingSensor].id, type, code, location, channel, rd, installDate, project};
+    editingSensor = null;
+  } else {
+    sensorData.push({id: Date.now(), type, code, location, channel, rd, installDate, project});
+  }
+
+  // Clear form
+  ['newSensorCode','newSensorLocation','newSensorChannel','newSensorRD','newSensorProject'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('newSensorDate').value='';
+  document.getElementById('newSensorType').selectedIndex=0;
+
+  renderSensorTable();
+  closeModal('addSensorModal');
+  showToast('Sensor saved!');
+}
+
+function openAddSensorModal(){
+  editingSensor=null;
+  document.getElementById('addSensorModalTitle').textContent='Add New Sensor';
+  ['newSensorCode','newSensorLocation','newSensorChannel','newSensorRD','newSensorProject'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('newSensorDate').value='';
+  document.getElementById('newSensorType').selectedIndex=0;
+  openModal('addSensorModal');
+}
+
+function editSensor(idx){
+  const s=sensorData[idx];if(!s)return;
+  editingSensor=idx;
+  document.getElementById('addSensorModalTitle').textContent='Edit Sensor — '+s.code;
+  document.getElementById('newSensorType').value=s.type;
+  document.getElementById('newSensorCode').value=s.code;
+  document.getElementById('newSensorLocation').value=s.location;
+  document.getElementById('newSensorChannel').value=s.channel;
+  document.getElementById('newSensorRD').value=s.rd;
+  document.getElementById('newSensorDate').value=s.installDate;
+  document.getElementById('newSensorProject').value=s.project;
+  openModal('addSensorModal');
+}
+
+function deleteSensor(idx){
+  if(!confirm('Delete sensor '+sensorData[idx].code+'?'))return;
+  sensorData.splice(idx,1);
+  renderSensorTable();
+  showToast('Sensor deleted.');
+}
+
+function renderSensorTable(){
+  const tbody=document.getElementById('sensorTbody');
+  if(!tbody)return;
+  if(!sensorData.length){
+    tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--txt3);font-family:var(--mono);font-size:10px;padding:20px">No sensors registered. Click "+ Add Sensor" to add.</td></tr>';
+    document.getElementById('sensorCount').textContent='0 Sensors';
+    return;
+  }
+  tbody.innerHTML=sensorData.map((s,i)=>`
+    <tr>
+      <td class="iid">${s.code}</td>
+      <td><span class="chip chip-ok">${s.type}</span></td>
+      <td>${s.location}</td>
+      <td class="iu">${s.channel||'—'}</td>
+      <td class="iu">${s.rd||'—'}</td>
+      <td class="iu">${s.installDate||'—'}</td>
+      <td class="no-print"><div class="tbl-actions"><button onclick="editSensor(${i})">Edit</button><button class="del" onclick="deleteSensor(${i})">Del</button></div></td>
+    </tr>`).join('');
+  document.getElementById('sensorCount').textContent=sensorData.length+' Sensor'+(sensorData.length!==1?'s':'');
+}
 
 // ================================================================
 // STATS
