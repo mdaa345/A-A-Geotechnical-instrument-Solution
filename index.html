@@ -1239,6 +1239,42 @@ let sgCurrentProject = 'all';
 let incSelectedBH = null;
 let charts = {};
 
+// ================================================================
+// LOCALSTORAGE PERSISTENCE
+// ================================================================
+const LS_KEYS = {
+  lcData: 'aageo_lcData',
+  sgData: 'aageo_sgData',
+  incData: 'aageo_incData',
+  sensorData: 'aageo_sensorData',
+  kimiBoreholes: 'aageo_kimiBoreholes',
+};
+
+function saveToStorage(){
+  try {
+    localStorage.setItem(LS_KEYS.lcData, JSON.stringify(lcData));
+    localStorage.setItem(LS_KEYS.sgData, JSON.stringify(sgData));
+    localStorage.setItem(LS_KEYS.incData, JSON.stringify(incData));
+    localStorage.setItem(LS_KEYS.sensorData, JSON.stringify(sensorData));
+    localStorage.setItem(LS_KEYS.kimiBoreholes, JSON.stringify(KIMI_BOREHOLES));
+  } catch(e){ console.warn('Storage save failed:', e); }
+}
+
+function loadFromStorage(){
+  try {
+    const lc = localStorage.getItem(LS_KEYS.lcData);
+    const sg = localStorage.getItem(LS_KEYS.sgData);
+    const inc = localStorage.getItem(LS_KEYS.incData);
+    const sen = localStorage.getItem(LS_KEYS.sensorData);
+    const kimi = localStorage.getItem(LS_KEYS.kimiBoreholes);
+    if(lc) lcData = JSON.parse(lc);
+    if(sg) sgData = JSON.parse(sg);
+    if(inc) incData = JSON.parse(inc);
+    if(sen) sensorData = JSON.parse(sen);
+    if(kimi){ const arr = JSON.parse(kimi); KIMI_BOREHOLES.length=0; arr.forEach(b=>KIMI_BOREHOLES.push(b)); }
+  } catch(e){ console.warn('Storage load failed:', e); }
+}
+
 // OTP state
 let pendingOTPUser = null;
 let currentOTP = '';
@@ -1394,6 +1430,7 @@ function notifyAdmin(msg){
 // INIT
 // ================================================================
 function initApp(){
+  loadFromStorage();
   startClock();
   renderLCTable();
   renderSGGauges();renderSGTable();
@@ -1499,14 +1536,14 @@ function openLCModal(id=null){
   openModal('lcDataModal');
 }
 function editLC(id){const r=lcData.find(x=>x.id===id);if(!r)return;editingLC=id;document.getElementById('lcModalTitle').textContent='Edit Load Cell Reading';document.getElementById('lcSelect').value=r.lc;document.getElementById('lcDate').value=r.date;document.getElementById('lcSensor1').value=r.ch1;document.getElementById('lcSensor2').value=r.ch2;document.getElementById('lcSensor3').value=r.ch3;document.getElementById('lcAvg').value=r.avg;openModal('lcDataModal');}
-function deleteLC(id){if(confirm('Delete this reading?')){lcData=lcData.filter(x=>x.id!==id);renderLCTable();renderLCCharts();updateReportCounts();}}
+function deleteLC(id){if(confirm('Delete this reading?')){lcData=lcData.filter(x=>x.id!==id);renderLCTable();renderLCCharts();updateReportCounts();saveToStorage();}}
 function saveLCData(){
   const ch1=parseFloat(document.getElementById('lcSensor1').value)||0,ch2=parseFloat(document.getElementById('lcSensor2').value)||0,ch3=parseFloat(document.getElementById('lcSensor3').value)||0;
   const avg=(ch1+ch2+ch3)/3,lc=document.getElementById('lcSelect').value,date=document.getElementById('lcDate').value;
   if(!date)return alert('Please enter a date');
   if(editingLC){const r=lcData.find(x=>x.id===editingLC);Object.assign(r,{lc,date,ch1,ch2,ch3,avg});}
   else lcData.push({id:Date.now(),date,lc,ch1,ch2,ch3,avg,type:'rib'});
-  renderLCTable();renderLCCharts();updateReportCounts();updateEntryStats();closeModal('lcDataModal');
+  renderLCTable();renderLCCharts();updateReportCounts();updateEntryStats();closeModal('lcDataModal');saveToStorage();
   if(avg>=7.5)notifyAdmin('Alert: '+lc+' avg load '+avg.toFixed(3)+'T exceeds threshold.');
 }
 function exportLCData(){const csv=['Date,LoadCell,CH1,CH2,CH3,Avg(Ton),Status',...lcData.map(r=>`${r.date},${r.lc},${r.ch1},${r.ch2},${r.ch3},${r.avg.toFixed(3)},${lcStatus(r.avg).txt}`)].join('\n');downloadCSV(csv,'LoadCell_Data.csv');}
@@ -1537,13 +1574,13 @@ function renderSGTable(){
 }
 function openSGModal(){editingSG=null;document.getElementById('sgModalTitle').textContent='Add Strain Gauge Reading';openModal('sgDataModal');}
 function editSG(id){const r=sgData.find(x=>x.id===id);if(!r)return;editingSG=id;document.getElementById('sgModalTitle').textContent='Edit Strain Gauge Reading';document.getElementById('sgSelect').value=r.gauge;document.getElementById('sgProject').value=r.project;document.getElementById('sgDate').value=r.date;document.getElementById('sgVal').value=r.val;openModal('sgDataModal');}
-function deleteSG(id){if(confirm('Delete?')){sgData=sgData.filter(x=>x.id!==id);renderSGGauges();renderSGTable();renderSGCharts();updateReportCounts();}}
+function deleteSG(id){if(confirm('Delete?')){sgData=sgData.filter(x=>x.id!==id);renderSGGauges();renderSGTable();renderSGCharts();updateReportCounts();saveToStorage();}}
 function saveSGData(){
   const gauge=document.getElementById('sgSelect').value,project=document.getElementById('sgProject').value,date=document.getElementById('sgDate').value,val=parseFloat(document.getElementById('sgVal').value)||0;
   if(!date)return alert('Please enter a date');
   if(editingSG){const r=sgData.find(x=>x.id===editingSG);Object.assign(r,{gauge,project,date,val});}
   else sgData.push({id:Date.now(),gauge,project,date,val,notes:''});
-  renderSGGauges();renderSGTable();renderSGCharts();updateReportCounts();updateEntryStats();closeModal('sgDataModal');
+  renderSGGauges();renderSGTable();renderSGCharts();updateReportCounts();updateEntryStats();closeModal('sgDataModal');saveToStorage();
   if(val>=SG_ALERT)notifyAdmin('Alert: '+gauge+' reading '+val+'με exceeds alert threshold.');
 }
 function exportSGData(){const csv=['Date,Gauge,Project,Reading(με),Status',...sgData.map(r=>`${r.date},${r.gauge},${r.project},${r.val},${sgStatus(r.val).txt}`)].join('\n');downloadCSV(csv,'StrainGauge_Data.csv');}
@@ -1570,15 +1607,15 @@ function renderIncTable(){
 }
 function openIncModal(){editingInc=null;document.getElementById('incModalTitle').textContent='Add Inclinometer Reading';openModal('incModal');}
 function editInc(id){const r=incData.find(x=>x.id===id);if(!r)return;editingInc=id;document.getElementById('incModalTitle').textContent='Edit Inclinometer Reading';document.getElementById('incBH').value=r.bh;document.getElementById('incDate').value=r.date;document.getElementById('incDepth').value=r.depth;document.getElementById('incA').value=r.axisA;document.getElementById('incB').value=r.axisB;document.getElementById('incCum').value=r.cumul;openModal('incModal');}
-function deleteInc(id){if(confirm('Delete this reading?')){incData=incData.filter(x=>x.id!==id);renderIncBoreholes();renderIncTable();renderIncCharts();updateReportCounts();}}
+function deleteInc(id){if(confirm('Delete this reading?')){incData=incData.filter(x=>x.id!==id);renderIncBoreholes();renderIncTable();renderIncCharts();updateReportCounts();saveToStorage();}}
 function saveIncData(){
   const bh=document.getElementById('incBH').value.trim(),date=document.getElementById('incDate').value,depth=parseFloat(document.getElementById('incDepth').value)||0,axisA=parseFloat(document.getElementById('incA').value)||0,axisB=parseFloat(document.getElementById('incB').value)||0,cumul=parseFloat(document.getElementById('incCum').value)||0;
   if(!bh||!date)return alert('Please enter borehole ID and date');
   const csvFile=document.getElementById('incCSV').files[0];
-  if(csvFile){const reader=new FileReader();reader.onload=ev=>{const lines=ev.target.result.split('\n').slice(1);lines.forEach(line=>{const parts=line.split(',');if(parts.length>=4)incData.push({id:Date.now()+Math.random(),bh:bh||parts[0].trim(),date:date||parts[1].trim(),depth:parseFloat(parts[2])||0,axisA:parseFloat(parts[3])||0,axisB:parseFloat(parts[4])||0,cumul:parseFloat(parts[5])||0});});renderIncBoreholes();renderIncTable();renderIncCharts();};reader.readAsText(csvFile);closeModal('incModal');return;}
+  if(csvFile){const reader=new FileReader();reader.onload=ev=>{const lines=ev.target.result.split('\n').slice(1);lines.forEach(line=>{const parts=line.split(',');if(parts.length>=4)incData.push({id:Date.now()+Math.random(),bh:bh||parts[0].trim(),date:date||parts[1].trim(),depth:parseFloat(parts[2])||0,axisA:parseFloat(parts[3])||0,axisB:parseFloat(parts[4])||0,cumul:parseFloat(parts[5])||0});});renderIncBoreholes();renderIncTable();renderIncCharts();saveToStorage();};reader.readAsText(csvFile);closeModal('incModal');return;}
   if(editingInc){const r=incData.find(x=>x.id===editingInc);Object.assign(r,{bh,date,depth,axisA,axisB,cumul});}
   else incData.push({id:Date.now(),bh,date,depth,axisA,axisB,cumul});
-  renderIncBoreholes();renderIncTable();renderIncCharts();updateReportCounts();updateEntryStats();closeModal('incModal');
+  renderIncBoreholes();renderIncTable();renderIncCharts();updateReportCounts();updateEntryStats();closeModal('incModal');saveToStorage();
   if(cumul>=INC_ALERT)notifyAdmin('Alert: '+bh+' cumulative '+cumul.toFixed(2)+'mm exceeds threshold.');
 }
 function importIncCSV(){const input=document.createElement('input');input.type='file';input.accept='.csv';input.onchange=e=>{const f=e.target.files[0];if(!f)return;const reader=new FileReader();reader.onload=ev=>{const lines=ev.target.result.split('\n').slice(1);lines.forEach(line=>{const [bh,date,depth,axisA,axisB,cumul]=line.split(',');if(bh&&date)incData.push({id:Date.now()+Math.random(),bh:bh.trim(),date:date.trim(),depth:parseFloat(depth)||0,axisA:parseFloat(axisA)||0,axisB:parseFloat(axisB)||0,cumul:parseFloat(cumul)||0});});renderIncBoreholes();renderIncTable();renderIncCharts();alert('Imported '+lines.length+' rows');};reader.readAsText(f);};input.click();}
@@ -1592,7 +1629,7 @@ function quickEntryLC(){
   const avg=(ch1+ch2+ch3)/3,lc=document.getElementById('qeLC').value,date=document.getElementById('qeLCDate').value;
   if(!date||(!ch1&&!ch2&&!ch3))return alert('Fill date and at least one reading');
   lcData.push({id:Date.now(),date,lc,ch1,ch2,ch3,avg,type:'rib'});
-  renderLCTable();renderLCCharts();updateReportCounts();updateEntryStats();
+  renderLCTable();renderLCCharts();updateReportCounts();updateEntryStats();saveToStorage();
   ['qeLC1','qeLC2','qeLC3','qeLCAvg'].forEach(id=>document.getElementById(id).value='');
   showToast('Load cell reading saved!');
   if(avg>=7.5)notifyAdmin('Alert: '+lc+' reading '+avg.toFixed(3)+'T');
@@ -1601,7 +1638,7 @@ function quickEntrySG(){
   const gauge=document.getElementById('qeSG').value,project=document.getElementById('qeSGProj').value,date=document.getElementById('qeSGDate').value,val=parseFloat(document.getElementById('qeSGVal').value)||0;
   if(!date||!val)return alert('Fill date and reading value');
   sgData.push({id:Date.now(),gauge,project,date,val,notes:document.getElementById('qeSGNotes').value});
-  renderSGGauges();renderSGTable();renderSGCharts();updateReportCounts();updateEntryStats();
+  renderSGGauges();renderSGTable();renderSGCharts();updateReportCounts();updateEntryStats();saveToStorage();
   document.getElementById('qeSGVal').value='';document.getElementById('qeSGNotes').value='';
   showToast('Strain gauge reading saved!');
   if(val>=SG_ALERT)notifyAdmin('Alert: '+gauge+' reading '+val+'με');
@@ -1610,7 +1647,7 @@ function quickEntryInc(){
   const bh=document.getElementById('qeIncBH').value.trim(),date=document.getElementById('qeIncDate').value,depth=parseFloat(document.getElementById('qeIncDepth').value)||0,axisA=parseFloat(document.getElementById('qeIncA').value)||0,axisB=parseFloat(document.getElementById('qeIncB').value)||0,cumul=parseFloat(document.getElementById('qeIncCum').value)||0;
   if(!bh||!date)return alert('Enter borehole ID and date');
   incData.push({id:Date.now(),bh,date,depth,axisA,axisB,cumul});
-  renderIncBoreholes();renderIncTable();renderIncCharts();updateReportCounts();updateEntryStats();
+  renderIncBoreholes();renderIncTable();renderIncCharts();updateReportCounts();updateEntryStats();saveToStorage();
   ['qeIncA','qeIncB','qeIncCum'].forEach(id=>document.getElementById(id).value='');
   showToast('Inclinometer reading saved!');
 }
@@ -1664,6 +1701,7 @@ function saveSensor(){
   renderSensorTable();
   closeModal('addSensorModal');
   showToast('Sensor saved!');
+  saveToStorage();
 }
 
 function openAddSensorModal(){
@@ -1696,6 +1734,7 @@ function deleteSensor(idx){
   sensorData.splice(idx,1);
   renderSensorTable();
   showToast('Sensor deleted.');
+  saveToStorage();
 }
 
 function renderSensorTable(){
@@ -1796,7 +1835,7 @@ setInterval(()=>{if(document.getElementById('view-overview').classList.contains(
 // ================================================================
 // ================================================================
 
-const KIMI_BOREHOLES = [
+let KIMI_BOREHOLES = [
   {id:'BH-INC-01',depth:30,sensors:25,spacing:1.2,status:'warn',maxA:18.4,maxB:9.7,depthA:14,depthB:12,rateA:1.2,rateB:0.5,
    aProfile:[0.2,0.5,1.1,2.0,3.4,5.1,7.2,9.6,11.4,13.2,14.9,16.0,17.1,18.4,17.8,16.2,13.5,10.8,8.1,5.9,4.1,2.8,1.7,0.9,0.3],
    bProfile:[0.1,0.3,0.7,1.3,2.2,3.4,4.6,5.8,6.9,7.8,8.5,9.1,9.5,9.7,9.2,8.3,6.9,5.3,3.8,2.5,1.5,0.8,0.4,0.1,0.0]},
@@ -2191,6 +2230,7 @@ function kimiSaveBorehole(){
   kimiCloseModal('kimiAddBHModal');
   kimiBuildBHList();kimiUpdateKPIs();kimiUpdateStats();kimiRenderDataTable();kimiRebuildActiveTab();kimiUpdateAlertStrip();
   showToast(editIdx!==''?'Borehole updated!':'New borehole added!');
+  saveToStorage();
 }
 
 function kimiDeleteBH(idx){
@@ -2198,7 +2238,7 @@ function kimiDeleteBH(idx){
   KIMI_BOREHOLES.splice(idx,1);
   if(kimiCurrentBH>=KIMI_BOREHOLES.length)kimiCurrentBH=Math.max(0,KIMI_BOREHOLES.length-1);
   kimiBuildBHList();kimiUpdateKPIs();kimiUpdateStats();kimiRenderDataTable();kimiRebuildActiveTab();kimiUpdateAlertStrip();
-  showToast('Borehole deleted.');
+  showToast('Borehole deleted.');saveToStorage();
 }
 
 function kimiOpenAddReadingModal(){
@@ -2243,7 +2283,7 @@ function kimiSaveReading(){
   else bh.status='ok';
   kimiCloseModal('kimiAddReadingModal');
   kimiBuildBHList();kimiUpdateKPIs();kimiUpdateStats();kimiRenderDataTable();kimiRebuildActiveTab();kimiUpdateAlertStrip();
-  showToast('Reading added to '+bh.id+'!');
+  showToast('Reading added to '+bh.id+'!');saveToStorage();
   if(maxA>20||maxB>20)notifyAdmin('Alert: '+bh.id+' displacement exceeds alert threshold!');
 }
 
