@@ -1093,7 +1093,7 @@ canvas{display:block}
           <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--txt)">Combined Reading Log</div>
           <div style="font-family:var(--mono);font-size:10px;color:var(--txt3);margin-top:2px">CVT · MAT · TRT — Ek sequence mein, month-wise</div>
         </div>
-        <div style="display:flex;gap:6px;align-items:center">
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
           <select class="fs" id="combMonthFilter" onchange="renderCombinedLog()" style="padding:5px 8px;font-size:10px">
             <option value="all">All Months</option>
           </select>
@@ -1103,7 +1103,8 @@ canvas{display:block}
             <option value="mat">MAT Only</option>
             <option value="trt">TRT Only</option>
           </select>
-          <button class="btn btn-ghost no-print" onclick="exportCombinedLog()">Export CSV</button>
+          <button class="btn btn-p no-print" onclick="openCombAddModal()" style="font-size:10px;padding:5px 12px">+ Add Reading</button>
+          <button class="btn btn-ghost no-print" onclick="exportCombinedLog()" style="font-size:10px;padding:5px 12px">Export CSV</button>
         </div>
       </div>
       <!-- Month folder cards -->
@@ -3200,9 +3201,9 @@ function renderCombinedLog(){
   const typeColors={cvt:'var(--accent)',mat:'var(--info)',trt:'#a78bfa'};
   const typeLabels={cvt:'CVT',mat:'MAT',trt:'TRT'};
   const typeActions={
-    cvt:(id)=>`<button onclick="editCVT(${id})">Edit</button><button class="del" onclick="deleteCVT(${id});renderCombinedLog()">Del</button>`,
-    mat:(id)=>`<button onclick="editMAT(${id})">Edit</button><button class="del" onclick="deleteMAT(${id});renderCombinedLog()">Del</button>`,
-    trt:(id)=>`<button onclick="editTRT(${id})">Edit</button><button class="del" onclick="deleteTRT(${id});renderCombinedLog()">Del</button>`,
+    cvt:(id)=>`<button onclick="editCVTFromComb(${id})">Edit</button><button class="del" onclick="deleteCVT(${id});renderCombinedLog()">Del</button>`,
+    mat:(id)=>`<button onclick="editMATFromComb(${id})">Edit</button><button class="del" onclick="deleteMAT(${id});renderCombinedLog()">Del</button>`,
+    trt:(id)=>`<button onclick="editTRTFromComb(${id})">Edit</button><button class="del" onclick="deleteTRT(${id});renderCombinedLog()">Del</button>`,
   };
 
   tbody.innerHTML=allRows.map(r=>{
@@ -3271,6 +3272,74 @@ function toggleSubMenu(id){
   document.querySelectorAll('.ni-sub').forEach(s=>s.classList.remove('show'));
   if(!isOpen) el.classList.add('show');
 }
+
+
+// ================================================================
+// COMBINED LOG — ADD / EDIT helpers
+// ================================================================
+function openCombAddModal(){
+  // Show a small picker to choose which instrument to add
+  const picker = document.getElementById('combAddPicker');
+  if(picker){ picker.classList.toggle('open'); return; }
+  // Create picker dropdown inline
+  const btn = document.querySelector('[onclick="openCombAddModal()"]');
+  const div = document.createElement('div');
+  div.id = 'combAddPicker';
+  div.className = 'open';
+  div.style.cssText = 'position:absolute;z-index:9999;background:var(--panel);border:1px solid var(--border-hi);border-radius:8px;padding:6px 0;min-width:160px;box-shadow:0 8px 24px rgba(0,0,0,.4)';
+  div.innerHTML = `
+    <div style="font-family:var(--mono);font-size:9px;color:var(--txt3);padding:4px 14px 6px;text-transform:uppercase;letter-spacing:.05em">Select Instrument</div>
+    <button onclick="document.getElementById('combAddPicker').remove();openCVTModal()" style="display:flex;align-items:center;gap:8px;width:100%;padding:7px 14px;background:transparent;border:none;cursor:pointer;font-family:var(--mono);font-size:11px;color:var(--accent)">
+      <span style="width:8px;height:8px;border-radius:50%;background:var(--accent);display:inline-block"></span> CVT Reading
+    </button>
+    <button onclick="document.getElementById('combAddPicker').remove();openMATModal()" style="display:flex;align-items:center;gap:8px;width:100%;padding:7px 14px;background:transparent;border:none;cursor:pointer;font-family:var(--mono);font-size:11px;color:var(--info)">
+      <span style="width:8px;height:8px;border-radius:50%;background:var(--info);display:inline-block"></span> MAT Reading
+    </button>
+    <button onclick="document.getElementById('combAddPicker').remove();openTRTModal()" style="display:flex;align-items:center;gap:8px;width:100%;padding:7px 14px;background:transparent;border:none;cursor:pointer;font-family:var(--mono);font-size:11px;color:#a78bfa">
+      <span style="width:8px;height:8px;border-radius:50%;background:#a78bfa;display:inline-block"></span> TRT Reading
+    </button>`;
+  // Position below button
+  btn.style.position = 'relative';
+  btn.parentElement.style.position = 'relative';
+  btn.parentElement.appendChild(div);
+  // Close on outside click
+  setTimeout(()=>document.addEventListener('click', function h(e){
+    if(!div.contains(e.target)&&e.target!==btn){div.remove();document.removeEventListener('click',h);}
+  }),100);
+}
+
+// Edit from combined log — opens modal, on save re-renders combined log too
+function editCVTFromComb(id){
+  editCVT(id);
+  // After modal save, also refresh combined log
+  const origSave = window._cvtSaveHook;
+  window._cvtCombHook = true;
+}
+function editMATFromComb(id){
+  editMAT(id);
+  window._matCombHook = true;
+}
+function editTRTFromComb(id){
+  editTRT(id);
+  window._trtCombHook = true;
+}
+
+// Patch save functions to re-render combined log if opened from there
+const _origSaveCVT = saveCVTData;
+window.saveCVTData = function(){
+  _origSaveCVT();
+  if(document.getElementById('view-combinedlog')?.style.display!=='none') renderCombinedLog();
+};
+const _origSaveMAT = saveMATData;
+window.saveMATData = function(){
+  _origSaveMAT();
+  if(document.getElementById('view-combinedlog')?.style.display!=='none') renderCombinedLog();
+};
+const _origSaveTRT = saveTRTData;
+window.saveTRTData = function(){
+  _origSaveTRT();
+  if(document.getElementById('view-combinedlog')?.style.display!=='none') renderCombinedLog();
+};
 
 // ================================================================
 // APP BOOT
