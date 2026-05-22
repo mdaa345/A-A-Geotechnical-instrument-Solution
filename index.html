@@ -584,6 +584,23 @@ canvas{display:block}
   </div>
 </div>
 
+<!-- ========== ADD CVT DATA MODAL ========== -->
+<div class="modal-bg" id="cvtDataModal">
+  <div class="modal">
+    <div class="modal-title"><span id="cvtModalTitle">Add CVT Reading</span><button class="modal-close" onclick="closeModal('cvtDataModal')">×</button></div>
+    <div class="form-grid">
+      <div class="fg"><label class="fl">CVT Instrument ID</label><select class="fs" id="cvtIdSelect"><option>CVT-01</option><option>CVT-02</option><option>CVT-03</option><option>CVT-04</option><option>CVT-05</option></select></div>
+      <div class="fg"><label class="fl">Position</label><select class="fs" id="cvtPosition"><option>MAT</option><option>TRT</option><option>LHS Crown</option><option>RHS</option></select></div>
+      <div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="cvtDate"/></div>
+      <div class="fg"><label class="fl">Initial Reading (mm)</label><input class="fi" type="number" step="0.01" id="cvtInitial" placeholder="0.00"/></div>
+      <div class="fg"><label class="fl">Current Reading (mm)</label><input class="fi" type="number" step="0.01" id="cvtCurrent" placeholder="0.00" oninput="calcCVTConv()"/></div>
+      <div class="fg"><label class="fl">Convergence (auto, mm)</label><input class="fi" id="cvtConvCalc" readonly style="opacity:.7"/></div>
+      <div class="fg span2"><label class="fl">Notes</label><input class="fi" id="cvtNotes" placeholder="Optional notes"/></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('cvtDataModal')">Cancel</button><button class="btn btn-p" onclick="saveCVTData()">Save Reading</button></div>
+  </div>
+</div>
+
 <!-- ========== ADMIN PANEL MODAL ========== -->
 <div class="modal-bg" id="adminModal">
   <div class="modal" style="width:560px">
@@ -683,7 +700,23 @@ canvas{display:block}
       Kimi INC System
       <span class="ni-badge b">4</span>
     </div>
+    <div class="ni" onclick="switchView('cvt',this)">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M2 8 Q4 2 8 2 Q12 2 14 8 Q12 14 8 14 Q4 14 2 8z"/><line x1="2" y1="8" x2="14" y2="8"/><line x1="8" y1="2" x2="8" y2="14"/></svg>
+      Convergence (CVT)
+    </div>
+    <div class="ni" onclick="switchView('mat',this)">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="2" y="6" width="12" height="4" rx="1"/><line x1="4" y1="4" x2="4" y2="6"/><line x1="8" y1="3" x2="8" y2="6"/><line x1="12" y1="4" x2="12" y2="6"/><line x1="4" y1="10" x2="4" y2="12"/><line x1="8" y1="10" x2="8" y2="13"/><line x1="12" y1="10" x2="12" y2="12"/></svg>
+      MAT Monitor
+    </div>
+    <div class="ni" onclick="switchView('trt',this)">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M2 14 Q2 4 8 2 Q14 4 14 14"/><line x1="5" y1="8" x2="11" y2="8"/><line x1="4" y1="11" x2="12" y2="11"/></svg>
+      TRT Monitor
+    </div>
     <div class="nav-sec">DATA</div>
+    <div class="ni" onclick="switchView('combinedlog',this)">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 2h12v2H2V2zm0 3h12v2H2V5zm0 3h8v2H2V8zm0 3h10v2H2v-2z" opacity=".8"/></svg>
+      Combined Log
+    </div>
     <div class="ni" onclick="switchView('dataentry',this)">
       <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 2h12v2H2V2zm0 4h8v2H2V6zm0 4h10v2H2v-2zm0 4h6v2H2v-2z" opacity=".8"/></svg>
       Manual Entry
@@ -911,6 +944,200 @@ canvas{display:block}
           <table class="tbl">
             <thead><tr><th>Date</th><th>Borehole</th><th>Depth (m)</th><th>A-axis (mm)</th><th>B-axis (mm)</th><th>Cumul. (mm)</th><th>Status</th><th class="no-print">Actions</th></tr></thead>
             <tbody id="incTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== CONVERGENCE (CVT) ===== -->
+    <div id="view-cvt" class="view">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div style="font-family:var(--mono);font-size:11px;color:var(--txt2)">Tunnel Convergence Monitoring — MAT · TRT · LHS Crown · RHS</div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost no-print" onclick="openCVTModal()">+ Add Reading</button>
+          <button class="btn btn-ghost no-print" onclick="exportCVTData()">Export CSV</button>
+          <select class="fs" id="cvtFilterPos" onchange="renderCVTTable();renderCVTCharts()" style="padding:5px 8px;font-size:10px">
+            <option value="all">All Positions</option>
+            <option value="MAT">MAT</option>
+            <option value="TRT">TRT</option>
+            <option value="LHS Crown">LHS Crown</option>
+            <option value="RHS">RHS</option>
+          </select>
+          <select class="fs" id="cvtFilterId" onchange="renderCVTTable();renderCVTCharts()" style="padding:5px 8px;font-size:10px">
+            <option value="all">All CVT IDs</option>
+            <option value="CVT-01">CVT-01</option>
+            <option value="CVT-02">CVT-02</option>
+            <option value="CVT-03">CVT-03</option>
+            <option value="CVT-04">CVT-04</option>
+            <option value="CVT-05">CVT-05</option>
+          </select>
+        </div>
+      </div>
+      <div id="cvtPositionCards" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px"></div>
+      <div class="g2" style="margin-bottom:14px">
+        <div class="panel">
+          <div class="ph"><span class="pt">Convergence Trend – All Positions</span><span class="ptag">mm</span></div>
+          <div class="pb"><div class="ch" style="height:220px"><canvas id="cvtTrendChart"></canvas></div></div>
+        </div>
+        <div class="panel">
+          <div class="ph"><span class="pt">Latest Readings by Position</span></div>
+          <div class="pb"><div class="ch" style="height:220px"><canvas id="cvtBarChart"></canvas></div></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="ph">
+          <span class="pt">CVT Reading Log</span>
+          <span class="ptag i" id="cvtRowCount">0 Entries</span>
+        </div>
+        <div class="pb" style="padding:0">
+          <table class="tbl">
+            <thead><tr><th>Date</th><th>Month</th><th>CVT ID</th><th>Position</th><th>Initial (mm)</th><th>Current (mm)</th><th>Convergence (mm)</th><th>Status</th><th>Notes</th><th class="no-print">Actions</th></tr></thead>
+            <tbody id="cvtTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ===== MAT MONITOR ===== -->
+    <div id="view-mat" class="view">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div>
+          <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--txt)">MAT – Main Access Tunnel</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--txt3);margin-top:2px">Load Cell & Convergence Monitoring — Month-wise Data</div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <select class="fs" id="matMonthFilter" onchange="renderMATTable()" style="padding:5px 8px;font-size:10px">
+            <option value="all">All Months</option>
+          </select>
+          <button class="btn btn-ghost no-print" onclick="openMATModal()">+ Add Reading</button>
+          <button class="btn btn-ghost no-print" onclick="exportMATData()">Export CSV</button>
+        </div>
+      </div>
+      <!-- Month folder cards -->
+      <div id="matMonthCards" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px"></div>
+      <!-- Charts -->
+      <div class="g2" style="margin-bottom:14px">
+        <div class="panel">
+          <div class="ph"><span class="pt">MAT Avg Load Trend</span><span class="ptag" style="background:rgba(96,165,250,.12);color:var(--info)">Ton</span></div>
+          <div class="pb"><div class="ch" style="height:200px"><canvas id="matTrendChart"></canvas></div></div>
+        </div>
+        <div class="panel">
+          <div class="ph"><span class="pt">Channel Comparison</span></div>
+          <div class="pb"><div class="ch" style="height:200px"><canvas id="matBarChart"></canvas></div></div>
+        </div>
+      </div>
+      <!-- Reading Log -->
+      <div class="panel">
+        <div class="ph">
+          <span class="pt">MAT Reading Log</span>
+          <span class="ptag i" id="matRowCount">0 Entries</span>
+        </div>
+        <div class="pb" style="padding:0">
+          <table class="tbl">
+            <thead><tr><th>Date</th><th>Month</th><th>Instrument ID</th><th>RD (m)</th><th>CH-1 (T)</th><th>CH-2 (T)</th><th>CH-3 (T)</th><th>Avg (T)</th><th>Status</th><th>Notes</th><th class="no-print">Actions</th></tr></thead>
+            <tbody id="matTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TRT MONITOR ===== -->
+    <div id="view-trt" class="view">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div>
+          <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--txt)">TRT – Tunnel Roof / TRT Section</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--txt3);margin-top:2px">Load Cell & Convergence Monitoring — Month-wise Data</div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <select class="fs" id="trtMonthFilter" onchange="renderTRTTable()" style="padding:5px 8px;font-size:10px">
+            <option value="all">All Months</option>
+          </select>
+          <button class="btn btn-ghost no-print" onclick="openTRTModal()">+ Add Reading</button>
+          <button class="btn btn-ghost no-print" onclick="exportTRTData()">Export CSV</button>
+        </div>
+      </div>
+      <!-- Month folder cards -->
+      <div id="trtMonthCards" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px"></div>
+      <!-- Charts -->
+      <div class="g2" style="margin-bottom:14px">
+        <div class="panel">
+          <div class="ph"><span class="pt">TRT Avg Load Trend</span><span class="ptag" style="background:rgba(167,139,250,.12);color:#a78bfa">Ton</span></div>
+          <div class="pb"><div class="ch" style="height:200px"><canvas id="trtTrendChart"></canvas></div></div>
+        </div>
+        <div class="panel">
+          <div class="ph"><span class="pt">Channel Comparison</span></div>
+          <div class="pb"><div class="ch" style="height:200px"><canvas id="trtBarChart"></canvas></div></div>
+        </div>
+      </div>
+      <!-- Reading Log -->
+      <div class="panel">
+        <div class="ph">
+          <span class="pt">TRT Reading Log</span>
+          <span class="ptag i" id="trtRowCount">0 Entries</span>
+        </div>
+        <div class="pb" style="padding:0">
+          <table class="tbl">
+            <thead><tr><th>Date</th><th>Month</th><th>Instrument ID</th><th>RD (m)</th><th>CH-1 (T)</th><th>CH-2 (T)</th><th>CH-3 (T)</th><th>Avg (T)</th><th>Status</th><th>Notes</th><th class="no-print">Actions</th></tr></thead>
+            <tbody id="trtTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ===== COMBINED READING LOG ===== -->
+    <div id="view-combinedlog" class="view">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div>
+          <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--txt)">Combined Reading Log</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--txt3);margin-top:2px">CVT · MAT · TRT — Ek sequence mein, month-wise</div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <select class="fs" id="combMonthFilter" onchange="renderCombinedLog()" style="padding:5px 8px;font-size:10px">
+            <option value="all">All Months</option>
+          </select>
+          <select class="fs" id="combTypeFilter" onchange="renderCombinedLog()" style="padding:5px 8px;font-size:10px">
+            <option value="all">All Types</option>
+            <option value="cvt">CVT Only</option>
+            <option value="mat">MAT Only</option>
+            <option value="trt">TRT Only</option>
+          </select>
+          <button class="btn btn-ghost no-print" onclick="exportCombinedLog()">Export CSV</button>
+        </div>
+      </div>
+      <!-- Month folder cards -->
+      <div id="combMonthCards" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px"></div>
+      <!-- Sequential Reading Log: CVT line, MAT line, TRT line per date -->
+      <div class="panel">
+        <div class="ph">
+          <span class="pt">Sequential Reading Log</span>
+          <span class="ptag i" id="combRowCount">0 Entries</span>
+          <div class="pa" style="margin-left:auto;gap:8px">
+            <span style="font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(0,212,170,.12);color:var(--accent)">■ CVT</span>
+            <span style="font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(96,165,250,.12);color:var(--info)">■ MAT</span>
+            <span style="font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(167,139,250,.12);color:#a78bfa">■ TRT</span>
+          </div>
+        </div>
+        <div class="pb" style="padding:0">
+          <table class="tbl" id="combTable">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Month</th>
+                <th>Type</th>
+                <th>Instrument ID</th>
+                <th>Position/RD</th>
+                <th>Reading 1</th>
+                <th>Reading 2</th>
+                <th>Reading 3</th>
+                <th>Value (mm/T)</th>
+                <th>Status</th>
+                <th>Notes</th>
+                <th class="no-print">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="combTbody"></tbody>
           </table>
         </div>
       </div>
@@ -1172,6 +1399,31 @@ canvas{display:block}
           <button class="btn btn-p" onclick="quickEntryInc()">Save Inclinometer Reading</button>
         </div>
       </div>
+      <div class="panel" style="margin-top:14px">
+        <div class="ph"><span class="pt">Quick Entry – Convergence (CVT)</span><span class="ptag" style="background:rgba(167,139,250,.12);color:#a78bfa">MAT·TRT·LHS·RHS</span></div>
+        <div class="pb">
+          <div class="form-grid g3x" style="margin-bottom:12px">
+            <div class="fg"><label class="fl">CVT ID</label><select class="fs" id="qeCVTId"><option>CVT-01</option><option>CVT-02</option><option>CVT-03</option><option>CVT-04</option><option>CVT-05</option></select></div>
+            <div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="qeCVTDate"/></div>
+            <div class="fg"><label class="fl">Initial Reading (mm)</label><input class="fi" type="number" step="0.01" id="qeCVTInitial" placeholder="0.00"/></div>
+          </div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--txt3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">Enter Current Readings for Each Position (mm)</div>
+          <div class="form-grid" style="margin-bottom:12px">
+            <div class="fg"><label class="fl">MAT – Current (mm)</label><input class="fi" type="number" step="0.01" id="qeCVTmat" placeholder="0.00" oninput="calcQECVT()"/></div>
+            <div class="fg"><label class="fl">MAT – Convergence</label><input class="fi" id="qeCVTmatConv" readonly style="opacity:.7;color:var(--accent)"/></div>
+            <div class="fg"><label class="fl">TRT – Current (mm)</label><input class="fi" type="number" step="0.01" id="qeCVTtrt" placeholder="0.00" oninput="calcQECVT()"/></div>
+            <div class="fg"><label class="fl">TRT – Convergence</label><input class="fi" id="qeCVTtrtConv" readonly style="opacity:.7;color:var(--accent)"/></div>
+            <div class="fg"><label class="fl">LHS Crown – Current (mm)</label><input class="fi" type="number" step="0.01" id="qeCVTlhs" placeholder="0.00" oninput="calcQECVT()"/></div>
+            <div class="fg"><label class="fl">LHS Crown – Convergence</label><input class="fi" id="qeCVTlhsConv" readonly style="opacity:.7;color:var(--accent)"/></div>
+            <div class="fg"><label class="fl">RHS – Current (mm)</label><input class="fi" type="number" step="0.01" id="qeCVTrhs" placeholder="0.00" oninput="calcQECVT()"/></div>
+            <div class="fg"><label class="fl">RHS – Convergence</label><input class="fi" id="qeCVTrhsConv" readonly style="opacity:.7;color:var(--accent)"/></div>
+          </div>
+          <div style="background:var(--acc-dim);border:1px solid rgba(0,212,170,.2);border-radius:var(--r);padding:8px 12px;font-family:var(--mono);font-size:9px;color:var(--accent);margin-bottom:12px">
+            ✓ Each position (MAT, TRT, LHS Crown, RHS) will be saved as a separate entry in the CVT log.
+          </div>
+          <button class="btn btn-p" onclick="quickEntryCVT()">Save All 4 CVT Readings</button>
+        </div>
+      </div>
     </div>
 
     <!-- ===== REPORTS ===== -->
@@ -1180,7 +1432,7 @@ canvas{display:block}
         <div class="kpi-card"><div class="kpi-label">Total Load Cell Records</div><div class="kpi-val a" id="rptLC">0</div></div>
         <div class="kpi-card i"><div class="kpi-label">Strain Gauge Records</div><div class="kpi-val i" id="rptSG">0</div></div>
         <div class="kpi-card"><div class="kpi-label">Inclinometer Records</div><div class="kpi-val" id="rptInc">0</div></div>
-        <div class="kpi-card w"><div class="kpi-label">Active Alerts</div><div class="kpi-val w">3</div></div>
+        <div class="kpi-card" style="--kc:var(--info)"><div class="kpi-label">CVT Records</div><div class="kpi-val" id="rptCVT" style="color:#a78bfa">0</div></div>
       </div>
       <div class="panel">
         <div class="ph"><span class="pt">Export Options</span></div>
@@ -1203,6 +1455,14 @@ canvas{display:block}
               <div style="font-size:11px;color:var(--txt2);margin-bottom:12px">Displacement profiles and cumulative plots</div>
               <button class="btn btn-p" onclick="switchView('inclinometer',null);setTimeout(printReport,300)">Print PDF</button>
               <button class="btn btn-ghost" onclick="exportIncData()" style="margin-left:6px">Export CSV</button>
+            </div>
+          </div>
+          <div class="g3" style="margin-top:12px">
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px">
+              <div style="font-family:var(--mono);font-size:11px;font-weight:700;margin-bottom:8px;color:#a78bfa">CVT Convergence Report</div>
+              <div style="font-size:11px;color:var(--txt2);margin-bottom:12px">All CVT readings — MAT, TRT, LHS Crown, RHS</div>
+              <button class="btn btn-p" onclick="switchView('cvt',null);setTimeout(printReport,300)">Print PDF</button>
+              <button class="btn btn-ghost" onclick="exportCVTData()" style="margin-left:6px">Export CSV</button>
             </div>
           </div>
         </div>
@@ -1233,8 +1493,8 @@ const USERS = [
   {id:3,name:'operator2',pass:'op456',role:'user',status:'pending',displayName:'Operator 2',email:'op2@aa-geo.com'},
 ];
 let currentUser = null;
-let lcData = [], sgData = [], incData = [];
-let editingLC = null, editingSG = null, editingInc = null;
+let lcData = [], sgData = [], incData = [], cvtData = [], matData = [], trtData = [];
+let editingLC = null, editingSG = null, editingInc = null, editingCVT = null, editingMAT = null, editingTRT = null;
 let sgCurrentProject = 'all';
 let incSelectedBH = null;
 let charts = {};
@@ -1246,8 +1506,11 @@ const LS_KEYS = {
   lcData: 'aageo_lcData',
   sgData: 'aageo_sgData',
   incData: 'aageo_incData',
+  cvtData: 'aageo_cvtData',
   sensorData: 'aageo_sensorData',
   kimiBoreholes: 'aageo_kimiBoreholes',
+  matData: 'aageo_matData',
+  trtData: 'aageo_trtData',
 };
 
 function saveToStorage(){
@@ -1255,8 +1518,11 @@ function saveToStorage(){
     localStorage.setItem(LS_KEYS.lcData, JSON.stringify(lcData));
     localStorage.setItem(LS_KEYS.sgData, JSON.stringify(sgData));
     localStorage.setItem(LS_KEYS.incData, JSON.stringify(incData));
+    localStorage.setItem(LS_KEYS.cvtData, JSON.stringify(cvtData));
     localStorage.setItem(LS_KEYS.sensorData, JSON.stringify(sensorData));
     localStorage.setItem(LS_KEYS.kimiBoreholes, JSON.stringify(KIMI_BOREHOLES));
+    localStorage.setItem(LS_KEYS.matData, JSON.stringify(matData));
+    localStorage.setItem(LS_KEYS.trtData, JSON.stringify(trtData));
   } catch(e){ console.warn('Storage save failed:', e); }
 }
 
@@ -1265,13 +1531,19 @@ function loadFromStorage(){
     const lc = localStorage.getItem(LS_KEYS.lcData);
     const sg = localStorage.getItem(LS_KEYS.sgData);
     const inc = localStorage.getItem(LS_KEYS.incData);
+    const cvt = localStorage.getItem(LS_KEYS.cvtData);
     const sen = localStorage.getItem(LS_KEYS.sensorData);
     const kimi = localStorage.getItem(LS_KEYS.kimiBoreholes);
     if(lc) lcData = JSON.parse(lc);
     if(sg) sgData = JSON.parse(sg);
     if(inc) incData = JSON.parse(inc);
+    if(cvt) cvtData = JSON.parse(cvt);
     if(sen) sensorData = JSON.parse(sen);
     if(kimi){ const arr = JSON.parse(kimi); KIMI_BOREHOLES.length=0; arr.forEach(b=>KIMI_BOREHOLES.push(b)); }
+    const mat = localStorage.getItem(LS_KEYS.matData);
+    const trt = localStorage.getItem(LS_KEYS.trtData);
+    if(mat) matData = JSON.parse(mat);
+    if(trt) trtData = JSON.parse(trt);
   } catch(e){ console.warn('Storage load failed:', e); }
 }
 
@@ -1306,6 +1578,30 @@ incData = [
   {id:5,date:'2026-03-15',bh:'BH-INC-02',depth:3,axisA:0.8,axisB:0.3,cumul:0.85},
   {id:6,date:'2026-04-01',bh:'BH-INC-03',depth:8,axisA:2.3,axisB:0.9,cumul:2.47},
   {id:7,date:'2026-04-15',bh:'BH-INC-04',depth:4,axisA:0.7,axisB:0.3,cumul:0.76},
+];
+cvtData = [
+  {id:1,date:'2026-02-10',cvtId:'CVT-01',position:'MAT',  initial:0.00,current:2.10,convergence:2.10},
+  {id:2,date:'2026-02-10',cvtId:'CVT-01',position:'TRT',  initial:0.00,current:1.85,convergence:1.85},
+  {id:3,date:'2026-02-10',cvtId:'CVT-01',position:'LHS Crown',initial:0.00,current:1.40,convergence:1.40},
+  {id:4,date:'2026-02-10',cvtId:'CVT-01',position:'RHS',  initial:0.00,current:1.60,convergence:1.60},
+  {id:5,date:'2026-03-15',cvtId:'CVT-01',position:'MAT',  initial:0.00,current:3.50,convergence:3.50},
+  {id:6,date:'2026-03-15',cvtId:'CVT-01',position:'TRT',  initial:0.00,current:2.90,convergence:2.90},
+  {id:7,date:'2026-03-15',cvtId:'CVT-01',position:'LHS Crown',initial:0.00,current:2.20,convergence:2.20},
+  {id:8,date:'2026-03-15',cvtId:'CVT-01',position:'RHS',  initial:0.00,current:2.55,convergence:2.55},
+];
+matData = [
+  {id:101,date:'2026-02-10',instId:'MAT-01',rdm:12.812,ch1:0.45,ch2:0.52,ch3:0.48,avg:0.483,notes:'Initial reading'},
+  {id:102,date:'2026-02-24',instId:'MAT-01',rdm:12.812,ch1:0.67,ch2:0.71,ch3:0.65,avg:0.677,notes:''},
+  {id:103,date:'2026-03-10',instId:'MAT-01',rdm:12.812,ch1:0.88,ch2:0.95,ch3:0.90,avg:0.910,notes:'Slight increase'},
+  {id:104,date:'2026-03-24',instId:'MAT-02',rdm:14.200,ch1:0.30,ch2:0.28,ch3:0.32,avg:0.300,notes:''},
+  {id:105,date:'2026-04-07',instId:'MAT-01',rdm:12.812,ch1:1.10,ch2:1.18,ch3:1.12,avg:1.133,notes:'Monitor closely'},
+];
+trtData = [
+  {id:201,date:'2026-02-10',instId:'TRT-01',rdm:8.500,ch1:0.22,ch2:0.25,ch3:0.20,avg:0.223,notes:'Initial reading'},
+  {id:202,date:'2026-02-24',instId:'TRT-01',rdm:8.500,ch1:0.38,ch2:0.40,ch3:0.36,avg:0.380,notes:''},
+  {id:203,date:'2026-03-10',instId:'TRT-01',rdm:8.500,ch1:0.55,ch2:0.60,ch3:0.57,avg:0.573,notes:''},
+  {id:204,date:'2026-03-24',instId:'TRT-02',rdm:10.000,ch1:0.18,ch2:0.20,ch3:0.19,avg:0.190,notes:''},
+  {id:205,date:'2026-04-07',instId:'TRT-01',rdm:8.500,ch1:0.72,ch2:0.78,ch3:0.74,avg:0.747,notes:'Normal trend'},
 ];
 
 // ================================================================
@@ -1435,14 +1731,17 @@ function initApp(){
   renderLCTable();
   renderSGGauges();renderSGTable();
   renderIncBoreholes();renderIncTable();
+  renderCVTTable();renderCVTPositionCards();
+  renderMATTable();renderTRTTable();
+  updateMATMonthFilter();updateTRTMonthFilter();
   updateReportCounts();updateEntryStats();
   kimiInit();
   renderSensorTable();
   setTimeout(()=>{
-    initOverviewCharts();renderLCCharts();renderSGCharts();renderIncCharts();
+    initOverviewCharts();renderLCCharts();renderSGCharts();renderIncCharts();renderCVTCharts();renderMATCharts();renderTRTCharts();
   },100);
   const today=new Date().toISOString().split('T')[0];
-  ['lcDate','sgDate','incDate','qeLCDate','qeSGDate','qeIncDate'].forEach(id=>{
+  ['lcDate','sgDate','incDate','cvtDate','qeLCDate','qeSGDate','qeIncDate','qeCVTDate','matDate','trtDate'].forEach(id=>{
     const el=document.getElementById(id);if(el)el.value=today;
   });
   ['qeLC1','qeLC2','qeLC3'].forEach(id=>document.getElementById(id).addEventListener('input',calcQEAvg));
@@ -1463,7 +1762,7 @@ function startClock(){
 // ================================================================
 // NAVIGATION
 // ================================================================
-const viewMeta={overview:'Dashboard Overview',loadcell:'Load Cell Monitoring',strain:'Strain Gauge Monitoring',inclinometer:'Inclinometer Monitoring','kimi-inc':'Kimi Inclinometer System',dataentry:'Manual Data Entry',reports:'Reports & Export'};
+const viewMeta={overview:'Dashboard Overview',loadcell:'Load Cell Monitoring',strain:'Strain Gauge Monitoring',inclinometer:'Inclinometer Monitoring','kimi-inc':'Kimi Inclinometer System',cvt:'Convergence (CVT) Monitoring',mat:'MAT Monitoring',trt:'TRT Monitoring',combinedlog:'Combined Reading Log',dataentry:'Manual Data Entry',reports:'Reports & Export'};
 function switchView(id,el){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
@@ -1476,7 +1775,10 @@ function switchView(id,el){
     if(id==='loadcell')renderLCCharts();
     if(id==='strain')renderSGCharts();
     if(id==='inclinometer')renderIncCharts();
-    if(id==='kimi-inc')kimiRebuildActiveTab();
+    if(id==='cvt'){renderCVTTable();renderCVTCharts();renderCVTPositionCards();}
+    if(id==='mat'){renderMATTable();renderMATCharts();updateMATMonthFilter();}
+    if(id==='trt'){renderTRTTable();renderTRTCharts();updateTRTMonthFilter();}
+    if(id==='combinedlog'){renderCombinedLog();}
     if(id==='reports')updateReportCounts();
   },50);
 }
@@ -1485,7 +1787,7 @@ function switchView(id,el){
 // MODALS
 // ================================================================
 function openModal(id){document.getElementById(id).classList.add('open');}
-function closeModal(id){document.getElementById(id).classList.remove('open');editingLC=null;editingSG=null;editingInc=null;}
+function closeModal(id){document.getElementById(id).classList.remove('open');editingLC=null;editingSG=null;editingInc=null;editingCVT=null;editingMAT=null;editingTRT=null;}
 document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open')}));
 
 // ================================================================
@@ -1620,6 +1922,199 @@ function saveIncData(){
 }
 function importIncCSV(){const input=document.createElement('input');input.type='file';input.accept='.csv';input.onchange=e=>{const f=e.target.files[0];if(!f)return;const reader=new FileReader();reader.onload=ev=>{const lines=ev.target.result.split('\n').slice(1);lines.forEach(line=>{const [bh,date,depth,axisA,axisB,cumul]=line.split(',');if(bh&&date)incData.push({id:Date.now()+Math.random(),bh:bh.trim(),date:date.trim(),depth:parseFloat(depth)||0,axisA:parseFloat(axisA)||0,axisB:parseFloat(axisB)||0,cumul:parseFloat(cumul)||0});});renderIncBoreholes();renderIncTable();renderIncCharts();alert('Imported '+lines.length+' rows');};reader.readAsText(f);};input.click();}
 function exportIncData(){const csv=['Borehole,Date,Depth(m),A-axis(mm),B-axis(mm),Cumulative(mm),Status',...incData.map(r=>`${r.bh},${r.date},${r.depth},${r.axisA.toFixed(2)},${r.axisB.toFixed(2)},${r.cumul.toFixed(2)},${incStatus(r.cumul).txt}`)].join('\n');downloadCSV(csv,'Inclinometer_Data.csv');}
+
+// ================================================================
+// CONVERGENCE (CVT)
+// ================================================================
+// ================================================================
+// HELPERS – Month label
+// ================================================================
+function getMonthLabel(dateStr){
+  if(!dateStr) return '—';
+  const d = new Date(dateStr);
+  return d.toLocaleString('en-IN',{month:'long',year:'numeric'});
+}
+function getMonthKey(dateStr){
+  if(!dateStr) return '0000-00';
+  return dateStr.slice(0,7); // YYYY-MM
+}
+
+const CVT_POSITIONS = ['MAT','TRT','LHS Crown','RHS'];
+const CVT_COLORS = {'MAT':'#00d4aa','TRT':'#60a5fa','LHS Crown':'#f5a623','RHS':'#a78bfa'};
+const CVT_ALERT = 10; // mm alert threshold
+
+function cvtStatus(conv){
+  if(conv>=CVT_ALERT)return {cls:'chip-d',txt:'ALERT'};
+  if(conv>=6)return {cls:'chip-w',txt:'WARN'};
+  return {cls:'chip-ok',txt:'NORMAL'};
+}
+
+function calcCVTConv(){
+  const init=parseFloat(document.getElementById('cvtInitial').value)||0;
+  const cur=parseFloat(document.getElementById('cvtCurrent').value)||0;
+  document.getElementById('cvtConvCalc').value=(cur-init).toFixed(2);
+}
+
+function calcQECVT(){
+  const init=parseFloat(document.getElementById('qeCVTInitial').value)||0;
+  [['mat','qeCVTmat','qeCVTmatConv'],['trt','qeCVTtrt','qeCVTtrtConv'],['lhs','qeCVTlhs','qeCVTlhsConv'],['rhs','qeCVTrhs','qeCVTrhsConv']].forEach(([,curId,convId])=>{
+    const cur=parseFloat(document.getElementById(curId).value)||0;
+    document.getElementById(convId).value=(cur-init).toFixed(2);
+  });
+}
+
+function renderCVTPositionCards(){
+  const container=document.getElementById('cvtPositionCards');
+  if(!container)return;
+  container.innerHTML=CVT_POSITIONS.map(pos=>{
+    const rows=cvtData.filter(r=>r.position===pos);
+    const last=rows.sort((a,b)=>b.date.localeCompare(a.date))[0];
+    const conv=last?last.convergence:0;
+    const s=cvtStatus(conv);
+    const color=CVT_COLORS[pos]||'var(--accent)';
+    return `<div class="kpi-card" style="border-top-color:${color}">
+      <div class="kpi-label">${pos}</div>
+      <div class="kpi-val" style="color:${color};font-size:20px">${last?conv.toFixed(2):'--'} <span style="font-size:11px;color:var(--txt3)">mm</span></div>
+      <div class="kpi-sub">${last?last.date:'No data'}</div>
+      <span class="chip ${s.cls}" style="margin-top:5px;font-size:8px">${s.txt}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderCVTTable(){
+  const tbody=document.getElementById('cvtTbody');
+  if(!tbody)return;
+  const filterPos=document.getElementById('cvtFilterPos')?.value||'all';
+  const filterId=document.getElementById('cvtFilterId')?.value||'all';
+  let rows=[...cvtData];
+  if(filterPos!=='all')rows=rows.filter(r=>r.position===filterPos);
+  if(filterId!=='all')rows=rows.filter(r=>r.cvtId===filterId);
+  rows.sort((a,b)=>b.date.localeCompare(a.date)||a.position.localeCompare(b.position));
+  if(!rows.length){
+    tbody.innerHTML='<tr><td colspan="10" style="text-align:center;color:var(--txt3);font-family:var(--mono);font-size:10px;padding:20px">No CVT readings. Click "+ Add Reading" to add.</td></tr>';
+    document.getElementById('cvtRowCount').textContent='0 Entries';
+    renderCVTMonthCards();
+    return;
+  }
+  tbody.innerHTML=rows.map(r=>{
+    const s=cvtStatus(r.convergence);
+    const col=CVT_COLORS[r.position]||'var(--accent)';
+    return `<tr>
+      <td>${r.date}</td>
+      <td style="font-family:var(--mono);font-size:9px;color:var(--txt3)">${getMonthLabel(r.date)}</td>
+      <td class="iid">${r.cvtId}</td>
+      <td><span style="font-family:var(--mono);font-size:10px;font-weight:700;color:${col}">${r.position}</span></td>
+      <td class="iv">${r.initial.toFixed(2)}</td>
+      <td class="iv">${r.current.toFixed(2)}</td>
+      <td class="iv" style="color:${r.convergence>=CVT_ALERT?'var(--danger)':r.convergence>=6?'var(--warn)':col}">${r.convergence.toFixed(2)}</td>
+      <td><span class="chip ${s.cls}">${s.txt}</span></td>
+      <td style="font-size:11px;color:var(--txt2)">${r.notes||'—'}</td>
+      <td class="no-print"><div class="tbl-actions">
+        <button onclick="editCVT(${r.id})">Edit</button>
+        <button class="del" onclick="deleteCVT(${r.id})">Del</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('cvtRowCount').textContent=rows.length+' Entries';
+  renderCVTMonthCards();
+}
+
+function openCVTModal(id=null){
+  editingCVT=id;
+  document.getElementById('cvtModalTitle').textContent=id?'Edit CVT Reading':'Add CVT Reading';
+  if(!id){['cvtInitial','cvtCurrent','cvtConvCalc','cvtNotes'].forEach(x=>document.getElementById(x).value='');}
+  openModal('cvtDataModal');
+}
+
+function editCVT(id){
+  const r=cvtData.find(x=>x.id===id);if(!r)return;
+  editingCVT=id;
+  document.getElementById('cvtModalTitle').textContent='Edit CVT Reading — '+r.cvtId+' ('+r.position+')';
+  document.getElementById('cvtIdSelect').value=r.cvtId;
+  document.getElementById('cvtPosition').value=r.position;
+  document.getElementById('cvtDate').value=r.date;
+  document.getElementById('cvtInitial').value=r.initial;
+  document.getElementById('cvtCurrent').value=r.current;
+  document.getElementById('cvtConvCalc').value=r.convergence.toFixed(2);
+  document.getElementById('cvtNotes').value=r.notes||'';
+  openModal('cvtDataModal');
+}
+
+function deleteCVT(id){
+  if(!confirm('Delete this CVT reading?'))return;
+  cvtData=cvtData.filter(x=>x.id!==id);
+  renderCVTTable();renderCVTCharts();renderCVTPositionCards();updateReportCounts();updateEntryStats();saveToStorage();
+}
+
+function saveCVTData(){
+  const cvtId=document.getElementById('cvtIdSelect').value;
+  const position=document.getElementById('cvtPosition').value;
+  const date=document.getElementById('cvtDate').value;
+  const initial=parseFloat(document.getElementById('cvtInitial').value)||0;
+  const current=parseFloat(document.getElementById('cvtCurrent').value)||0;
+  const convergence=+(current-initial).toFixed(3);
+  const notes=document.getElementById('cvtNotes').value.trim();
+  if(!date)return alert('Please enter a date');
+  if(editingCVT){
+    const r=cvtData.find(x=>x.id===editingCVT);
+    Object.assign(r,{cvtId,position,date,initial,current,convergence,notes});
+  } else {
+    cvtData.push({id:Date.now(),cvtId,position,date,initial,current,convergence,notes});
+  }
+  renderCVTTable();renderCVTCharts();renderCVTPositionCards();updateReportCounts();updateEntryStats();
+  closeModal('cvtDataModal');saveToStorage();
+  showToast('CVT reading saved — '+position);
+  if(convergence>=CVT_ALERT)notifyAdmin('Alert: '+cvtId+' ('+position+') convergence '+convergence.toFixed(2)+'mm exceeds threshold.');
+}
+
+function quickEntryCVT(){
+  const cvtId=document.getElementById('qeCVTId').value;
+  const date=document.getElementById('qeCVTDate').value;
+  const initial=parseFloat(document.getElementById('qeCVTInitial').value)||0;
+  if(!date)return alert('Please enter a date');
+  const positions=[
+    {pos:'MAT',   curId:'qeCVTmat'},
+    {pos:'TRT',   curId:'qeCVTtrt'},
+    {pos:'LHS Crown',curId:'qeCVTlhs'},
+    {pos:'RHS',   curId:'qeCVTrhs'},
+  ];
+  let saved=0;
+  positions.forEach(({pos,curId})=>{
+    const cur=parseFloat(document.getElementById(curId).value);
+    if(isNaN(cur)||document.getElementById(curId).value==='')return; // skip blank
+    const convergence=+(cur-initial).toFixed(3);
+    cvtData.push({id:Date.now()+Math.random(),cvtId,position:pos,date,initial,current:cur,convergence,notes:''});
+    saved++;
+    if(convergence>=CVT_ALERT)notifyAdmin('Alert: '+cvtId+' ('+pos+') convergence '+convergence.toFixed(2)+'mm');
+  });
+  if(!saved)return alert('Please enter at least one current reading');
+  renderCVTTable();renderCVTCharts();renderCVTPositionCards();updateReportCounts();updateEntryStats();saveToStorage();
+  ['qeCVTmat','qeCVTtrt','qeCVTlhs','qeCVTrhs','qeCVTmatConv','qeCVTtrtConv','qeCVTlhsConv','qeCVTrhsConv','qeCVTInitial'].forEach(id=>document.getElementById(id).value='');
+  showToast(saved+' CVT readings saved ('+cvtId+')!');
+}
+
+function renderCVTCharts(){
+  const allDates=[...new Set(cvtData.map(r=>r.date))].sort();
+  const datasets=CVT_POSITIONS.map(pos=>({
+    label:pos,
+    data:allDates.map(d=>{const r=cvtData.find(x=>x.position===pos&&x.date===d);return r?r.convergence:null;}),
+    borderColor:CVT_COLORS[pos],
+    backgroundColor:'transparent',
+    tension:0.3,pointRadius:4,spanGaps:true
+  }));
+  if(allDates.length){
+    datasets.push({label:'Alert ('+CVT_ALERT+'mm)',data:allDates.map(()=>CVT_ALERT),borderColor:'rgba(239,68,68,0.5)',borderDash:[4,4],pointRadius:0,borderWidth:1,backgroundColor:'transparent'});
+  }
+  mkChart('cvtTrendChart',{type:'line',data:{labels:allDates,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8892a4',font:{family:'Space Mono',size:9},boxWidth:10}}},scales:{y:{ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'},title:{display:true,text:'Convergence (mm)',color:'#4a5568'}},x:{ticks:{color:'#4a5568',font:{family:'Space Mono',size:8},maxRotation:45},grid:{display:false}}}}});
+  // Bar chart latest per position
+  const latestVals=CVT_POSITIONS.map(pos=>{const rows=cvtData.filter(r=>r.position===pos);return rows.length?rows.sort((a,b)=>b.date.localeCompare(a.date))[0].convergence:0;});
+  mkChart('cvtBarChart',{type:'bar',data:{labels:CVT_POSITIONS,datasets:[{label:'Latest Convergence (mm)',data:latestVals,backgroundColor:CVT_POSITIONS.map((p,i)=>latestVals[i]>=CVT_ALERT?'rgba(239,68,68,0.7)':latestVals[i]>=6?'rgba(245,166,35,0.7)':CVT_COLORS[p]+'bb'),borderRadius:4,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'},title:{display:true,text:'mm',color:'#4a5568'}},x:{ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{display:false}}}}});
+}
+
+function exportCVTData(){
+  const csv=['Date,CVT_ID,Position,Initial(mm),Current(mm),Convergence(mm),Status,Notes',...cvtData.map(r=>`${r.date},${r.cvtId},${r.position},${r.initial.toFixed(2)},${r.current.toFixed(2)},${r.convergence.toFixed(2)},${cvtStatus(r.convergence).txt},${r.notes||''}`)].join('\n');
+  downloadCSV(csv,'CVT_Convergence_Data.csv');
+}
 
 // ================================================================
 // QUICK ENTRY
@@ -1761,13 +2256,23 @@ function renderSensorTable(){
 // ================================================================
 // STATS
 // ================================================================
-function updateReportCounts(){document.getElementById('rptLC').textContent=lcData.length;document.getElementById('rptSG').textContent=sgData.length;document.getElementById('rptInc').textContent=incData.length;}
+function updateReportCounts(){
+  document.getElementById('rptLC').textContent=lcData.length;
+  document.getElementById('rptSG').textContent=sgData.length;
+  document.getElementById('rptInc').textContent=incData.length;
+  const rptCVT=document.getElementById('rptCVT');
+  if(rptCVT)rptCVT.textContent=cvtData.length;
+  const rptMAT=document.getElementById('rptMAT');
+  if(rptMAT)rptMAT.textContent=matData.length;
+  const rptTRT=document.getElementById('rptTRT');
+  if(rptTRT)rptTRT.textContent=trtData.length;
+}
 function updateEntryStats(){
   const today=new Date().toISOString().split('T')[0];
-  const todayEntries=[...lcData,...sgData,...incData].filter(r=>r.date===today).length;
+  const todayEntries=[...lcData,...sgData,...incData,...cvtData,...matData,...trtData].filter(r=>r.date===today).length;
   document.getElementById('entryCountToday').textContent=todayEntries;
-  document.getElementById('entryCountTotal').textContent=lcData.length+sgData.length+incData.length;
-  const allDates=[...lcData,...sgData,...incData].map(r=>r.date).sort().reverse();
+  document.getElementById('entryCountTotal').textContent=lcData.length+sgData.length+incData.length+cvtData.length+matData.length+trtData.length;
+  const allDates=[...lcData,...sgData,...incData,...cvtData,...matData,...trtData].map(r=>r.date).sort().reverse();
   document.getElementById('lastEntryTime').textContent=allDates[0]||'--';
 }
 
@@ -2299,6 +2804,474 @@ setInterval(()=>{
   kimiUpdateKPIs();kimiBuildBHList();
 },8000);
 
+
+// Month helpers moved above CVT section
+
+// ================================================================
+// MAT MONITOR
+// ================================================================
+const MAT_ALERT = 7.5, MAT_ALARM = 12;
+function matStatus(avg){
+  if(avg>=MAT_ALARM) return {cls:'chip-d',txt:'ALARM'};
+  if(avg>=MAT_ALERT) return {cls:'chip-w',txt:'ALERT'};
+  return {cls:'chip-ok',txt:'NORMAL'};
+}
+function calcMATAvg(){
+  const v=[parseFloat(document.getElementById('matCh1').value)||0,
+           parseFloat(document.getElementById('matCh2').value)||0,
+           parseFloat(document.getElementById('matCh3').value)||0];
+  document.getElementById('matAvg').value=((v[0]+v[1]+v[2])/3).toFixed(3);
+}
+function openMATModal(id=null){
+  editingMAT=id;
+  document.getElementById('matModalTitle').textContent=id?'Edit MAT Reading':'Add MAT Reading';
+  if(!id){['matCh1','matCh2','matCh3','matAvg','matNotes'].forEach(x=>document.getElementById(x).value='');
+    document.getElementById('matRDM').value='';
+    const today=new Date().toISOString().split('T')[0];
+    document.getElementById('matDate').value=today;
+  }
+  openModal('matDataModal');
+}
+function editMAT(id){
+  const r=matData.find(x=>x.id===id);if(!r)return;
+  editingMAT=id;
+  document.getElementById('matModalTitle').textContent='Edit MAT Reading';
+  document.getElementById('matInstSelect').value=r.instId;
+  document.getElementById('matDate').value=r.date;
+  document.getElementById('matRDM').value=r.rdm;
+  document.getElementById('matCh1').value=r.ch1;
+  document.getElementById('matCh2').value=r.ch2;
+  document.getElementById('matCh3').value=r.ch3;
+  document.getElementById('matAvg').value=r.avg;
+  document.getElementById('matNotes').value=r.notes||'';
+  openModal('matDataModal');
+}
+function deleteMAT(id){
+  if(!confirm('Delete this MAT reading?'))return;
+  matData=matData.filter(x=>x.id!==id);
+  renderMATTable();renderMATCharts();updateMATMonthFilter();updateReportCounts();updateEntryStats();saveToStorage();
+}
+function renameMAT(id){
+  const r=matData.find(x=>x.id===id);if(!r)return;
+  document.getElementById('renameNewVal').value=r.instId;
+  document.getElementById('renameType').value='mat';
+  document.getElementById('renameRecordId').value=id;
+  openModal('renameModal');
+}
+function saveMATData(){
+  const instId=document.getElementById('matInstSelect').value;
+  const date=document.getElementById('matDate').value;
+  const rdm=parseFloat(document.getElementById('matRDM').value)||0;
+  const ch1=parseFloat(document.getElementById('matCh1').value)||0;
+  const ch2=parseFloat(document.getElementById('matCh2').value)||0;
+  const ch3=parseFloat(document.getElementById('matCh3').value)||0;
+  const avg=(ch1+ch2+ch3)/3;
+  const notes=document.getElementById('matNotes').value.trim();
+  if(!date)return alert('Please enter a date');
+  if(editingMAT){
+    const r=matData.find(x=>x.id===editingMAT);
+    Object.assign(r,{instId,date,rdm,ch1,ch2,ch3,avg,notes});
+  } else {
+    matData.push({id:Date.now(),instId,date,rdm,ch1,ch2,ch3,avg,notes});
+  }
+  renderMATTable();renderMATCharts();updateMATMonthFilter();updateReportCounts();updateEntryStats();
+  closeModal('matDataModal');saveToStorage();
+  showToast('MAT reading saved!');
+}
+function exportMATData(){
+  const csv=['Date,Month,InstID,RD(m),CH1(T),CH2(T),CH3(T),Avg(T),Status,Notes',...matData.map(r=>`${r.date},${getMonthLabel(r.date)},${r.instId},${r.rdm},${r.ch1.toFixed(2)},${r.ch2.toFixed(2)},${r.ch3.toFixed(2)},${r.avg.toFixed(3)},${matStatus(r.avg).txt},${r.notes||''}`)].join('\n');
+  downloadCSV(csv,'MAT_Data.csv');
+}
+function updateMATMonthFilter(){
+  const sel=document.getElementById('matMonthFilter');
+  const months=[...new Set(matData.map(r=>getMonthKey(r.date)))].sort().reverse();
+  sel.innerHTML='<option value="all">All Months</option>'+months.map(m=>`<option value="${m}">${getMonthLabel(m+'-01')}</option>`).join('');
+}
+function renderMATMonthCards(){
+  const container=document.getElementById('matMonthCards');
+  if(!container)return;
+  const months=[...new Set(matData.map(r=>getMonthKey(r.date)))].sort().reverse();
+  const selFilter=document.getElementById('matMonthFilter')?.value||'all';
+  container.innerHTML=months.map(m=>{
+    const rows=matData.filter(r=>getMonthKey(r.date)===m);
+    const isActive=selFilter===m;
+    return `<div onclick="document.getElementById('matMonthFilter').value='${m}';renderMATTable();" style="cursor:pointer;background:${isActive?'var(--acc-dim)':'var(--card)'};border:1px solid ${isActive?'var(--accent)':'var(--border)'};border-radius:8px;padding:10px 14px;min-width:140px;transition:all .15s">
+      <div style="font-family:var(--mono);font-size:9px;color:${isActive?'var(--accent)':'var(--txt3)'};text-transform:uppercase;margin-bottom:4px">📁 FOLDER</div>
+      <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:${isActive?'var(--accent)':'var(--txt)'}">${getMonthLabel(m+'-01')}</div>
+      <div style="font-size:10px;color:var(--txt2);margin-top:2px">${rows.length} reading${rows.length!==1?'s':''}</div>
+    </div>`;
+  }).join('');
+}
+function renderMATTable(){
+  const tbody=document.getElementById('matTbody');
+  if(!tbody)return;
+  const filter=document.getElementById('matMonthFilter')?.value||'all';
+  let rows=filter==='all'?[...matData]:matData.filter(r=>getMonthKey(r.date)===filter);
+  rows.sort((a,b)=>b.date.localeCompare(a.date));
+  renderMATMonthCards();
+  if(!rows.length){
+    tbody.innerHTML='<tr><td colspan="11" style="text-align:center;color:var(--txt3);font-family:var(--mono);font-size:10px;padding:20px">No MAT readings. Click "+ Add Reading".</td></tr>';
+    document.getElementById('matRowCount').textContent='0 Entries';return;
+  }
+  tbody.innerHTML=rows.map(r=>{
+    const s=matStatus(r.avg);
+    return `<tr>
+      <td>${r.date}</td>
+      <td style="font-family:var(--mono);font-size:9px;color:var(--accent)">${getMonthLabel(r.date)}</td>
+      <td class="iid">${r.instId}</td>
+      <td class="iu">${r.rdm||'—'}</td>
+      <td class="iv">${r.ch1.toFixed(2)}</td>
+      <td class="iv">${r.ch2.toFixed(2)}</td>
+      <td class="iv">${r.ch3.toFixed(2)}</td>
+      <td class="iv" style="color:${r.avg>=MAT_ALERT?'var(--warn)':'var(--accent)'}">${r.avg.toFixed(3)}</td>
+      <td><span class="chip ${s.cls}">${s.txt}</span></td>
+      <td style="font-size:11px;color:var(--txt2)">${r.notes||'—'}</td>
+      <td class="no-print"><div class="tbl-actions">
+        <button onclick="editMAT(${r.id})">Edit</button>
+        <button class="del" onclick="deleteMAT(${r.id})">Del</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('matRowCount').textContent=rows.length+' Entries';
+}
+function renderMATCharts(){
+  const allDates=[...new Set(matData.map(r=>r.date))].sort();
+  const insts=[...new Set(matData.map(r=>r.instId))];
+  const colors=['#60a5fa','#00d4aa','#f5a623','#a78bfa'];
+  const datasets=insts.map((inst,i)=>({
+    label:inst,
+    data:allDates.map(d=>{const r=matData.find(x=>x.instId===inst&&x.date===d);return r?+r.avg.toFixed(3):null;}),
+    borderColor:colors[i%colors.length],backgroundColor:'transparent',tension:0.3,pointRadius:4,spanGaps:true
+  }));
+  mkChart('matTrendChart',{type:'line',data:{labels:allDates,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8892a4',font:{family:'Space Mono',size:9},boxWidth:10}}},scales:{y:{ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'},title:{display:true,text:'Avg Load (Ton)',color:'#4a5568'}},x:{ticks:{color:'#4a5568',font:{family:'Space Mono',size:8},maxRotation:45},grid:{display:false}}}}});
+  // Bar chart latest per instrument
+  const latestVals=insts.map(inst=>{const rows=matData.filter(r=>r.instId===inst);return rows.length?rows.sort((a,b)=>b.date.localeCompare(a.date))[0].avg:0;});
+  mkChart('matBarChart',{type:'bar',data:{labels:insts,datasets:[{label:'Latest Avg (Ton)',data:latestVals,backgroundColor:latestVals.map((v,i)=>colors[i%colors.length]+'99'),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'}},x:{ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{display:false}}}}});
+}
+
+// ================================================================
+// TRT MONITOR
+// ================================================================
+const TRT_ALERT = 7.5, TRT_ALARM = 12;
+function trtStatus(avg){
+  if(avg>=TRT_ALARM) return {cls:'chip-d',txt:'ALARM'};
+  if(avg>=TRT_ALERT) return {cls:'chip-w',txt:'ALERT'};
+  return {cls:'chip-ok',txt:'NORMAL'};
+}
+function calcTRTAvg(){
+  const v=[parseFloat(document.getElementById('trtCh1').value)||0,
+           parseFloat(document.getElementById('trtCh2').value)||0,
+           parseFloat(document.getElementById('trtCh3').value)||0];
+  document.getElementById('trtAvg').value=((v[0]+v[1]+v[2])/3).toFixed(3);
+}
+function openTRTModal(id=null){
+  editingTRT=id;
+  document.getElementById('trtModalTitle').textContent=id?'Edit TRT Reading':'Add TRT Reading';
+  if(!id){['trtCh1','trtCh2','trtCh3','trtAvg','trtNotes'].forEach(x=>document.getElementById(x).value='');
+    document.getElementById('trtRDM').value='';
+    const today=new Date().toISOString().split('T')[0];
+    document.getElementById('trtDate').value=today;
+  }
+  openModal('trtDataModal');
+}
+function editTRT(id){
+  const r=trtData.find(x=>x.id===id);if(!r)return;
+  editingTRT=id;
+  document.getElementById('trtModalTitle').textContent='Edit TRT Reading';
+  document.getElementById('trtInstSelect').value=r.instId;
+  document.getElementById('trtDate').value=r.date;
+  document.getElementById('trtRDM').value=r.rdm;
+  document.getElementById('trtCh1').value=r.ch1;
+  document.getElementById('trtCh2').value=r.ch2;
+  document.getElementById('trtCh3').value=r.ch3;
+  document.getElementById('trtAvg').value=r.avg;
+  document.getElementById('trtNotes').value=r.notes||'';
+  openModal('trtDataModal');
+}
+function deleteTRT(id){
+  if(!confirm('Delete this TRT reading?'))return;
+  trtData=trtData.filter(x=>x.id!==id);
+  renderTRTTable();renderTRTCharts();updateTRTMonthFilter();updateReportCounts();updateEntryStats();saveToStorage();
+}
+function renameTRT(id){
+  const r=trtData.find(x=>x.id===id);if(!r)return;
+  document.getElementById('renameNewVal').value=r.instId;
+  document.getElementById('renameType').value='trt';
+  document.getElementById('renameRecordId').value=id;
+  openModal('renameModal');
+}
+function saveTRTData(){
+  const instId=document.getElementById('trtInstSelect').value;
+  const date=document.getElementById('trtDate').value;
+  const rdm=parseFloat(document.getElementById('trtRDM').value)||0;
+  const ch1=parseFloat(document.getElementById('trtCh1').value)||0;
+  const ch2=parseFloat(document.getElementById('trtCh2').value)||0;
+  const ch3=parseFloat(document.getElementById('trtCh3').value)||0;
+  const avg=(ch1+ch2+ch3)/3;
+  const notes=document.getElementById('trtNotes').value.trim();
+  if(!date)return alert('Please enter a date');
+  if(editingTRT){
+    const r=trtData.find(x=>x.id===editingTRT);
+    Object.assign(r,{instId,date,rdm,ch1,ch2,ch3,avg,notes});
+  } else {
+    trtData.push({id:Date.now(),instId,date,rdm,ch1,ch2,ch3,avg,notes});
+  }
+  renderTRTTable();renderTRTCharts();updateTRTMonthFilter();updateReportCounts();updateEntryStats();
+  closeModal('trtDataModal');saveToStorage();
+  showToast('TRT reading saved!');
+}
+function exportTRTData(){
+  const csv=['Date,Month,InstID,RD(m),CH1(T),CH2(T),CH3(T),Avg(T),Status,Notes',...trtData.map(r=>`${r.date},${getMonthLabel(r.date)},${r.instId},${r.rdm},${r.ch1.toFixed(2)},${r.ch2.toFixed(2)},${r.ch3.toFixed(2)},${r.avg.toFixed(3)},${trtStatus(r.avg).txt},${r.notes||''}`)].join('\n');
+  downloadCSV(csv,'TRT_Data.csv');
+}
+function updateTRTMonthFilter(){
+  const sel=document.getElementById('trtMonthFilter');
+  const months=[...new Set(trtData.map(r=>getMonthKey(r.date)))].sort().reverse();
+  sel.innerHTML='<option value="all">All Months</option>'+months.map(m=>`<option value="${m}">${getMonthLabel(m+'-01')}</option>`).join('');
+}
+function renderTRTMonthCards(){
+  const container=document.getElementById('trtMonthCards');
+  if(!container)return;
+  const months=[...new Set(trtData.map(r=>getMonthKey(r.date)))].sort().reverse();
+  const selFilter=document.getElementById('trtMonthFilter')?.value||'all';
+  container.innerHTML=months.map(m=>{
+    const rows=trtData.filter(r=>getMonthKey(r.date)===m);
+    const isActive=selFilter===m;
+    return `<div onclick="document.getElementById('trtMonthFilter').value='${m}';renderTRTTable();" style="cursor:pointer;background:${isActive?'rgba(167,139,250,.12)':'var(--card)'};border:1px solid ${isActive?'#a78bfa':'var(--border)'};border-radius:8px;padding:10px 14px;min-width:140px;transition:all .15s">
+      <div style="font-family:var(--mono);font-size:9px;color:${isActive?'#a78bfa':'var(--txt3)'};text-transform:uppercase;margin-bottom:4px">📁 FOLDER</div>
+      <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:${isActive?'#a78bfa':'var(--txt)'}">${getMonthLabel(m+'-01')}</div>
+      <div style="font-size:10px;color:var(--txt2);margin-top:2px">${rows.length} reading${rows.length!==1?'s':''}</div>
+    </div>`;
+  }).join('');
+}
+function renderTRTTable(){
+  const tbody=document.getElementById('trtTbody');
+  if(!tbody)return;
+  const filter=document.getElementById('trtMonthFilter')?.value||'all';
+  let rows=filter==='all'?[...trtData]:trtData.filter(r=>getMonthKey(r.date)===filter);
+  rows.sort((a,b)=>b.date.localeCompare(a.date));
+  renderTRTMonthCards();
+  if(!rows.length){
+    tbody.innerHTML='<tr><td colspan="11" style="text-align:center;color:var(--txt3);font-family:var(--mono);font-size:10px;padding:20px">No TRT readings. Click "+ Add Reading".</td></tr>';
+    document.getElementById('trtRowCount').textContent='0 Entries';return;
+  }
+  tbody.innerHTML=rows.map(r=>{
+    const s=trtStatus(r.avg);
+    return `<tr>
+      <td>${r.date}</td>
+      <td style="font-family:var(--mono);font-size:9px;color:#a78bfa">${getMonthLabel(r.date)}</td>
+      <td class="iid">${r.instId}</td>
+      <td class="iu">${r.rdm||'—'}</td>
+      <td class="iv">${r.ch1.toFixed(2)}</td>
+      <td class="iv">${r.ch2.toFixed(2)}</td>
+      <td class="iv">${r.ch3.toFixed(2)}</td>
+      <td class="iv" style="color:${r.avg>=TRT_ALERT?'var(--warn)':'#a78bfa'}">${r.avg.toFixed(3)}</td>
+      <td><span class="chip ${s.cls}">${s.txt}</span></td>
+      <td style="font-size:11px;color:var(--txt2)">${r.notes||'—'}</td>
+      <td class="no-print"><div class="tbl-actions">
+        <button onclick="editTRT(${r.id})">Edit</button>
+        <button class="del" onclick="deleteTRT(${r.id})">Del</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('trtRowCount').textContent=rows.length+' Entries';
+}
+function renderTRTCharts(){
+  const allDates=[...new Set(trtData.map(r=>r.date))].sort();
+  const insts=[...new Set(trtData.map(r=>r.instId))];
+  const colors=['#a78bfa','#f5a623','#60a5fa','#00d4aa'];
+  const datasets=insts.map((inst,i)=>({
+    label:inst,
+    data:allDates.map(d=>{const r=trtData.find(x=>x.instId===inst&&x.date===d);return r?+r.avg.toFixed(3):null;}),
+    borderColor:colors[i%colors.length],backgroundColor:'transparent',tension:0.3,pointRadius:4,spanGaps:true
+  }));
+  mkChart('trtTrendChart',{type:'line',data:{labels:allDates,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8892a4',font:{family:'Space Mono',size:9},boxWidth:10}}},scales:{y:{ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'},title:{display:true,text:'Avg Load (Ton)',color:'#4a5568'}},x:{ticks:{color:'#4a5568',font:{family:'Space Mono',size:8},maxRotation:45},grid:{display:false}}}}});
+  const latestVals=insts.map(inst=>{const rows=trtData.filter(r=>r.instId===inst);return rows.length?rows.sort((a,b)=>b.date.localeCompare(a.date))[0].avg:0;});
+  mkChart('trtBarChart',{type:'bar',data:{labels:insts,datasets:[{label:'Latest Avg (Ton)',data:latestVals,backgroundColor:latestVals.map((v,i)=>colors[i%colors.length]+'99'),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'}},x:{ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{display:false}}}}});
+}
+
+// ================================================================
+// RENAME (generic for CVT, MAT, TRT)
+// ================================================================
+function openRenameCVT(id){
+  const r=cvtData.find(x=>x.id===id);if(!r)return;
+  document.getElementById('renameNewVal').value=r.cvtId;
+  document.getElementById('renameType').value='cvt';
+  document.getElementById('renameRecordId').value=id;
+  openModal('renameModal');
+}
+function doRename(){
+  const newVal=document.getElementById('renameNewVal').value.trim();
+  const type=document.getElementById('renameType').value;
+  const id=parseInt(document.getElementById('renameRecordId').value);
+  if(!newVal)return alert('Enter a new name');
+  if(type==='cvt'){
+    const r=cvtData.find(x=>x.id===id);if(r)r.cvtId=newVal;
+    renderCVTTable();renderCVTCharts();renderCVTPositionCards();saveToStorage();
+  } else if(type==='mat'){
+    const r=matData.find(x=>x.id===id);if(r)r.instId=newVal;
+    renderMATTable();renderMATCharts();saveToStorage();
+  } else if(type==='trt'){
+    const r=trtData.find(x=>x.id===id);if(r)r.instId=newVal;
+    renderTRTTable();renderTRTCharts();saveToStorage();
+  }
+  closeModal('renameModal');
+  showToast('Renamed to: '+newVal);
+}
+
+// ================================================================
+// COMBINED READING LOG (CVT view enhanced with month folders)
+// ================================================================
+function renderCVTMonthCards(){
+  let container=document.getElementById('cvtMonthCards');
+  if(!container){
+    // Insert month cards div before the charts in CVT view
+    container=document.createElement('div');
+    container.id='cvtMonthCards';
+    container.style.cssText='display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px';
+    const cvtView=document.getElementById('view-cvt');
+    const firstPanel=cvtView.querySelector('.g2');
+    if(firstPanel) cvtView.insertBefore(container, firstPanel);
+  }
+  const months=[...new Set(cvtData.map(r=>getMonthKey(r.date)))].sort().reverse();
+  container.innerHTML=months.map(m=>{
+    const rows=cvtData.filter(r=>getMonthKey(r.date)===m);
+    return `<div style="cursor:pointer;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;min-width:140px;transition:all .15s" onmouseenter="this.style.borderColor='var(--accent)'" onmouseleave="this.style.borderColor='var(--border)'">
+      <div style="font-family:var(--mono);font-size:9px;color:var(--txt3);text-transform:uppercase;margin-bottom:4px">📁 FOLDER</div>
+      <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--txt)">${getMonthLabel(m+'-01')}</div>
+      <div style="font-size:10px;color:var(--txt2);margin-top:2px">${rows.length} readings</div>
+    </div>`;
+  }).join('');
+}
+
+// CVT rename is handled directly in renderCVTTable below
+
+
+// ================================================================
+// COMBINED READING LOG
+// ================================================================
+function renderCombinedLog(){
+  updateCombMonthFilter();
+  const tbody=document.getElementById('combTbody');
+  if(!tbody)return;
+  const monthFilter=document.getElementById('combMonthFilter')?.value||'all';
+  const typeFilter=document.getElementById('combTypeFilter')?.value||'all';
+
+  // Build unified rows
+  let allRows=[];
+  // CVT rows
+  if(typeFilter==='all'||typeFilter==='cvt'){
+    cvtData.forEach(r=>{
+      if(monthFilter!=='all'&&getMonthKey(r.date)!==monthFilter)return;
+      allRows.push({date:r.date,type:'cvt',inst:r.cvtId,pos:r.position,v1:r.initial.toFixed(2),v2:r.current.toFixed(2),v3:'—',val:r.convergence.toFixed(2),unit:'mm',statusCls:cvtStatus(r.convergence).cls,statusTxt:cvtStatus(r.convergence).txt,notes:r.notes||'—',id:r.id});
+    });
+  }
+  // MAT rows
+  if(typeFilter==='all'||typeFilter==='mat'){
+    matData.forEach(r=>{
+      if(monthFilter!=='all'&&getMonthKey(r.date)!==monthFilter)return;
+      const s=matStatus(r.avg);
+      allRows.push({date:r.date,type:'mat',inst:r.instId,pos:'RD '+r.rdm,v1:r.ch1.toFixed(2),v2:r.ch2.toFixed(2),v3:r.ch3.toFixed(2),val:r.avg.toFixed(3),unit:'T',statusCls:s.cls,statusTxt:s.txt,notes:r.notes||'—',id:r.id});
+    });
+  }
+  // TRT rows
+  if(typeFilter==='all'||typeFilter==='trt'){
+    trtData.forEach(r=>{
+      if(monthFilter!=='all'&&getMonthKey(r.date)!==monthFilter)return;
+      const s=trtStatus(r.avg);
+      allRows.push({date:r.date,type:'trt',inst:r.instId,pos:'RD '+r.rdm,v1:r.ch1.toFixed(2),v2:r.ch2.toFixed(2),v3:r.ch3.toFixed(2),val:r.avg.toFixed(3),unit:'T',statusCls:s.cls,statusTxt:s.txt,notes:r.notes||'—',id:r.id});
+    });
+  }
+
+  // Sort: date desc, then within same date: CVT first, MAT second, TRT third
+  const typeOrder={cvt:1,mat:2,trt:3};
+  allRows.sort((a,b)=>{
+    const dc=b.date.localeCompare(a.date);
+    if(dc!==0)return dc;
+    return (typeOrder[a.type]||9)-(typeOrder[b.type]||9);
+  });
+
+  if(!allRows.length){
+    tbody.innerHTML='<tr><td colspan="12" style="text-align:center;color:var(--txt3);font-family:var(--mono);font-size:10px;padding:20px">No data. Add readings from CVT, MAT, or TRT sections.</td></tr>';
+    document.getElementById('combRowCount').textContent='0 Entries';
+    renderCombMonthCards(monthFilter);return;
+  }
+
+  const typeColors={cvt:'var(--accent)',mat:'var(--info)',trt:'#a78bfa'};
+  const typeLabels={cvt:'CVT',mat:'MAT',trt:'TRT'};
+  const typeActions={
+    cvt:(id)=>`<button onclick="editCVT(${id})">Edit</button><button class="del" onclick="deleteCVT(${id});renderCombinedLog()">Del</button>`,
+    mat:(id)=>`<button onclick="editMAT(${id})">Edit</button><button class="del" onclick="deleteMAT(${id});renderCombinedLog()">Del</button>`,
+    trt:(id)=>`<button onclick="editTRT(${id})">Edit</button><button class="del" onclick="deleteTRT(${id});renderCombinedLog()">Del</button>`,
+  };
+
+  tbody.innerHTML=allRows.map(r=>{
+    const col=typeColors[r.type]||'var(--accent)';
+    return `<tr style="border-left:3px solid ${col}">
+      <td>${r.date}</td>
+      <td style="font-family:var(--mono);font-size:9px;color:var(--txt3)">${getMonthLabel(r.date)}</td>
+      <td><span style="font-family:var(--mono);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;background:${col}22;color:${col}">${typeLabels[r.type]}</span></td>
+      <td class="iid">${r.inst}</td>
+      <td style="font-family:var(--mono);font-size:10px;color:var(--txt2)">${r.pos}</td>
+      <td class="iv">${r.v1}</td>
+      <td class="iv">${r.v2}</td>
+      <td class="iv">${r.v3}</td>
+      <td class="iv" style="color:${col}">${r.val} <span class="iu">${r.unit}</span></td>
+      <td><span class="chip ${r.statusCls}">${r.statusTxt}</span></td>
+      <td style="font-size:11px;color:var(--txt2)">${r.notes}</td>
+      <td class="no-print"><div class="tbl-actions">${typeActions[r.type](r.id)}</div></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('combRowCount').textContent=allRows.length+' Entries';
+  renderCombMonthCards(monthFilter);
+}
+function renderCombMonthCards(activeMonth){
+  const container=document.getElementById('combMonthCards');
+  if(!container)return;
+  const allDates=[...cvtData,...matData,...trtData].map(r=>r.date);
+  const months=[...new Set(allDates.map(d=>getMonthKey(d)))].sort().reverse();
+  container.innerHTML=months.map(m=>{
+    const cnt=[...cvtData,...matData,...trtData].filter(r=>getMonthKey(r.date)===m).length;
+    const isActive=activeMonth===m;
+    return `<div onclick="document.getElementById('combMonthFilter').value='${m}';renderCombinedLog();" style="cursor:pointer;background:${isActive?'var(--acc-dim)':'var(--card)'};border:1px solid ${isActive?'var(--accent)':'var(--border)'};border-radius:8px;padding:10px 14px;min-width:140px;transition:all .15s">
+      <div style="font-family:var(--mono);font-size:9px;color:${isActive?'var(--accent)':'var(--txt3)'};text-transform:uppercase;margin-bottom:4px">📁 FOLDER</div>
+      <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:${isActive?'var(--accent)':'var(--txt)'}">${getMonthLabel(m+'-01')}</div>
+      <div style="font-size:10px;color:var(--txt2);margin-top:2px">${cnt} entries</div>
+    </div>`;
+  }).join('');
+}
+function updateCombMonthFilter(){
+  const sel=document.getElementById('combMonthFilter');
+  if(!sel)return;
+  const allDates=[...cvtData,...matData,...trtData].map(r=>r.date);
+  const months=[...new Set(allDates.map(d=>getMonthKey(d)))].sort().reverse();
+  const cur=sel.value;
+  sel.innerHTML='<option value="all">All Months</option>'+months.map(m=>`<option value="${m}"${m===cur?' selected':''}>${getMonthLabel(m+'-01')}</option>`).join('');
+}
+function exportCombinedLog(){
+  const rows=[];
+  cvtData.forEach(r=>rows.push({date:r.date,type:'CVT',inst:r.cvtId,pos:r.position,v1:r.initial,v2:r.current,v3:'',val:r.convergence,unit:'mm',status:cvtStatus(r.convergence).txt,notes:r.notes||''}));
+  matData.forEach(r=>rows.push({date:r.date,type:'MAT',inst:r.instId,pos:'RD '+r.rdm,v1:r.ch1,v2:r.ch2,v3:r.ch3,val:r.avg,unit:'T',status:matStatus(r.avg).txt,notes:r.notes||''}));
+  trtData.forEach(r=>rows.push({date:r.date,type:'TRT',inst:r.instId,pos:'RD '+r.rdm,v1:r.ch1,v2:r.ch2,v3:r.ch3,val:r.avg,unit:'T',status:trtStatus(r.avg).txt,notes:r.notes||''}));
+  const typeOrder={CVT:1,MAT:2,TRT:3};
+  rows.sort((a,b)=>{const dc=b.date.localeCompare(a.date);return dc!==0?dc:(typeOrder[a.type]||9)-(typeOrder[b.type]||9);});
+  const csv=['Date,Month,Type,InstrumentID,Position,V1,V2,V3,Value,Unit,Status,Notes',...rows.map(r=>`${r.date},${getMonthLabel(r.date)},${r.type},${r.inst},${r.pos},${r.v1},${r.v2},${r.v3},${r.val},${r.unit},${r.status},${r.notes}`)].join('\n');
+  downloadCSV(csv,'Combined_Reading_Log.csv');
+}
+
+
+// ================================================================
+// SIDEBAR SUB-MENU TOGGLE
+// ================================================================
+function toggleSubMenu(id){
+  const el=document.getElementById(id);
+  if(!el)return;
+  const isOpen=el.classList.contains('show');
+  // Close all submenus
+  document.querySelectorAll('.ni-sub').forEach(s=>s.classList.remove('show'));
+  if(!isOpen) el.classList.add('show');
+}
+
 // ================================================================
 // APP BOOT
 // ================================================================
@@ -2306,5 +3279,55 @@ window.addEventListener('load',()=>{
   document.getElementById('loginPage').style.display='flex';
 });
 </script>
+
+<!-- ========== MAT DATA MODAL ========== -->
+<div class="modal-bg" id="matDataModal">
+  <div class="modal">
+    <div class="modal-title"><span id="matModalTitle">Add MAT Reading</span><button class="modal-close" onclick="closeModal('matDataModal')">×</button></div>
+    <div class="form-grid">
+      <div class="fg"><label class="fl">Instrument ID</label><select class="fs" id="matInstSelect"><option>MAT-01</option><option>MAT-02</option><option>MAT-03</option></select></div>
+      <div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="matDate"/></div>
+      <div class="fg"><label class="fl">RD (m)</label><input class="fi" type="number" step="0.001" id="matRDM" placeholder="12.812"/></div>
+      <div class="fg"><label class="fl">CH-1 (Ton)</label><input class="fi" type="number" step="0.01" id="matCh1" placeholder="0.00" oninput="calcMATAvg()"/></div>
+      <div class="fg"><label class="fl">CH-2 (Ton)</label><input class="fi" type="number" step="0.01" id="matCh2" placeholder="0.00" oninput="calcMATAvg()"/></div>
+      <div class="fg"><label class="fl">CH-3 (Ton)</label><input class="fi" type="number" step="0.01" id="matCh3" placeholder="0.00" oninput="calcMATAvg()"/></div>
+      <div class="fg"><label class="fl">Avg (auto)</label><input class="fi" id="matAvg" readonly style="opacity:.7"/></div>
+      <div class="fg"><label class="fl">Notes</label><input class="fi" id="matNotes" placeholder="Optional"/></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('matDataModal')">Cancel</button><button class="btn btn-p" onclick="saveMATData()">Save Reading</button></div>
+  </div>
+</div>
+
+<!-- ========== TRT DATA MODAL ========== -->
+<div class="modal-bg" id="trtDataModal">
+  <div class="modal">
+    <div class="modal-title"><span id="trtModalTitle">Add TRT Reading</span><button class="modal-close" onclick="closeModal('trtDataModal')">×</button></div>
+    <div class="form-grid">
+      <div class="fg"><label class="fl">Instrument ID</label><select class="fs" id="trtInstSelect"><option>TRT-01</option><option>TRT-02</option><option>TRT-03</option></select></div>
+      <div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="trtDate"/></div>
+      <div class="fg"><label class="fl">RD (m)</label><input class="fi" type="number" step="0.001" id="trtRDM" placeholder="8.500"/></div>
+      <div class="fg"><label class="fl">CH-1 (Ton)</label><input class="fi" type="number" step="0.01" id="trtCh1" placeholder="0.00" oninput="calcTRTAvg()"/></div>
+      <div class="fg"><label class="fl">CH-2 (Ton)</label><input class="fi" type="number" step="0.01" id="trtCh2" placeholder="0.00" oninput="calcTRTAvg()"/></div>
+      <div class="fg"><label class="fl">CH-3 (Ton)</label><input class="fi" type="number" step="0.01" id="trtCh3" placeholder="0.00" oninput="calcTRTAvg()"/></div>
+      <div class="fg"><label class="fl">Avg (auto)</label><input class="fi" id="trtAvg" readonly style="opacity:.7"/></div>
+      <div class="fg"><label class="fl">Notes</label><input class="fi" id="trtNotes" placeholder="Optional"/></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('trtDataModal')">Cancel</button><button class="btn btn-p" onclick="saveTRTData()">Save Reading</button></div>
+  </div>
+</div>
+
+<!-- ========== RENAME INSTRUMENT MODAL ========== -->
+<div class="modal-bg" id="renameModal">
+  <div class="modal" style="width:360px">
+    <div class="modal-title"><span>Rename Instrument</span><button class="modal-close" onclick="closeModal('renameModal')">×</button></div>
+    <div class="fg" style="margin-bottom:16px">
+      <label class="fl">New Name / ID</label>
+      <input class="fi" id="renameNewVal" placeholder="Enter new name"/>
+    </div>
+    <input type="hidden" id="renameType"/>
+    <input type="hidden" id="renameRecordId"/>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('renameModal')">Cancel</button><button class="btn btn-p" onclick="doRename()">Rename</button></div>
+  </div>
+</div>
 </body>
 </html>
