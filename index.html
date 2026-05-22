@@ -589,10 +589,10 @@ canvas{display:block}
   <div class="modal">
     <div class="modal-title"><span id="cvtModalTitle">Add CVT Reading</span><button class="modal-close" onclick="closeModal('cvtDataModal')">×</button></div>
     <div class="form-grid">
-      <div class="fg"><label class="fl">CVT Instrument ID</label><select class="fs" id="cvtIdSelect"><option>CVT-01</option><option>CVT-02</option><option>CVT-03</option><option>CVT-04</option><option>CVT-05</option></select></div>
-      <div class="fg"><label class="fl">Position</label><select class="fs" id="cvtPosition"><option>MAT</option><option>TRT</option><option>LHS Crown</option><option>RHS</option></select></div>
+      <div class="fg"><label class="fl">CVT Instrument ID</label><select class="fs" id="cvtIdSelect"><option>LC CVT - 01</option><option>LC CVT - 02</option><option>LC CVT - 03</option></select></div>
+      <div class="fg"><label class="fl">Position</label><select class="fs" id="cvtPosition"><option>CVT LHS</option><option>CVT CROWN</option><option>CVT RHS</option></select></div>
       <div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="cvtDate"/></div>
-      <div class="fg"><label class="fl">Initial Reading (mm)</label><input class="fi" type="number" step="0.01" id="cvtInitial" placeholder="0.00"/></div>
+      <div class="fg"><label class="fl">Initial Reading (mm)</label><input class="fi" type="number" step="0.01" id="cvtInitial" placeholder="0.00" oninput="calcCVTConv()"/></div>
       <div class="fg"><label class="fl">Current Reading (mm)</label><input class="fi" type="number" step="0.01" id="cvtCurrent" placeholder="0.00" oninput="calcCVTConv()"/></div>
       <div class="fg"><label class="fl">Convergence (auto, mm)</label><input class="fi" id="cvtConvCalc" readonly style="opacity:.7"/></div>
       <div class="fg span2"><label class="fl">Notes</label><input class="fi" id="cvtNotes" placeholder="Optional notes"/></div>
@@ -958,22 +958,20 @@ canvas{display:block}
           <button class="btn btn-ghost no-print" onclick="exportCVTData()">Export CSV</button>
           <select class="fs" id="cvtFilterPos" onchange="renderCVTTable();renderCVTCharts()" style="padding:5px 8px;font-size:10px">
             <option value="all">All Positions</option>
-            <option value="MAT">MAT</option>
-            <option value="TRT">TRT</option>
-            <option value="LHS Crown">LHS Crown</option>
-            <option value="RHS">RHS</option>
+            <option value="CVT LHS">CVT LHS</option>
+            <option value="CVT CROWN">CVT CROWN</option>
+            <option value="CVT RHS">CVT RHS</option>
           </select>
           <select class="fs" id="cvtFilterId" onchange="renderCVTTable();renderCVTCharts()" style="padding:5px 8px;font-size:10px">
             <option value="all">All CVT IDs</option>
-            <option value="CVT-01">CVT-01</option>
-            <option value="CVT-02">CVT-02</option>
-            <option value="CVT-03">CVT-03</option>
-            <option value="CVT-04">CVT-04</option>
-            <option value="CVT-05">CVT-05</option>
+            <option value="LC CVT - 01">LC CVT - 01</option>
+            <option value="LC CVT - 02">LC CVT - 02</option>
+            <option value="LC CVT - 03">LC CVT - 03</option>
           </select>
+          <button class="btn btn-ghost no-print" onclick="addMonth('cvt')">+ Add Month</button>
         </div>
       </div>
-      <div id="cvtPositionCards" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px"></div>
+      <div id="cvtPositionCards" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px"></div>
       <div class="g2" style="margin-bottom:14px">
         <div class="panel">
           <div class="ph"><span class="pt">Convergence Trend – All Positions</span><span class="ptag">mm</span></div>
@@ -1010,6 +1008,13 @@ canvas{display:block}
           <select class="fs" id="matMonthFilter" onchange="renderMATTable()" style="padding:5px 8px;font-size:10px">
             <option value="all">All Months</option>
           </select>
+          <select class="fs" id="matPositionFilter" onchange="renderMATTable();renderMATCharts()" style="padding:5px 8px;font-size:10px">
+            <option value="all">All MAT Positions</option>
+            <option value="MAT LHS">MAT LHS</option>
+            <option value="MAT CROWN">MAT CROWN</option>
+            <option value="MAT RHS">MAT RHS</option>
+          </select>
+          <button class="btn btn-ghost no-print" onclick="addMonth('mat')">+ Add Month</button>
           <button class="btn btn-ghost no-print" onclick="openMATModal()">+ Add Reading</button>
           <button class="btn btn-ghost no-print" onclick="exportMATData()">Export CSV</button>
         </div>
@@ -1035,7 +1040,7 @@ canvas{display:block}
         </div>
         <div class="pb" style="padding:0">
           <table class="tbl">
-            <thead><tr><th>Date</th><th>Month</th><th>Instrument ID</th><th>RD (m)</th><th>CH-1 (T)</th><th>CH-2 (T)</th><th>CH-3 (T)</th><th>Avg (T)</th><th>Status</th><th>Notes</th><th class="no-print">Actions</th></tr></thead>
+            <thead><tr><th>Date</th><th>Month</th><th>Instrument ID</th><th>Position</th><th>RD (m)</th><th>CH-1 (T)</th><th>CH-2 (T)</th><th>CH-3 (T)</th><th>Avg (T)</th><th>Status</th><th>Notes</th><th class="no-print">Actions</th></tr></thead>
             <tbody id="matTbody"></tbody>
           </table>
         </div>
@@ -1053,6 +1058,13 @@ canvas{display:block}
           <select class="fs" id="trtMonthFilter" onchange="renderTRTTable()" style="padding:5px 8px;font-size:10px">
             <option value="all">All Months</option>
           </select>
+          <select class="fs" id="trtPositionFilter" onchange="renderTRTTable();renderTRTCharts()" style="padding:5px 8px;font-size:10px">
+            <option value="all">All TRT Positions</option>
+            <option value="TRT LHS">TRT LHS</option>
+            <option value="TRT CROWN">TRT CROWN</option>
+            <option value="TRT RHS">TRT RHS</option>
+          </select>
+          <button class="btn btn-ghost no-print" onclick="addMonth('trt')">+ Add Month</button>
           <button class="btn btn-ghost no-print" onclick="openTRTModal()">+ Add Reading</button>
           <button class="btn btn-ghost no-print" onclick="exportTRTData()">Export CSV</button>
         </div>
@@ -1078,7 +1090,7 @@ canvas{display:block}
         </div>
         <div class="pb" style="padding:0">
           <table class="tbl">
-            <thead><tr><th>Date</th><th>Month</th><th>Instrument ID</th><th>RD (m)</th><th>CH-1 (T)</th><th>CH-2 (T)</th><th>CH-3 (T)</th><th>Avg (T)</th><th>Status</th><th>Notes</th><th class="no-print">Actions</th></tr></thead>
+            <thead><tr><th>Date</th><th>Month</th><th>Instrument ID</th><th>Position</th><th>RD (m)</th><th>CH-1 (T)</th><th>CH-2 (T)</th><th>CH-3 (T)</th><th>Avg (T)</th><th>Status</th><th>Notes</th><th class="no-print">Actions</th></tr></thead>
             <tbody id="trtTbody"></tbody>
           </table>
         </div>
@@ -1404,7 +1416,7 @@ canvas{display:block}
         <div class="ph"><span class="pt">Quick Entry – Convergence (CVT)</span><span class="ptag" style="background:rgba(167,139,250,.12);color:#a78bfa">MAT·TRT·LHS·RHS</span></div>
         <div class="pb">
           <div class="form-grid g3x" style="margin-bottom:12px">
-            <div class="fg"><label class="fl">CVT ID</label><select class="fs" id="qeCVTId"><option>CVT-01</option><option>CVT-02</option><option>CVT-03</option><option>CVT-04</option><option>CVT-05</option></select></div>
+            <div class="fg"><label class="fl">CVT ID</label><select class="fs" id="qeCVTId"><option>LC CVT - 01</option><option>LC CVT - 02</option><option>LC CVT - 03</option></select></div>
             <div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="qeCVTDate"/></div>
             <div class="fg"><label class="fl">Initial Reading (mm)</label><input class="fi" type="number" step="0.01" id="qeCVTInitial" placeholder="0.00"/></div>
           </div>
@@ -1495,6 +1507,7 @@ const USERS = [
 ];
 let currentUser = null;
 let lcData = [], sgData = [], incData = [], cvtData = [], matData = [], trtData = [];
+let customMonths = {cvt:[], mat:[], trt:[], comb:[]};
 let editingLC = null, editingSG = null, editingInc = null, editingCVT = null, editingMAT = null, editingTRT = null;
 let sgCurrentProject = 'all';
 let incSelectedBH = null;
@@ -1512,6 +1525,7 @@ const LS_KEYS = {
   kimiBoreholes: 'aageo_kimiBoreholes',
   matData: 'aageo_matData',
   trtData: 'aageo_trtData',
+  customMonths: 'aageo_customMonths',
 };
 
 function saveToStorage(){
@@ -1524,6 +1538,7 @@ function saveToStorage(){
     localStorage.setItem(LS_KEYS.kimiBoreholes, JSON.stringify(KIMI_BOREHOLES));
     localStorage.setItem(LS_KEYS.matData, JSON.stringify(matData));
     localStorage.setItem(LS_KEYS.trtData, JSON.stringify(trtData));
+    localStorage.setItem(LS_KEYS.customMonths, JSON.stringify(customMonths));
   } catch(e){ console.warn('Storage save failed:', e); }
 }
 
@@ -1543,8 +1558,10 @@ function loadFromStorage(){
     if(kimi){ const arr = JSON.parse(kimi); KIMI_BOREHOLES.length=0; arr.forEach(b=>KIMI_BOREHOLES.push(b)); }
     const mat = localStorage.getItem(LS_KEYS.matData);
     const trt = localStorage.getItem(LS_KEYS.trtData);
+    const months = localStorage.getItem(LS_KEYS.customMonths);
     if(mat) matData = JSON.parse(mat);
     if(trt) trtData = JSON.parse(trt);
+    if(months) customMonths = {...customMonths, ...JSON.parse(months)};
   } catch(e){ console.warn('Storage load failed:', e); }
 }
 
@@ -1581,28 +1598,26 @@ incData = [
   {id:7,date:'2026-04-15',bh:'BH-INC-04',depth:4,axisA:0.7,axisB:0.3,cumul:0.76},
 ];
 cvtData = [
-  {id:1,date:'2026-02-10',cvtId:'CVT-01',position:'MAT',  initial:0.00,current:2.10,convergence:2.10},
-  {id:2,date:'2026-02-10',cvtId:'CVT-01',position:'TRT',  initial:0.00,current:1.85,convergence:1.85},
-  {id:3,date:'2026-02-10',cvtId:'CVT-01',position:'LHS Crown',initial:0.00,current:1.40,convergence:1.40},
-  {id:4,date:'2026-02-10',cvtId:'CVT-01',position:'RHS',  initial:0.00,current:1.60,convergence:1.60},
-  {id:5,date:'2026-03-15',cvtId:'CVT-01',position:'MAT',  initial:0.00,current:3.50,convergence:3.50},
-  {id:6,date:'2026-03-15',cvtId:'CVT-01',position:'TRT',  initial:0.00,current:2.90,convergence:2.90},
-  {id:7,date:'2026-03-15',cvtId:'CVT-01',position:'LHS Crown',initial:0.00,current:2.20,convergence:2.20},
-  {id:8,date:'2026-03-15',cvtId:'CVT-01',position:'RHS',  initial:0.00,current:2.55,convergence:2.55},
+  {id:1,date:'2026-02-10',cvtId:'LC CVT - 01',position:'CVT LHS',  initial:0.00,current:2.10,convergence:2.10},
+  {id:2,date:'2026-02-10',cvtId:'LC CVT - 02',position:'CVT CROWN',initial:0.00,current:1.85,convergence:1.85},
+  {id:3,date:'2026-02-10',cvtId:'LC CVT - 03',position:'CVT RHS',  initial:0.00,current:1.40,convergence:1.40},
+  {id:4,date:'2026-03-15',cvtId:'LC CVT - 01',position:'CVT LHS',  initial:0.00,current:3.50,convergence:3.50},
+  {id:5,date:'2026-03-15',cvtId:'LC CVT - 02',position:'CVT CROWN',initial:0.00,current:2.90,convergence:2.90},
+  {id:6,date:'2026-03-15',cvtId:'LC CVT - 03',position:'CVT RHS',  initial:0.00,current:2.20,convergence:2.20},
 ];
 matData = [
-  {id:101,date:'2026-02-10',instId:'MAT-01',rdm:12.812,ch1:0.45,ch2:0.52,ch3:0.48,avg:0.483,notes:'Initial reading'},
-  {id:102,date:'2026-02-24',instId:'MAT-01',rdm:12.812,ch1:0.67,ch2:0.71,ch3:0.65,avg:0.677,notes:''},
-  {id:103,date:'2026-03-10',instId:'MAT-01',rdm:12.812,ch1:0.88,ch2:0.95,ch3:0.90,avg:0.910,notes:'Slight increase'},
-  {id:104,date:'2026-03-24',instId:'MAT-02',rdm:14.200,ch1:0.30,ch2:0.28,ch3:0.32,avg:0.300,notes:''},
-  {id:105,date:'2026-04-07',instId:'MAT-01',rdm:12.812,ch1:1.10,ch2:1.18,ch3:1.12,avg:1.133,notes:'Monitor closely'},
+  {id:101,date:'2026-02-10',instId:'MAT-01',position:'MAT LHS',rdm:12.812,ch1:0.45,ch2:0.52,ch3:0.48,avg:0.483,notes:'Initial reading'},
+  {id:102,date:'2026-02-24',instId:'MAT-01',position:'MAT LHS',rdm:12.812,ch1:0.67,ch2:0.71,ch3:0.65,avg:0.677,notes:''},
+  {id:103,date:'2026-03-10',instId:'MAT-01',position:'MAT CROWN',rdm:12.812,ch1:0.88,ch2:0.95,ch3:0.90,avg:0.910,notes:'Slight increase'},
+  {id:104,date:'2026-03-24',instId:'MAT-02',position:'MAT RHS',rdm:14.200,ch1:0.30,ch2:0.28,ch3:0.32,avg:0.300,notes:''},
+  {id:105,date:'2026-04-07',instId:'MAT-01',position:'MAT CROWN',rdm:12.812,ch1:1.10,ch2:1.18,ch3:1.12,avg:1.133,notes:'Monitor closely'},
 ];
 trtData = [
-  {id:201,date:'2026-02-10',instId:'TRT-01',rdm:8.500,ch1:0.22,ch2:0.25,ch3:0.20,avg:0.223,notes:'Initial reading'},
-  {id:202,date:'2026-02-24',instId:'TRT-01',rdm:8.500,ch1:0.38,ch2:0.40,ch3:0.36,avg:0.380,notes:''},
-  {id:203,date:'2026-03-10',instId:'TRT-01',rdm:8.500,ch1:0.55,ch2:0.60,ch3:0.57,avg:0.573,notes:''},
-  {id:204,date:'2026-03-24',instId:'TRT-02',rdm:10.000,ch1:0.18,ch2:0.20,ch3:0.19,avg:0.190,notes:''},
-  {id:205,date:'2026-04-07',instId:'TRT-01',rdm:8.500,ch1:0.72,ch2:0.78,ch3:0.74,avg:0.747,notes:'Normal trend'},
+  {id:201,date:'2026-02-10',instId:'TRT-01',position:'TRT LHS',rdm:8.500,ch1:0.22,ch2:0.25,ch3:0.20,avg:0.223,notes:'Initial reading'},
+  {id:202,date:'2026-02-24',instId:'TRT-01',position:'TRT LHS',rdm:8.500,ch1:0.38,ch2:0.40,ch3:0.36,avg:0.380,notes:''},
+  {id:203,date:'2026-03-10',instId:'TRT-01',position:'TRT CROWN',rdm:8.500,ch1:0.55,ch2:0.60,ch3:0.57,avg:0.573,notes:''},
+  {id:204,date:'2026-03-24',instId:'TRT-02',position:'TRT RHS',rdm:10.000,ch1:0.18,ch2:0.20,ch3:0.19,avg:0.190,notes:''},
+  {id:205,date:'2026-04-07',instId:'TRT-01',position:'TRT CROWN',rdm:8.500,ch1:0.72,ch2:0.78,ch3:0.74,avg:0.747,notes:'Normal trend'},
 ];
 
 // ================================================================
@@ -1728,6 +1743,9 @@ function notifyAdmin(msg){
 // ================================================================
 function initApp(){
   loadFromStorage();
+  normalizeCVTData();
+  normalizeSectionPositions();
+  setupCVTQuickEntryLabels();
   startClock();
   renderLCTable();
   renderSGGauges();renderSGTable();
@@ -1940,9 +1958,63 @@ function getMonthKey(dateStr){
   return dateStr.slice(0,7); // YYYY-MM
 }
 
-const CVT_POSITIONS = ['MAT','TRT','LHS Crown','RHS'];
-const CVT_COLORS = {'MAT':'#00d4aa','TRT':'#60a5fa','LHS Crown':'#f5a623','RHS':'#a78bfa'};
+function getMonthsFor(type, rows){
+  const dataMonths = rows.map(r=>getMonthKey(r.date)).filter(m=>m && m!=='0000-00');
+  const addedMonths = customMonths[type] || [];
+  return [...new Set([...dataMonths, ...addedMonths])].sort().reverse();
+}
+
+function monthCardHTML({type, month, rows, active, accent='var(--accent)', renderFn}){
+  return `<div onclick="document.getElementById('${type}MonthFilter').value='${month}';${renderFn}();" style="cursor:pointer;background:${active?'var(--acc-dim)':'var(--card)'};border:1px solid ${active?accent:'var(--border)'};border-radius:8px;padding:10px 14px;min-width:174px;transition:all .15s">
+    <div style="display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:9px;color:${active?accent:'var(--txt3)'};text-transform:uppercase;margin-bottom:6px"><span style="color:#ffd166">■</span> Month</div>
+    <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:${active?accent:'var(--txt)'}">${getMonthLabel(month+'-01')}</div>
+    <div style="font-size:11px;color:var(--txt2);margin-top:4px">${rows.length} reading${rows.length!==1?'s':''}</div>
+  </div>`;
+}
+
+function addMonth(type){
+  const val=prompt('Enter month as YYYY-MM, example: 2026-03');
+  if(!val)return;
+  const month=val.trim();
+  if(!/^\d{4}-\d{2}$/.test(month))return alert('Please enter month in YYYY-MM format');
+  customMonths[type]=customMonths[type]||[];
+  if(!customMonths[type].includes(month))customMonths[type].push(month);
+  saveToStorage();
+  if(type==='mat'){updateMATMonthFilter();document.getElementById('matMonthFilter').value=month;renderMATTable();}
+  if(type==='trt'){updateTRTMonthFilter();document.getElementById('trtMonthFilter').value=month;renderTRTTable();}
+  if(type==='cvt'){document.getElementById('cvtFilterPos').value='all';renderCVTTable();renderCVTCharts();}
+}
+
+const CVT_IDS = ['LC CVT - 01','LC CVT - 02','LC CVT - 03'];
+const CVT_POSITIONS = ['CVT LHS','CVT CROWN','CVT RHS'];
+const CVT_COLORS = {
+  'CVT LHS':'#00d4aa','CVT CROWN':'#f5a623','CVT RHS':'#a78bfa'
+};
 const CVT_ALERT = 10; // mm alert threshold
+
+function normalizeCVTId(id){
+  const map = {'CVT-01':'LC CVT - 01','CVT-02':'LC CVT - 02','CVT-03':'LC CVT - 03','CVT-04':'LC CVT - 01','CVT-05':'LC CVT - 02'};
+  return map[id] || id || CVT_IDS[0];
+}
+
+function normalizeCVTPosition(position){
+  const map = {'MAT':'CVT LHS','TRT':'CVT CROWN','MAT LHS':'CVT LHS','MAT CROWN':'CVT CROWN','MAT RHS':'CVT RHS','TRT LHS':'CVT LHS','TRT CROWN':'CVT CROWN','TRT RHS':'CVT RHS','LHS Crown':'CVT CROWN','RHS':'CVT RHS','LHS':'CVT LHS','CROWN':'CVT CROWN'};
+  return map[position] || position || CVT_POSITIONS[0];
+}
+
+function normalizeCVTData(){
+  cvtData = cvtData
+    .map(r => ({...r, cvtId: normalizeCVTId(r.cvtId), position: normalizeCVTPosition(r.position)}))
+    .filter(r => CVT_POSITIONS.includes(r.position));
+}
+
+const MAT_POSITIONS = ['MAT LHS','MAT CROWN','MAT RHS'];
+const TRT_POSITIONS = ['TRT LHS','TRT CROWN','TRT RHS'];
+
+function normalizeSectionPositions(){
+  matData = matData.map(r=>({...r, position: r.position || 'MAT LHS'}));
+  trtData = trtData.map(r=>({...r, position: r.position || 'TRT LHS'}));
+}
 
 function cvtStatus(conv){
   if(conv>=CVT_ALERT)return {cls:'chip-d',txt:'ALERT'};
@@ -1958,9 +2030,30 @@ function calcCVTConv(){
 
 function calcQECVT(){
   const init=parseFloat(document.getElementById('qeCVTInitial').value)||0;
-  [['mat','qeCVTmat','qeCVTmatConv'],['trt','qeCVTtrt','qeCVTtrtConv'],['lhs','qeCVTlhs','qeCVTlhsConv'],['rhs','qeCVTrhs','qeCVTrhsConv']].forEach(([,curId,convId])=>{
+  [['lhs','qeCVTmat','qeCVTmatConv'],['crown','qeCVTtrt','qeCVTtrtConv'],['rhs','qeCVTlhs','qeCVTlhsConv']].forEach(([,curId,convId])=>{
     const cur=parseFloat(document.getElementById(curId).value)||0;
     document.getElementById(convId).value=(cur-init).toFixed(2);
+  });
+}
+
+function setupCVTQuickEntryLabels(){
+  const cvtHeader=document.querySelector('#view-cvt > div:first-child > div:first-child');
+  if(cvtHeader)cvtHeader.textContent='Tunnel Convergence Monitoring - CVT LHS / CROWN / RHS';
+  const cvtTag=document.querySelector('#view-dataentry .panel:nth-of-type(4) .ptag');
+  if(cvtTag)cvtTag.textContent='CVT LHS/CROWN/RHS';
+  const labels = [
+    ['qeCVTmat','CVT LHS - Current (mm)'],['qeCVTmatConv','CVT LHS - Convergence'],
+    ['qeCVTtrt','CVT CROWN - Current (mm)'],['qeCVTtrtConv','CVT CROWN - Convergence'],
+    ['qeCVTlhs','CVT RHS - Current (mm)'],['qeCVTlhsConv','CVT RHS - Convergence']
+  ];
+  labels.forEach(([id,text])=>{
+    const el=document.getElementById(id);
+    const label=el?.closest('.fg')?.querySelector('.fl');
+    if(label)label.textContent=text;
+  });
+  ['qeCVTrhs','qeCVTrhsConv'].forEach(id=>{
+    const wrap=document.getElementById(id)?.closest('.fg');
+    if(wrap)wrap.style.display='none';
   });
 }
 
@@ -1973,13 +2066,25 @@ function renderCVTPositionCards(){
     const conv=last?last.convergence:0;
     const s=cvtStatus(conv);
     const color=CVT_COLORS[pos]||'var(--accent)';
+    const editAction=last?`editCVT(${last.id})`:`openCVTModalForPosition('${pos}')`;
+    const deleteAction=last?`deleteCVT(${last.id})`:'';
     return `<div class="kpi-card" style="border-top-color:${color}">
       <div class="kpi-label">${pos}</div>
       <div class="kpi-val" style="color:${color};font-size:20px">${last?conv.toFixed(2):'--'} <span style="font-size:11px;color:var(--txt3)">mm</span></div>
       <div class="kpi-sub">${last?last.date:'No data'}</div>
       <span class="chip ${s.cls}" style="margin-top:5px;font-size:8px">${s.txt}</span>
+      <div class="tbl-actions no-print" style="margin-top:10px">
+        <button onclick="openCVTModalForPosition('${pos}')">Add</button>
+        <button onclick="${editAction}">Edit</button>
+        <button class="del" ${last?'':'disabled style="opacity:.45;cursor:not-allowed"'} onclick="${deleteAction}">Del</button>
+      </div>
     </div>`;
   }).join('');
+}
+
+function openCVTModalForPosition(position){
+  openCVTModal();
+  document.getElementById('cvtPosition').value=position;
 }
 
 function renderCVTTable(){
@@ -1987,7 +2092,7 @@ function renderCVTTable(){
   if(!tbody)return;
   const filterPos=document.getElementById('cvtFilterPos')?.value||'all';
   const filterId=document.getElementById('cvtFilterId')?.value||'all';
-  let rows=[...cvtData];
+  let rows=cvtData.filter(r=>CVT_POSITIONS.includes(r.position));
   if(filterPos!=='all')rows=rows.filter(r=>r.position===filterPos);
   if(filterId!=='all')rows=rows.filter(r=>r.cvtId===filterId);
   rows.sort((a,b)=>b.date.localeCompare(a.date)||a.position.localeCompare(b.position));
@@ -2023,7 +2128,13 @@ function renderCVTTable(){
 function openCVTModal(id=null){
   editingCVT=id;
   document.getElementById('cvtModalTitle').textContent=id?'Edit CVT Reading':'Add CVT Reading';
-  if(!id){['cvtInitial','cvtCurrent','cvtConvCalc','cvtNotes'].forEach(x=>document.getElementById(x).value='');}
+  document.getElementById('cvtIdSelect').innerHTML=CVT_IDS.map(cvtId=>`<option value="${cvtId}">${cvtId}</option>`).join('');
+  document.getElementById('cvtPosition').innerHTML=CVT_POSITIONS.map(pos=>`<option value="${pos}">${pos}</option>`).join('');
+  if(!id){
+    document.getElementById('cvtIdSelect').value=CVT_IDS[0];
+    document.getElementById('cvtPosition').value=CVT_POSITIONS[0];
+    ['cvtInitial','cvtCurrent','cvtConvCalc','cvtNotes'].forEach(x=>document.getElementById(x).value='');
+  }
   openModal('cvtDataModal');
 }
 
@@ -2048,8 +2159,8 @@ function deleteCVT(id){
 }
 
 function saveCVTData(){
-  const cvtId=document.getElementById('cvtIdSelect').value;
-  const position=document.getElementById('cvtPosition').value;
+  const cvtId=normalizeCVTId(document.getElementById('cvtIdSelect').value);
+  const position=normalizeCVTPosition(document.getElementById('cvtPosition').value);
   const date=document.getElementById('cvtDate').value;
   const initial=parseFloat(document.getElementById('cvtInitial').value)||0;
   const current=parseFloat(document.getElementById('cvtCurrent').value)||0;
@@ -2069,15 +2180,14 @@ function saveCVTData(){
 }
 
 function quickEntryCVT(){
-  const cvtId=document.getElementById('qeCVTId').value;
+  const cvtId=normalizeCVTId(document.getElementById('qeCVTId').value);
   const date=document.getElementById('qeCVTDate').value;
   const initial=parseFloat(document.getElementById('qeCVTInitial').value)||0;
   if(!date)return alert('Please enter a date');
   const positions=[
-    {pos:'MAT',   curId:'qeCVTmat'},
-    {pos:'TRT',   curId:'qeCVTtrt'},
-    {pos:'LHS Crown',curId:'qeCVTlhs'},
-    {pos:'RHS',   curId:'qeCVTrhs'},
+    {pos:'CVT LHS',curId:'qeCVTmat'},
+    {pos:'CVT CROWN',curId:'qeCVTtrt'},
+    {pos:'CVT RHS',curId:'qeCVTlhs'},
   ];
   let saved=0;
   positions.forEach(({pos,curId})=>{
@@ -2090,15 +2200,21 @@ function quickEntryCVT(){
   });
   if(!saved)return alert('Please enter at least one current reading');
   renderCVTTable();renderCVTCharts();renderCVTPositionCards();updateReportCounts();updateEntryStats();saveToStorage();
-  ['qeCVTmat','qeCVTtrt','qeCVTlhs','qeCVTrhs','qeCVTmatConv','qeCVTtrtConv','qeCVTlhsConv','qeCVTrhsConv','qeCVTInitial'].forEach(id=>document.getElementById(id).value='');
+  ['qeCVTmat','qeCVTtrt','qeCVTlhs','qeCVTmatConv','qeCVTtrtConv','qeCVTlhsConv','qeCVTInitial'].forEach(id=>document.getElementById(id).value='');
   showToast(saved+' CVT readings saved ('+cvtId+')!');
 }
 
 function renderCVTCharts(){
-  const allDates=[...new Set(cvtData.map(r=>r.date))].sort();
-  const datasets=CVT_POSITIONS.map(pos=>({
+  const filterPos=document.getElementById('cvtFilterPos')?.value||'all';
+  const filterId=document.getElementById('cvtFilterId')?.value||'all';
+  let rows=cvtData.filter(r=>CVT_POSITIONS.includes(r.position));
+  if(filterPos!=='all')rows=rows.filter(r=>r.position===filterPos);
+  if(filterId!=='all')rows=rows.filter(r=>r.cvtId===filterId);
+  const positions=filterPos==='all'?CVT_POSITIONS:[filterPos];
+  const allDates=[...new Set(rows.map(r=>r.date))].sort();
+  const datasets=positions.map(pos=>({
     label:pos,
-    data:allDates.map(d=>{const r=cvtData.find(x=>x.position===pos&&x.date===d);return r?r.convergence:null;}),
+    data:allDates.map(d=>{const r=rows.find(x=>x.position===pos&&x.date===d);return r?r.convergence:null;}),
     borderColor:CVT_COLORS[pos],
     backgroundColor:'transparent',
     tension:0.3,pointRadius:4,spanGaps:true
@@ -2108,8 +2224,8 @@ function renderCVTCharts(){
   }
   mkChart('cvtTrendChart',{type:'line',data:{labels:allDates,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8892a4',font:{family:'Space Mono',size:9},boxWidth:10}}},scales:{y:{ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'},title:{display:true,text:'Convergence (mm)',color:'#4a5568'}},x:{ticks:{color:'#4a5568',font:{family:'Space Mono',size:8},maxRotation:45},grid:{display:false}}}}});
   // Bar chart latest per position
-  const latestVals=CVT_POSITIONS.map(pos=>{const rows=cvtData.filter(r=>r.position===pos);return rows.length?rows.sort((a,b)=>b.date.localeCompare(a.date))[0].convergence:0;});
-  mkChart('cvtBarChart',{type:'bar',data:{labels:CVT_POSITIONS,datasets:[{label:'Latest Convergence (mm)',data:latestVals,backgroundColor:CVT_POSITIONS.map((p,i)=>latestVals[i]>=CVT_ALERT?'rgba(239,68,68,0.7)':latestVals[i]>=6?'rgba(245,166,35,0.7)':CVT_COLORS[p]+'bb'),borderRadius:4,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'},title:{display:true,text:'mm',color:'#4a5568'}},x:{ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{display:false}}}}});
+  const latestVals=positions.map(pos=>{const posRows=rows.filter(r=>r.position===pos);return posRows.length?posRows.sort((a,b)=>b.date.localeCompare(a.date))[0].convergence:0;});
+  mkChart('cvtBarChart',{type:'bar',data:{labels:positions,datasets:[{label:'Latest Convergence (mm)',data:latestVals,backgroundColor:positions.map((p,i)=>latestVals[i]>=CVT_ALERT?'rgba(239,68,68,0.7)':latestVals[i]>=6?'rgba(245,166,35,0.7)':CVT_COLORS[p]+'bb'),borderRadius:4,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'},title:{display:true,text:'mm',color:'#4a5568'}},x:{ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{display:false}}}}});
 }
 
 function exportCVTData(){
@@ -2828,6 +2944,7 @@ function openMATModal(id=null){
   document.getElementById('matModalTitle').textContent=id?'Edit MAT Reading':'Add MAT Reading';
   if(!id){['matCh1','matCh2','matCh3','matAvg','matNotes'].forEach(x=>document.getElementById(x).value='');
     document.getElementById('matRDM').value='';
+    document.getElementById('matPositionSelect').value='MAT LHS';
     const today=new Date().toISOString().split('T')[0];
     document.getElementById('matDate').value=today;
   }
@@ -2838,6 +2955,7 @@ function editMAT(id){
   editingMAT=id;
   document.getElementById('matModalTitle').textContent='Edit MAT Reading';
   document.getElementById('matInstSelect').value=r.instId;
+  document.getElementById('matPositionSelect').value=r.position||'MAT LHS';
   document.getElementById('matDate').value=r.date;
   document.getElementById('matRDM').value=r.rdm;
   document.getElementById('matCh1').value=r.ch1;
@@ -2861,6 +2979,7 @@ function renameMAT(id){
 }
 function saveMATData(){
   const instId=document.getElementById('matInstSelect').value;
+  const position=document.getElementById('matPositionSelect').value;
   const date=document.getElementById('matDate').value;
   const rdm=parseFloat(document.getElementById('matRDM').value)||0;
   const ch1=parseFloat(document.getElementById('matCh1').value)||0;
@@ -2871,9 +2990,9 @@ function saveMATData(){
   if(!date)return alert('Please enter a date');
   if(editingMAT){
     const r=matData.find(x=>x.id===editingMAT);
-    Object.assign(r,{instId,date,rdm,ch1,ch2,ch3,avg,notes});
+    Object.assign(r,{instId,position,date,rdm,ch1,ch2,ch3,avg,notes});
   } else {
-    matData.push({id:Date.now(),instId,date,rdm,ch1,ch2,ch3,avg,notes});
+    matData.push({id:Date.now(),instId,position,date,rdm,ch1,ch2,ch3,avg,notes});
   }
   renderMATTable();renderMATCharts();updateMATMonthFilter();updateReportCounts();updateEntryStats();
   closeModal('matDataModal');saveToStorage();
@@ -2885,13 +3004,14 @@ function exportMATData(){
 }
 function updateMATMonthFilter(){
   const sel=document.getElementById('matMonthFilter');
-  const months=[...new Set(matData.map(r=>getMonthKey(r.date)))].sort().reverse();
-  sel.innerHTML='<option value="all">All Months</option>'+months.map(m=>`<option value="${m}">${getMonthLabel(m+'-01')}</option>`).join('');
+  const months=getMonthsFor('mat', matData);
+  const cur=sel.value;
+  sel.innerHTML='<option value="all">All Months</option>'+months.map(m=>`<option value="${m}"${m===cur?' selected':''}>${getMonthLabel(m+'-01')}</option>`).join('');
 }
 function renderMATMonthCards(){
   const container=document.getElementById('matMonthCards');
   if(!container)return;
-  const months=[...new Set(matData.map(r=>getMonthKey(r.date)))].sort().reverse();
+  const months=getMonthsFor('mat', matData);
   const selFilter=document.getElementById('matMonthFilter')?.value||'all';
   container.innerHTML=months.map(m=>{
     const rows=matData.filter(r=>getMonthKey(r.date)===m);
@@ -2970,6 +3090,7 @@ function openTRTModal(id=null){
   document.getElementById('trtModalTitle').textContent=id?'Edit TRT Reading':'Add TRT Reading';
   if(!id){['trtCh1','trtCh2','trtCh3','trtAvg','trtNotes'].forEach(x=>document.getElementById(x).value='');
     document.getElementById('trtRDM').value='';
+    document.getElementById('trtPositionSelect').value='TRT LHS';
     const today=new Date().toISOString().split('T')[0];
     document.getElementById('trtDate').value=today;
   }
@@ -2980,6 +3101,7 @@ function editTRT(id){
   editingTRT=id;
   document.getElementById('trtModalTitle').textContent='Edit TRT Reading';
   document.getElementById('trtInstSelect').value=r.instId;
+  document.getElementById('trtPositionSelect').value=r.position||'TRT LHS';
   document.getElementById('trtDate').value=r.date;
   document.getElementById('trtRDM').value=r.rdm;
   document.getElementById('trtCh1').value=r.ch1;
@@ -3003,6 +3125,7 @@ function renameTRT(id){
 }
 function saveTRTData(){
   const instId=document.getElementById('trtInstSelect').value;
+  const position=document.getElementById('trtPositionSelect').value;
   const date=document.getElementById('trtDate').value;
   const rdm=parseFloat(document.getElementById('trtRDM').value)||0;
   const ch1=parseFloat(document.getElementById('trtCh1').value)||0;
@@ -3013,9 +3136,9 @@ function saveTRTData(){
   if(!date)return alert('Please enter a date');
   if(editingTRT){
     const r=trtData.find(x=>x.id===editingTRT);
-    Object.assign(r,{instId,date,rdm,ch1,ch2,ch3,avg,notes});
+    Object.assign(r,{instId,position,date,rdm,ch1,ch2,ch3,avg,notes});
   } else {
-    trtData.push({id:Date.now(),instId,date,rdm,ch1,ch2,ch3,avg,notes});
+    trtData.push({id:Date.now(),instId,position,date,rdm,ch1,ch2,ch3,avg,notes});
   }
   renderTRTTable();renderTRTCharts();updateTRTMonthFilter();updateReportCounts();updateEntryStats();
   closeModal('trtDataModal');saveToStorage();
@@ -3341,6 +3464,124 @@ window.saveTRTData = function(){
   if(document.getElementById('view-combinedlog')?.style.display!=='none') renderCombinedLog();
 };
 
+// MAT/TRT position filters + cleaner month cards
+function updateTRTMonthFilter(){
+  const sel=document.getElementById('trtMonthFilter');
+  if(!sel)return;
+  const months=getMonthsFor('trt', trtData);
+  const cur=sel.value;
+  sel.innerHTML='<option value="all">All Months</option>'+months.map(m=>`<option value="${m}"${m===cur?' selected':''}>${getMonthLabel(m+'-01')}</option>`).join('');
+}
+
+function renderMATMonthCards(){
+  const container=document.getElementById('matMonthCards');
+  if(!container)return;
+  const selFilter=document.getElementById('matMonthFilter')?.value||'all';
+  const months=getMonthsFor('mat', matData);
+  container.innerHTML=months.map(m=>{
+    const rows=matData.filter(r=>getMonthKey(r.date)===m);
+    return monthCardHTML({type:'mat', month:m, rows, active:selFilter===m, accent:'var(--accent)', renderFn:'renderMATTable'});
+  }).join('');
+}
+
+function renderTRTMonthCards(){
+  const container=document.getElementById('trtMonthCards');
+  if(!container)return;
+  const selFilter=document.getElementById('trtMonthFilter')?.value||'all';
+  const months=getMonthsFor('trt', trtData);
+  container.innerHTML=months.map(m=>{
+    const rows=trtData.filter(r=>getMonthKey(r.date)===m);
+    return monthCardHTML({type:'trt', month:m, rows, active:selFilter===m, accent:'#a78bfa', renderFn:'renderTRTTable'});
+  }).join('');
+}
+
+function renderCVTMonthCards(){
+  let container=document.getElementById('cvtMonthCards');
+  if(!container){
+    container=document.createElement('div');
+    container.id='cvtMonthCards';
+    container.style.cssText='display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px';
+    const cvtView=document.getElementById('view-cvt');
+    const firstPanel=cvtView.querySelector('.g2');
+    if(firstPanel)cvtView.insertBefore(container, firstPanel);
+  }
+  const months=getMonthsFor('cvt', cvtData);
+  container.innerHTML=months.map(m=>{
+    const rows=cvtData.filter(r=>getMonthKey(r.date)===m);
+    return `<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;min-width:174px;transition:all .15s">
+      <div style="display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:9px;color:var(--txt3);text-transform:uppercase;margin-bottom:6px"><span style="color:#ffd166">■</span> Month</div>
+      <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--txt)">${getMonthLabel(m+'-01')}</div>
+      <div style="font-size:11px;color:var(--txt2);margin-top:4px">${rows.length} reading${rows.length!==1?'s':''}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderMATTable(){
+  const tbody=document.getElementById('matTbody');
+  if(!tbody)return;
+  const monthFilter=document.getElementById('matMonthFilter')?.value||'all';
+  const posFilter=document.getElementById('matPositionFilter')?.value||'all';
+  let rows=monthFilter==='all'?[...matData]:matData.filter(r=>getMonthKey(r.date)===monthFilter);
+  if(posFilter!=='all')rows=rows.filter(r=>(r.position||'MAT LHS')===posFilter);
+  rows.sort((a,b)=>b.date.localeCompare(a.date));
+  renderMATMonthCards();
+  if(!rows.length){
+    tbody.innerHTML='<tr><td colspan="12" style="text-align:center;color:var(--txt3);font-family:var(--mono);font-size:10px;padding:20px">No MAT readings. Click "+ Add Reading".</td></tr>';
+    document.getElementById('matRowCount').textContent='0 Entries';return;
+  }
+  tbody.innerHTML=rows.map(r=>{
+    const s=matStatus(r.avg);
+    return `<tr>
+      <td>${r.date}</td>
+      <td style="font-family:var(--mono);font-size:9px;color:var(--accent)">${getMonthLabel(r.date)}</td>
+      <td class="iid">${r.instId}</td>
+      <td class="iid" style="color:var(--info)">${r.position||'MAT LHS'}</td>
+      <td class="iu">${r.rdm||'--'}</td>
+      <td class="iv">${r.ch1.toFixed(2)}</td>
+      <td class="iv">${r.ch2.toFixed(2)}</td>
+      <td class="iv">${r.ch3.toFixed(2)}</td>
+      <td class="iv" style="color:${r.avg>=MAT_ALERT?'var(--warn)':'var(--accent)'}">${r.avg.toFixed(3)}</td>
+      <td><span class="chip ${s.cls}">${s.txt}</span></td>
+      <td style="font-size:11px;color:var(--txt2)">${r.notes||'--'}</td>
+      <td class="no-print"><div class="tbl-actions"><button onclick="editMAT(${r.id})">Edit</button><button class="del" onclick="deleteMAT(${r.id})">Del</button></div></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('matRowCount').textContent=rows.length+' Entries';
+}
+
+function renderTRTTable(){
+  const tbody=document.getElementById('trtTbody');
+  if(!tbody)return;
+  const monthFilter=document.getElementById('trtMonthFilter')?.value||'all';
+  const posFilter=document.getElementById('trtPositionFilter')?.value||'all';
+  let rows=monthFilter==='all'?[...trtData]:trtData.filter(r=>getMonthKey(r.date)===monthFilter);
+  if(posFilter!=='all')rows=rows.filter(r=>(r.position||'TRT LHS')===posFilter);
+  rows.sort((a,b)=>b.date.localeCompare(a.date));
+  renderTRTMonthCards();
+  if(!rows.length){
+    tbody.innerHTML='<tr><td colspan="12" style="text-align:center;color:var(--txt3);font-family:var(--mono);font-size:10px;padding:20px">No TRT readings. Click "+ Add Reading".</td></tr>';
+    document.getElementById('trtRowCount').textContent='0 Entries';return;
+  }
+  tbody.innerHTML=rows.map(r=>{
+    const s=trtStatus(r.avg);
+    return `<tr>
+      <td>${r.date}</td>
+      <td style="font-family:var(--mono);font-size:9px;color:#a78bfa">${getMonthLabel(r.date)}</td>
+      <td class="iid">${r.instId}</td>
+      <td class="iid" style="color:#a78bfa">${r.position||'TRT LHS'}</td>
+      <td class="iu">${r.rdm||'--'}</td>
+      <td class="iv">${r.ch1.toFixed(2)}</td>
+      <td class="iv">${r.ch2.toFixed(2)}</td>
+      <td class="iv">${r.ch3.toFixed(2)}</td>
+      <td class="iv" style="color:${r.avg>=TRT_ALERT?'var(--warn)':'#a78bfa'}">${r.avg.toFixed(3)}</td>
+      <td><span class="chip ${s.cls}">${s.txt}</span></td>
+      <td style="font-size:11px;color:var(--txt2)">${r.notes||'--'}</td>
+      <td class="no-print"><div class="tbl-actions"><button onclick="editTRT(${r.id})">Edit</button><button class="del" onclick="deleteTRT(${r.id})">Del</button></div></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('trtRowCount').textContent=rows.length+' Entries';
+}
+
 // ================================================================
 // APP BOOT
 // ================================================================
@@ -3355,6 +3596,7 @@ window.addEventListener('load',()=>{
     <div class="modal-title"><span id="matModalTitle">Add MAT Reading</span><button class="modal-close" onclick="closeModal('matDataModal')">×</button></div>
     <div class="form-grid">
       <div class="fg"><label class="fl">Instrument ID</label><select class="fs" id="matInstSelect"><option>MAT-01</option><option>MAT-02</option><option>MAT-03</option></select></div>
+      <div class="fg"><label class="fl">Position</label><select class="fs" id="matPositionSelect"><option>MAT LHS</option><option>MAT CROWN</option><option>MAT RHS</option></select></div>
       <div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="matDate"/></div>
       <div class="fg"><label class="fl">RD (m)</label><input class="fi" type="number" step="0.001" id="matRDM" placeholder="12.812"/></div>
       <div class="fg"><label class="fl">CH-1 (Ton)</label><input class="fi" type="number" step="0.01" id="matCh1" placeholder="0.00" oninput="calcMATAvg()"/></div>
@@ -3373,6 +3615,7 @@ window.addEventListener('load',()=>{
     <div class="modal-title"><span id="trtModalTitle">Add TRT Reading</span><button class="modal-close" onclick="closeModal('trtDataModal')">×</button></div>
     <div class="form-grid">
       <div class="fg"><label class="fl">Instrument ID</label><select class="fs" id="trtInstSelect"><option>TRT-01</option><option>TRT-02</option><option>TRT-03</option></select></div>
+      <div class="fg"><label class="fl">Position</label><select class="fs" id="trtPositionSelect"><option>TRT LHS</option><option>TRT CROWN</option><option>TRT RHS</option></select></div>
       <div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="trtDate"/></div>
       <div class="fg"><label class="fl">RD (m)</label><input class="fi" type="number" step="0.001" id="trtRDM" placeholder="8.500"/></div>
       <div class="fg"><label class="fl">CH-1 (Ton)</label><input class="fi" type="number" step="0.01" id="trtCh1" placeholder="0.00" oninput="calcTRTAvg()"/></div>
