@@ -2182,6 +2182,7 @@ function saveCVTData(){
   }
   renderCVTTable();renderCVTCharts();renderCVTPositionCards();updateReportCounts();updateEntryStats();
   closeModal('cvtDataModal');saveToStorage();
+  if(document.getElementById('view-combinedlog')?.classList.contains('active'))renderCombinedLog();
   showToast('CVT reading saved — '+position);
   if(convergence>=CVT_ALERT)notifyAdmin('Alert: '+cvtId+' ('+position+') convergence '+convergence.toFixed(2)+'mm exceeds threshold.');
 }
@@ -2207,6 +2208,7 @@ function quickEntryCVT(){
   });
   if(!saved)return alert('Please enter at least one current reading');
   renderCVTTable();renderCVTCharts();renderCVTPositionCards();updateReportCounts();updateEntryStats();saveToStorage();
+  if(document.getElementById('view-combinedlog')?.classList.contains('active'))renderCombinedLog();
   ['qeCVTmat','qeCVTtrt','qeCVTlhs','qeCVTmatConv','qeCVTtrtConv','qeCVTlhsConv','qeCVTInitial'].forEach(id=>document.getElementById(id).value='');
   showToast(saved+' CVT readings saved ('+cvtId+')!');
 }
@@ -3003,6 +3005,7 @@ function saveMATData(){
   }
   renderMATTable();renderMATCharts();updateMATMonthFilter();updateReportCounts();updateEntryStats();
   closeModal('matDataModal');saveToStorage();
+  if(document.getElementById('view-combinedlog')?.classList.contains('active'))renderCombinedLog();
   showToast('MAT reading saved!');
 }
 function exportMATData(){
@@ -3117,6 +3120,7 @@ function saveTRTData(){
   }
   renderTRTTable();renderTRTCharts();updateTRTMonthFilter();updateReportCounts();updateEntryStats();
   closeModal('trtDataModal');saveToStorage();
+  if(document.getElementById('view-combinedlog')?.classList.contains('active'))renderCombinedLog();
   showToast('TRT reading saved!');
 }
 function exportTRTData(){
@@ -3390,22 +3394,7 @@ function editTRTFromComb(id){
   window._trtCombHook = true;
 }
 
-// Patch save functions to re-render combined log if opened from there
-const _origSaveCVT = saveCVTData;
-window.saveCVTData = function(){
-  _origSaveCVT();
-  if(document.getElementById('view-combinedlog')?.style.display!=='none') renderCombinedLog();
-};
-const _origSaveMAT = saveMATData;
-window.saveMATData = function(){
-  _origSaveMAT();
-  if(document.getElementById('view-combinedlog')?.style.display!=='none') renderCombinedLog();
-};
-const _origSaveTRT = saveTRTData;
-window.saveTRTData = function(){
-  _origSaveTRT();
-  if(document.getElementById('view-combinedlog')?.style.display!=='none') renderCombinedLog();
-};
+// Combined log auto-refresh: called from each save function directly
 
 // MAT/TRT position filters + cleaner month cards
 function updateTRTMonthFilter(){
