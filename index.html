@@ -542,6 +542,7 @@ canvas{display:block}
     <div class="modal-title"><span id="lcModalTitle">Add Load Cell Reading</span><button class="modal-close" onclick="closeModal('lcDataModal')">×</button></div>
     <div class="form-grid">
       <div class="fg"><label class="fl">Load Cell</label><select class="fs" id="lcSelect"><option>LC MAT-LHS (4421)</option><option>LC MAT-CROWN (4422)</option><option>LC MAT-RHS (4423)</option></select></div>
+      <div class="fg"><label class="fl">Type</label><select class="fs" id="lcType"><option value="rib">Rib LC</option><option value="rock">Rock Bolt LC</option></select></div>
       <div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="lcDate"/></div>
       <div class="fg"><label class="fl">Sensor CH-1 (Ton)</label><input class="fi" type="number" step="0.01" id="lcSensor1" placeholder="0.00"/></div>
       <div class="fg"><label class="fl">Sensor CH-2 (Ton)</label><input class="fi" type="number" step="0.01" id="lcSensor2" placeholder="0.00"/></div>
@@ -1509,6 +1510,8 @@ let currentUser = null;
 let lcData = [], sgData = [], incData = [], cvtData = [], matData = [], trtData = [];
 let customMonths = {cvt:[], mat:[], trt:[], comb:[]};
 let editingLC = null, editingSG = null, editingInc = null, editingCVT = null, editingMAT = null, editingTRT = null;
+let sensorData = [];
+let editingSensor = null;
 let sgCurrentProject = 'all';
 let incSelectedBH = null;
 let charts = {};
@@ -1686,11 +1689,11 @@ function resendOTP(){
 function otpInput(el){
   el.value=el.value.replace(/[^0-9]/g,'');
 }
-function otpKeyUp(el,idx){
+function otpKeyUp(el,idx,event){
   if(el.value&&idx<5){
     document.querySelectorAll('.otp-box')[idx+1].focus();
   }
-  if(event.key==='Backspace'&&!el.value&&idx>0){
+  if(event&&event.key==='Backspace'&&!el.value&&idx>0){
     document.querySelectorAll('.otp-box')[idx-1].focus();
   }
 }
@@ -1813,7 +1816,16 @@ function switchView(id,el){
 // MODALS
 // ================================================================
 function openModal(id){document.getElementById(id).classList.add('open');}
-function closeModal(id){document.getElementById(id).classList.remove('open');editingLC=null;editingSG=null;editingInc=null;editingCVT=null;editingMAT=null;editingTRT=null;}
+function closeModal(id){
+  document.getElementById(id).classList.remove('open');
+  if(id==='lcDataModal') editingLC=null;
+  else if(id==='sgDataModal') editingSG=null;
+  else if(id==='incModal') editingInc=null;
+  else if(id==='cvtDataModal') editingCVT=null;
+  else if(id==='matDataModal') editingMAT=null;
+  else if(id==='trtDataModal') editingTRT=null;
+  else if(id==='sensorModal') editingSensor=null;
+}
 document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open')}));
 
 // ================================================================
@@ -1860,21 +1872,32 @@ function openLCModal(id=null){
   const addedLC=sensorData.filter(s=>s.type.startsWith('Load Cell')).map(s=>`${s.code} – ${s.location}`);
   const allOpts=[...defaultOpts,...addedLC.filter(o=>!defaultOpts.includes(o))];
   sel.innerHTML=allOpts.map(o=>`<option>${o}</option>`).join('');
-  if(!id){['lcSensor1','lcSensor2','lcSensor3','lcAvg'].forEach(x=>{document.getElementById(x).value='';});}
+  if(!id){['lcSensor1','lcSensor2','lcSensor3','lcAvg'].forEach(x=>{document.getElementById(x).value='';});const lt=document.getElementById('lcType');if(lt)lt.value='rib';}
   openModal('lcDataModal');
 }
-function editLC(id){const r=lcData.find(x=>x.id===id);if(!r)return;editingLC=id;document.getElementById('lcModalTitle').textContent='Edit Load Cell Reading';document.getElementById('lcSelect').value=r.lc;document.getElementById('lcDate').value=r.date;document.getElementById('lcSensor1').value=r.ch1;document.getElementById('lcSensor2').value=r.ch2;document.getElementById('lcSensor3').value=r.ch3;document.getElementById('lcAvg').value=r.avg;openModal('lcDataModal');}
+function editLC(id){
+  const r=lcData.find(x=>x.id===id);if(!r)return;
+  openLCModal(id);
+  document.getElementById('lcSelect').value=r.lc;
+  const lt=document.getElementById('lcType');if(lt)lt.value=r.type||'rib';
+  document.getElementById('lcDate').value=r.date;
+  document.getElementById('lcSensor1').value=r.ch1;
+  document.getElementById('lcSensor2').value=r.ch2;
+  document.getElementById('lcSensor3').value=r.ch3;
+  document.getElementById('lcAvg').value=r.avg.toFixed(3);
+}
 function deleteLC(id){if(confirm('Delete this reading?')){lcData=lcData.filter(x=>x.id!==id);renderLCTable();renderLCCharts();updateReportCounts();saveToStorage();}}
 function saveLCData(){
   const ch1=parseFloat(document.getElementById('lcSensor1').value)||0,ch2=parseFloat(document.getElementById('lcSensor2').value)||0,ch3=parseFloat(document.getElementById('lcSensor3').value)||0;
   const avg=(ch1+ch2+ch3)/3,lc=document.getElementById('lcSelect').value,date=document.getElementById('lcDate').value;
   if(!date)return alert('Please enter a date');
-  if(editingLC){const r=lcData.find(x=>x.id===editingLC);Object.assign(r,{lc,date,ch1,ch2,ch3,avg});}
-  else lcData.push({id:Date.now(),date,lc,ch1,ch2,ch3,avg,type:'rib'});
+  const lcTypeEl=document.getElementById('lcType');const type=lcTypeEl?lcTypeEl.value:'rib';
+  if(editingLC){const r=lcData.find(x=>x.id===editingLC);Object.assign(r,{lc,date,ch1,ch2,ch3,avg,type});}
+  else lcData.push({id:Date.now(),date,lc,ch1,ch2,ch3,avg,type});
   renderLCTable();renderLCCharts();updateReportCounts();updateEntryStats();closeModal('lcDataModal');saveToStorage();
   if(avg>=7.5)notifyAdmin('Alert: '+lc+' avg load '+avg.toFixed(3)+'T exceeds threshold.');
 }
-function exportLCData(){const csv=['Date,LoadCell,CH1,CH2,CH3,Avg(Ton),Status',...lcData.map(r=>`${r.date},${r.lc},${r.ch1},${r.ch2},${r.ch3},${r.avg.toFixed(3)},${lcStatus(r.avg).txt}`)].join('\n');downloadCSV(csv,'LoadCell_Data.csv');}
+function exportLCData(){const csv=['Date,LoadCell,Type,CH1,CH2,CH3,Avg(Ton),Status',...lcData.map(r=>`${r.date},"${r.lc}",${r.type||'rib'},${r.ch1},${r.ch2},${r.ch3},${r.avg.toFixed(3)},${lcStatus(r.avg).txt}`)].join('\n');downloadCSV(csv,'LoadCell_Data.csv');}
 
 // ================================================================
 // STRAIN GAUGE
@@ -1911,7 +1934,7 @@ function saveSGData(){
   renderSGGauges();renderSGTable();renderSGCharts();updateReportCounts();updateEntryStats();closeModal('sgDataModal');saveToStorage();
   if(val>=SG_ALERT)notifyAdmin('Alert: '+gauge+' reading '+val+'με exceeds alert threshold.');
 }
-function exportSGData(){const csv=['Date,Gauge,Project,Reading(με),Status',...sgData.map(r=>`${r.date},${r.gauge},${r.project},${r.val},${sgStatus(r.val).txt}`)].join('\n');downloadCSV(csv,'StrainGauge_Data.csv');}
+function exportSGData(){const csv=['Date,Gauge,Project,Reading(με),Status',...sgData.map(r=>`${r.date},"${r.gauge}","${(r.project||'')}",${r.val},${sgStatus(r.val).txt}`)].join('\n');downloadCSV(csv,'StrainGauge_Data.csv');}
 function importCSV(){const input=document.createElement('input');input.type='file';input.accept='.csv';input.onchange=e=>{const f=e.target.files[0];if(!f)return;const reader=new FileReader();reader.onload=ev=>{const lines=ev.target.result.split('\n').slice(1);lines.forEach(line=>{const [date,gauge,project,val]=line.split(',');if(date&&gauge&&val)sgData.push({id:Date.now()+Math.random(),gauge:gauge.trim(),project:(project||'').trim(),date:date.trim(),val:parseFloat(val)||0,notes:'CSV import'});});renderSGGauges();renderSGTable();renderSGCharts();alert('CSV imported: '+lines.length+' rows');};reader.readAsText(f);};input.click();}
 
 // ================================================================
@@ -1947,7 +1970,7 @@ function saveIncData(){
   if(cumul>=INC_ALERT)notifyAdmin('Alert: '+bh+' cumulative '+cumul.toFixed(2)+'mm exceeds threshold.');
 }
 function importIncCSV(){const input=document.createElement('input');input.type='file';input.accept='.csv';input.onchange=e=>{const f=e.target.files[0];if(!f)return;const reader=new FileReader();reader.onload=ev=>{const lines=ev.target.result.split('\n').slice(1);lines.forEach(line=>{const [bh,date,depth,axisA,axisB,cumul]=line.split(',');if(bh&&date)incData.push({id:Date.now()+Math.random(),bh:bh.trim(),date:date.trim(),depth:parseFloat(depth)||0,axisA:parseFloat(axisA)||0,axisB:parseFloat(axisB)||0,cumul:parseFloat(cumul)||0});});renderIncBoreholes();renderIncTable();renderIncCharts();alert('Imported '+lines.length+' rows');};reader.readAsText(f);};input.click();}
-function exportIncData(){const csv=['Borehole,Date,Depth(m),A-axis(mm),B-axis(mm),Cumulative(mm),Status',...incData.map(r=>`${r.bh},${r.date},${r.depth},${r.axisA.toFixed(2)},${r.axisB.toFixed(2)},${r.cumul.toFixed(2)},${incStatus(r.cumul).txt}`)].join('\n');downloadCSV(csv,'Inclinometer_Data.csv');}
+function exportIncData(){const csv=['Borehole,Date,Depth(m),A-axis(mm),B-axis(mm),Cumulative(mm),Status',...incData.map(r=>`"${r.bh}",${r.date},${r.depth},${r.axisA.toFixed(2)},${r.axisB.toFixed(2)},${r.cumul.toFixed(2)},${incStatus(r.cumul).txt}`)].join('\n');downloadCSV(csv,'Inclinometer_Data.csv');}
 
 // ================================================================
 // CONVERGENCE (CVT)
@@ -2238,7 +2261,7 @@ function renderCVTCharts(){
 }
 
 function exportCVTData(){
-  const csv=['Date,CVT_ID,Position,Initial(mm),Current(mm),Convergence(mm),Status,Notes',...cvtData.map(r=>`${r.date},${r.cvtId},${r.position},${r.initial.toFixed(2)},${r.current.toFixed(2)},${r.convergence.toFixed(2)},${cvtStatus(r.convergence).txt},${r.notes||''}`)].join('\n');
+  const csv=['Date,CVT_ID,Position,Initial(mm),Current(mm),Convergence(mm),Status,Notes',...cvtData.map(r=>`${r.date},"${r.cvtId}","${r.position}",${r.initial.toFixed(2)},${r.current.toFixed(2)},${r.convergence.toFixed(2)},${cvtStatus(r.convergence).txt},"${(r.notes||'').replace(/"/g,'\'')}"`)].join('\n');
   downloadCSV(csv,'CVT_Convergence_Data.csv');
 }
 
@@ -2290,9 +2313,6 @@ function addUserPrompt(){const name=prompt('Username:');if(!name)return;const pa
 // ================================================================
 // SENSOR REGISTRY
 // ================================================================
-let sensorData = [];
-let editingSensor = null;
-
 function saveSensor(){
   const type = document.getElementById('newSensorType').value.trim();
   const code = document.getElementById('newSensorCode').value.trim();
@@ -2922,10 +2942,10 @@ function kimiSaveReading(){
 setInterval(()=>{
   if(!document.getElementById('view-kimi-inc').classList.contains('active'))return;
   KIMI_BOREHOLES.forEach(bh=>{
-    bh.maxA=+(bh.maxA+(Math.random()-0.3)*0.05).toFixed(2);
-    bh.maxB=+(bh.maxB+(Math.random()-0.3)*0.04).toFixed(2);
-    bh.aProfile=bh.aProfile.map(v=>+(v+(Math.random()-0.35)*0.03).toFixed(3));
-    bh.bProfile=bh.bProfile.map(v=>+(v+(Math.random()-0.35)*0.02).toFixed(3));
+    bh.maxA=+Math.max(0,bh.maxA+(Math.random()-0.3)*0.05).toFixed(2);
+    bh.maxB=+Math.max(0,bh.maxB+(Math.random()-0.3)*0.04).toFixed(2);
+    bh.aProfile=bh.aProfile.map(v=>+Math.max(0,v+(Math.random()-0.35)*0.03).toFixed(3));
+    bh.bProfile=bh.bProfile.map(v=>+Math.max(0,v+(Math.random()-0.35)*0.02).toFixed(3));
   });
   kimiUpdateKPIs();kimiBuildBHList();
 },8000);
@@ -3009,7 +3029,7 @@ function saveMATData(){
   showToast('MAT reading saved!');
 }
 function exportMATData(){
-  const csv=['Date,Month,InstID,RD(m),CH1(T),CH2(T),CH3(T),Avg(T),Status,Notes',...matData.map(r=>`${r.date},${getMonthLabel(r.date)},${r.instId},${r.rdm},${r.ch1.toFixed(2)},${r.ch2.toFixed(2)},${r.ch3.toFixed(2)},${r.avg.toFixed(3)},${matStatus(r.avg).txt},${r.notes||''}`)].join('\n');
+  const csv=['Date,Month,InstID,Position,RD(m),CH1(T),CH2(T),CH3(T),Avg(T),Status,Notes',...matData.map(r=>`${r.date},"${getMonthLabel(r.date)}","${r.instId}","${r.position||'MAT LHS'}",${r.rdm||'--'},${r.ch1.toFixed(2)},${r.ch2.toFixed(2)},${r.ch3.toFixed(2)},${r.avg.toFixed(3)},${matStatus(r.avg).txt},"${(r.notes||'').replace(/"/g,'\'')}"`)].join('\n');
   downloadCSV(csv,'MAT_Data.csv');
 }
 function updateMATMonthFilter(){
@@ -3017,21 +3037,6 @@ function updateMATMonthFilter(){
   const months=getMonthsFor('mat', matData);
   const cur=sel.value;
   sel.innerHTML='<option value="all">All Months</option>'+months.map(m=>`<option value="${m}"${m===cur?' selected':''}>${getMonthLabel(m+'-01')}</option>`).join('');
-}
-function renderMATMonthCards(){
-  const container=document.getElementById('matMonthCards');
-  if(!container)return;
-  const months=getMonthsFor('mat', matData);
-  const selFilter=document.getElementById('matMonthFilter')?.value||'all';
-  container.innerHTML=months.map(m=>{
-    const rows=matData.filter(r=>getMonthKey(r.date)===m);
-    const isActive=selFilter===m;
-    return `<div onclick="document.getElementById('matMonthFilter').value='${m}';renderMATTable();" style="cursor:pointer;background:${isActive?'var(--acc-dim)':'var(--card)'};border:1px solid ${isActive?'var(--accent)':'var(--border)'};border-radius:8px;padding:10px 14px;min-width:140px;transition:all .15s">
-      <div style="font-family:var(--mono);font-size:9px;color:${isActive?'var(--accent)':'var(--txt3)'};text-transform:uppercase;margin-bottom:4px">📁 FOLDER</div>
-      <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:${isActive?'var(--accent)':'var(--txt)'}">${getMonthLabel(m+'-01')}</div>
-      <div style="font-size:10px;color:var(--txt2);margin-top:2px">${rows.length} reading${rows.length!==1?'s':''}</div>
-    </div>`;
-  }).join('');
 }
 function renderMATCharts(){
   const allDates=[...new Set(matData.map(r=>r.date))].sort();
@@ -3124,28 +3129,8 @@ function saveTRTData(){
   showToast('TRT reading saved!');
 }
 function exportTRTData(){
-  const csv=['Date,Month,InstID,RD(m),CH1(T),CH2(T),CH3(T),Avg(T),Status,Notes',...trtData.map(r=>`${r.date},${getMonthLabel(r.date)},${r.instId},${r.rdm},${r.ch1.toFixed(2)},${r.ch2.toFixed(2)},${r.ch3.toFixed(2)},${r.avg.toFixed(3)},${trtStatus(r.avg).txt},${r.notes||''}`)].join('\n');
+  const csv=['Date,Month,InstID,Position,RD(m),CH1(T),CH2(T),CH3(T),Avg(T),Status,Notes',...trtData.map(r=>`${r.date},"${getMonthLabel(r.date)}","${r.instId}","${r.position||'TRT LHS'}",${r.rdm||'--'},${r.ch1.toFixed(2)},${r.ch2.toFixed(2)},${r.ch3.toFixed(2)},${r.avg.toFixed(3)},${trtStatus(r.avg).txt},"${(r.notes||'').replace(/"/g,'\'')}"`)].join('\n');
   downloadCSV(csv,'TRT_Data.csv');
-}
-function updateTRTMonthFilter(){
-  const sel=document.getElementById('trtMonthFilter');
-  const months=[...new Set(trtData.map(r=>getMonthKey(r.date)))].sort().reverse();
-  sel.innerHTML='<option value="all">All Months</option>'+months.map(m=>`<option value="${m}">${getMonthLabel(m+'-01')}</option>`).join('');
-}
-function renderTRTMonthCards(){
-  const container=document.getElementById('trtMonthCards');
-  if(!container)return;
-  const months=[...new Set(trtData.map(r=>getMonthKey(r.date)))].sort().reverse();
-  const selFilter=document.getElementById('trtMonthFilter')?.value||'all';
-  container.innerHTML=months.map(m=>{
-    const rows=trtData.filter(r=>getMonthKey(r.date)===m);
-    const isActive=selFilter===m;
-    return `<div onclick="document.getElementById('trtMonthFilter').value='${m}';renderTRTTable();" style="cursor:pointer;background:${isActive?'rgba(167,139,250,.12)':'var(--card)'};border:1px solid ${isActive?'#a78bfa':'var(--border)'};border-radius:8px;padding:10px 14px;min-width:140px;transition:all .15s">
-      <div style="font-family:var(--mono);font-size:9px;color:${isActive?'#a78bfa':'var(--txt3)'};text-transform:uppercase;margin-bottom:4px">📁 FOLDER</div>
-      <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:${isActive?'#a78bfa':'var(--txt)'}">${getMonthLabel(m+'-01')}</div>
-      <div style="font-size:10px;color:var(--txt2);margin-top:2px">${rows.length} reading${rows.length!==1?'s':''}</div>
-    </div>`;
-  }).join('');
 }
 function renderTRTCharts(){
   const allDates=[...new Set(trtData.map(r=>r.date))].sort();
@@ -3189,34 +3174,6 @@ function doRename(){
   closeModal('renameModal');
   showToast('Renamed to: '+newVal);
 }
-
-// ================================================================
-// COMBINED READING LOG (CVT view enhanced with month folders)
-// ================================================================
-function renderCVTMonthCards(){
-  let container=document.getElementById('cvtMonthCards');
-  if(!container){
-    // Insert month cards div before the charts in CVT view
-    container=document.createElement('div');
-    container.id='cvtMonthCards';
-    container.style.cssText='display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px';
-    const cvtView=document.getElementById('view-cvt');
-    const firstPanel=cvtView.querySelector('.g2');
-    if(firstPanel) cvtView.insertBefore(container, firstPanel);
-  }
-  const months=[...new Set(cvtData.map(r=>getMonthKey(r.date)))].sort().reverse();
-  container.innerHTML=months.map(m=>{
-    const rows=cvtData.filter(r=>getMonthKey(r.date)===m);
-    return `<div style="cursor:pointer;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;min-width:140px;transition:all .15s" onmouseenter="this.style.borderColor='var(--accent)'" onmouseleave="this.style.borderColor='var(--border)'">
-      <div style="font-family:var(--mono);font-size:9px;color:var(--txt3);text-transform:uppercase;margin-bottom:4px">📁 FOLDER</div>
-      <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--txt)">${getMonthLabel(m+'-01')}</div>
-      <div style="font-size:10px;color:var(--txt2);margin-top:2px">${rows.length} readings</div>
-    </div>`;
-  }).join('');
-}
-
-// CVT rename is handled directly in renderCVTTable below
-
 
 // ================================================================
 // COMBINED READING LOG
@@ -3326,7 +3283,7 @@ function exportCombinedLog(){
   trtData.forEach(r=>rows.push({date:r.date,type:'TRT',inst:r.instId,pos:'RD '+r.rdm,v1:r.ch1,v2:r.ch2,v3:r.ch3,val:r.avg,unit:'T',status:trtStatus(r.avg).txt,notes:r.notes||''}));
   const typeOrder={CVT:1,MAT:2,TRT:3};
   rows.sort((a,b)=>{const dc=b.date.localeCompare(a.date);return dc!==0?dc:(typeOrder[a.type]||9)-(typeOrder[b.type]||9);});
-  const csv=['Date,Month,Type,InstrumentID,Position,V1,V2,V3,Value,Unit,Status,Notes',...rows.map(r=>`${r.date},${getMonthLabel(r.date)},${r.type},${r.inst},${r.pos},${r.v1},${r.v2},${r.v3},${r.val},${r.unit},${r.status},${r.notes}`)].join('\n');
+  const csv=['Date,Month,Type,InstrumentID,Position,V1,V2,V3,Value,Unit,Status,Notes',...rows.map(r=>`${r.date},"${getMonthLabel(r.date)}",${r.type},"${r.inst}","${r.pos}",${r.v1},${r.v2},${r.v3},${r.val},${r.unit},${r.status},"${String(r.notes).replace(/"/g,'\'')}"`)].join('\n');
   downloadCSV(csv,'Combined_Reading_Log.csv');
 }
 
@@ -3379,20 +3336,9 @@ function openCombAddModal(){
 }
 
 // Edit from combined log — opens modal, on save re-renders combined log too
-function editCVTFromComb(id){
-  editCVT(id);
-  // After modal save, also refresh combined log
-  const origSave = window._cvtSaveHook;
-  window._cvtCombHook = true;
-}
-function editMATFromComb(id){
-  editMAT(id);
-  window._matCombHook = true;
-}
-function editTRTFromComb(id){
-  editTRT(id);
-  window._trtCombHook = true;
-}
+function editCVTFromComb(id){editCVT(id);}
+function editMATFromComb(id){editMAT(id);}
+function editTRTFromComb(id){editTRT(id);}
 
 // Combined log auto-refresh: called from each save function directly
 
