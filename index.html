@@ -544,9 +544,9 @@ canvas{display:block}
       <div class="fg"><label class="fl">Load Cell</label><select class="fs" id="lcSelect"><option>LC MAT-LHS (4421)</option><option>LC MAT-CROWN (4422)</option><option>LC MAT-RHS (4423)</option></select></div>
       <div class="fg"><label class="fl">Type</label><select class="fs" id="lcType"><option value="rib">Rib LC</option><option value="rock">Rock Bolt LC</option></select></div>
       <div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="lcDate"/></div>
-      <div class="fg"><label class="fl">Sensor CH-1 (Ton)</label><input class="fi" type="number" step="0.01" id="lcSensor1" placeholder="0.00"/></div>
-      <div class="fg"><label class="fl">Sensor CH-2 (Ton)</label><input class="fi" type="number" step="0.01" id="lcSensor2" placeholder="0.00"/></div>
-      <div class="fg"><label class="fl">Sensor CH-3 (Ton)</label><input class="fi" type="number" step="0.01" id="lcSensor3" placeholder="0.00"/></div>
+      <div class="fg"><label class="fl">Sensor CH-1 (Ton)</label><input class="fi" type="number" step="0.01" id="lcSensor1" placeholder="0.00" oninput="calcLCAvg()"/></div>
+      <div class="fg"><label class="fl">Sensor CH-2 (Ton)</label><input class="fi" type="number" step="0.01" id="lcSensor2" placeholder="0.00" oninput="calcLCAvg()"/></div>
+      <div class="fg"><label class="fl">Sensor CH-3 (Ton)</label><input class="fi" type="number" step="0.01" id="lcSensor3" placeholder="0.00" oninput="calcLCAvg()"/></div>
       <div class="fg"><label class="fl">Avg Load (auto)</label><input class="fi" id="lcAvg" placeholder="Auto-calculated" readonly style="opacity:.7"/></div>
     </div>
     <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('lcDataModal')">Cancel</button><button class="btn btn-p" onclick="saveLCData()">Save Reading</button></div>
@@ -969,6 +969,7 @@ canvas{display:block}
             <option value="LC CVT - 02">LC CVT - 02</option>
             <option value="LC CVT - 03">LC CVT - 03</option>
           </select>
+          <select class="fs" id="cvtMonthFilter" onchange="renderCVTTable()" style="padding:5px 8px;font-size:10px"><option value="all">All Months</option></select>
           <button class="btn btn-ghost no-print" onclick="addMonth('cvt')">+ Add Month</button>
         </div>
       </div>
@@ -1762,7 +1763,8 @@ function initApp(){
   renderIncBoreholes();renderIncTable();
   renderCVTTable();renderCVTPositionCards();
   renderMATTable();renderTRTTable();
-  updateMATMonthFilter();updateTRTMonthFilter();
+  updateMATMonthFilter();updateTRTMonthFilter();updateCVTMonthFilter();
+  renderCombinedLog();
   updateReportCounts();updateEntryStats();
   kimiInit();
   renderSensorTable();
@@ -1924,13 +1926,13 @@ function renderSGTable(){
   document.getElementById('sgRowCount').textContent=rows.length+' Entries';
 }
 function openSGModal(){editingSG=null;document.getElementById('sgModalTitle').textContent='Add Strain Gauge Reading';openModal('sgDataModal');}
-function editSG(id){const r=sgData.find(x=>x.id===id);if(!r)return;editingSG=id;document.getElementById('sgModalTitle').textContent='Edit Strain Gauge Reading';document.getElementById('sgSelect').value=r.gauge;document.getElementById('sgProject').value=r.project;document.getElementById('sgDate').value=r.date;document.getElementById('sgVal').value=r.val;openModal('sgDataModal');}
+function editSG(id){const r=sgData.find(x=>x.id===id);if(!r)return;editingSG=id;document.getElementById('sgModalTitle').textContent='Edit Strain Gauge Reading';document.getElementById('sgSelect').value=r.gauge;document.getElementById('sgProject').value=r.project;document.getElementById('sgDate').value=r.date;document.getElementById('sgVal').value=r.val;document.getElementById('sgNotes').value=r.notes||'';openModal('sgDataModal');}
 function deleteSG(id){if(confirm('Delete?')){sgData=sgData.filter(x=>x.id!==id);renderSGGauges();renderSGTable();renderSGCharts();updateReportCounts();saveToStorage();}}
 function saveSGData(){
-  const gauge=document.getElementById('sgSelect').value,project=document.getElementById('sgProject').value,date=document.getElementById('sgDate').value,val=parseFloat(document.getElementById('sgVal').value)||0;
+  const gauge=document.getElementById('sgSelect').value,project=document.getElementById('sgProject').value,date=document.getElementById('sgDate').value,val=parseFloat(document.getElementById('sgVal').value)||0,notes=(document.getElementById('sgNotes').value||'').trim();
   if(!date)return alert('Please enter a date');
-  if(editingSG){const r=sgData.find(x=>x.id===editingSG);Object.assign(r,{gauge,project,date,val});}
-  else sgData.push({id:Date.now(),gauge,project,date,val,notes:''});
+  if(editingSG){const r=sgData.find(x=>x.id===editingSG);Object.assign(r,{gauge,project,date,val,notes});}
+  else sgData.push({id:Date.now(),gauge,project,date,val,notes});
   renderSGGauges();renderSGTable();renderSGCharts();updateReportCounts();updateEntryStats();closeModal('sgDataModal');saveToStorage();
   if(val>=SG_ALERT)notifyAdmin('Alert: '+gauge+' reading '+val+'με exceeds alert threshold.');
 }
@@ -2122,7 +2124,9 @@ function renderCVTTable(){
   if(!tbody)return;
   const filterPos=document.getElementById('cvtFilterPos')?.value||'all';
   const filterId=document.getElementById('cvtFilterId')?.value||'all';
+  const monthFilter=document.getElementById('cvtMonthFilter')?.value||'all';
   let rows=cvtData.filter(r=>CVT_POSITIONS.includes(r.position));
+  if(monthFilter!=='all')rows=rows.filter(r=>getMonthKey(r.date)===monthFilter);
   if(filterPos!=='all')rows=rows.filter(r=>r.position===filterPos);
   if(filterId!=='all')rows=rows.filter(r=>r.cvtId===filterId);
   rows.sort((a,b)=>b.date.localeCompare(a.date)||a.position.localeCompare(b.position));
@@ -2185,7 +2189,7 @@ function editCVT(id){
 function deleteCVT(id){
   if(!confirm('Delete this CVT reading?'))return;
   cvtData=cvtData.filter(x=>x.id!==id);
-  renderCVTTable();renderCVTCharts();renderCVTPositionCards();updateReportCounts();updateEntryStats();saveToStorage();
+  renderCVTTable();updateCVTMonthFilter();renderCVTCharts();renderCVTPositionCards();updateReportCounts();updateEntryStats();saveToStorage();
 }
 
 function saveCVTData(){
@@ -2203,7 +2207,7 @@ function saveCVTData(){
   } else {
     cvtData.push({id:Date.now(),cvtId,position,date,initial,current,convergence,notes});
   }
-  renderCVTTable();renderCVTCharts();renderCVTPositionCards();updateReportCounts();updateEntryStats();
+  renderCVTTable();renderCVTCharts();updateCVTMonthFilter();renderCVTPositionCards();updateReportCounts();updateEntryStats();
   closeModal('cvtDataModal');saveToStorage();
   if(document.getElementById('view-combinedlog')?.classList.contains('active'))renderCombinedLog();
   showToast('CVT reading saved — '+position);
@@ -3351,6 +3355,13 @@ function updateTRTMonthFilter(){
   sel.innerHTML='<option value="all">All Months</option>'+months.map(m=>`<option value="${m}"${m===cur?' selected':''}>${getMonthLabel(m+'-01')}</option>`).join('');
 }
 
+
+function updateCVTMonthFilter(){
+  const sel=document.getElementById('cvtMonthFilter');
+  if(!sel)return;
+  const months=getMonthsFor('cvt',cvtData);
+  sel.innerHTML='<option value="all">All Months</option>'+months.map(m=>`<option value="${m}">${getMonthLabel(m+'-01')}</option>`).join('');
+}
 function renderMATMonthCards(){
   const container=document.getElementById('matMonthCards');
   if(!container)return;
@@ -3384,11 +3395,13 @@ function renderCVTMonthCards(){
     if(firstPanel)cvtView.insertBefore(container, firstPanel);
   }
   const months=getMonthsFor('cvt', cvtData);
+  const selFilter=document.getElementById('cvtMonthFilter')?.value||'all';
   container.innerHTML=months.map(m=>{
     const rows=cvtData.filter(r=>getMonthKey(r.date)===m);
-    return `<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;min-width:174px;transition:all .15s">
-      <div style="display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:9px;color:var(--txt3);text-transform:uppercase;margin-bottom:6px"><span style="color:#ffd166">■</span> Month</div>
-      <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--txt)">${getMonthLabel(m+'-01')}</div>
+    const isActive=selFilter===m;
+    return `<div onclick="const s=document.getElementById('cvtMonthFilter');if(s){s.value='${m}';}renderCVTTable();" style="cursor:pointer;background:${isActive?'var(--acc-dim)':'var(--card)'};border:1px solid ${isActive?'var(--accent)':'var(--border)'};border-radius:8px;padding:10px 14px;min-width:174px;transition:all .15s">
+      <div style="display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:9px;color:${isActive?'var(--accent)':'var(--txt3)'};text-transform:uppercase;margin-bottom:6px"><span style="color:#ffd166">■</span> Month</div>
+      <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:${isActive?'var(--accent)':'var(--txt)'}">${getMonthLabel(m+'-01')}</div>
       <div style="font-size:11px;color:var(--txt2);margin-top:4px">${rows.length} reading${rows.length!==1?'s':''}</div>
     </div>`;
   }).join('');
