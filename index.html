@@ -602,6 +602,34 @@ canvas{display:block}
   </div>
 </div>
 
+<!-- ========== CVT IMPORT FROM EXCEL MODAL ========== -->
+<div class="modal-bg" id="cvtImportModal">
+  <div class="modal">
+    <div class="modal-title"><span>Import CVT Data from Excel</span><button class="modal-close" onclick="closeModal('cvtImportModal')">×</button></div>
+    <div style="padding:4px 0 14px">
+      <div id="cvtImportDropzone" style="border:1.5px dashed var(--border-hi,var(--border));border-radius:var(--r);padding:26px 16px;text-align:center;background:var(--card)">
+        <div style="font-size:26px;margin-bottom:8px">📄</div>
+        <div style="font-family:var(--mono);font-size:12px;color:var(--txt)">cvt_readings_import.xlsx</div>
+        <div style="font-size:10.5px;color:var(--txt3);margin-top:5px">Mock file detected — click "Parse File" to simulate import</div>
+      </div>
+      <div id="cvtImportPreviewWrap" style="display:none;margin-top:12px">
+        <div style="font-family:var(--mono);font-size:10.5px;color:var(--accent);background:rgba(0,212,170,.12);border:1px solid rgba(0,212,170,.3);padding:7px 11px;border-radius:6px;margin-bottom:10px" id="cvtImportStatusMsg">✓ rows parsed successfully</div>
+        <div style="max-height:220px;overflow:auto">
+          <table class="tbl">
+            <thead><tr><th>Date</th><th>CVT ID</th><th>Position</th><th>Initial (mm)</th><th>Current (mm)</th></tr></thead>
+            <tbody id="cvtImportPreviewTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('cvtImportModal')">Cancel</button>
+      <button class="btn btn-ghost" id="cvtImportParseBtn" onclick="parseCVTImport()">Parse File</button>
+      <button class="btn btn-p" id="cvtImportConfirmBtn" style="display:none" onclick="confirmCVTImport()">Confirm Import</button>
+    </div>
+  </div>
+</div>
+
 <!-- ========== ADMIN PANEL MODAL ========== -->
 <div class="modal-bg" id="adminModal">
   <div class="modal" style="width:560px">
@@ -834,6 +862,21 @@ canvas{display:block}
           </table>
         </div>
       </div>
+      <!-- INSTRUMENT SUMMARY BY CATEGORY -->
+      <div class="panel" style="margin-bottom:14px">
+        <div class="ph">
+          <span class="pt">Instrument Summary — All Categories</span>
+          <span class="ptag i" id="ovSummaryCount">4 Categories</span>
+        </div>
+        <div class="pb" style="padding:0">
+          <table class="tbl" id="ovSummaryTable">
+            <thead><tr><th>Category</th><th>Total Readings</th><th>Normal</th><th>Warning</th><th>Critical</th><th>Latest Entry</th><th>Status</th></tr></thead>
+            <tbody id="ovSummaryTbody">
+              <tr><td colspan="7" style="text-align:center;color:var(--txt3);font-family:var(--mono);font-size:10px;padding:20px">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
     <!-- ===== LOAD CELL ===== -->
@@ -956,6 +999,7 @@ canvas{display:block}
         <div style="font-family:var(--mono);font-size:11px;color:var(--txt2)">Tunnel Convergence Monitoring — MAT · TRT · LHS Crown · RHS</div>
         <div style="display:flex;gap:6px">
           <button class="btn btn-ghost no-print" onclick="openCVTModal()">+ Add Reading</button>
+          <button class="btn btn-ghost no-print" onclick="openCVTImportModal()">⇪ Import from Excel</button>
           <button class="btn btn-ghost no-print" onclick="exportCVTData()">Export CSV</button>
           <select class="fs" id="cvtFilterPos" onchange="renderCVTTable();renderCVTCharts()" style="padding:5px 8px;font-size:10px">
             <option value="all">All Positions</option>
@@ -1104,55 +1148,59 @@ canvas{display:block}
     <div id="view-combinedlog" class="view">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
         <div>
-          <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--txt)">Combined Reading Log</div>
-          <div style="font-family:var(--mono);font-size:10px;color:var(--txt3);margin-top:2px">CVT · MAT · TRT — Ek sequence mein, month-wise</div>
+          <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--txt)">Combined Reading Log — Master Report</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--txt3);margin-top:2px">CVT, MAT &amp; TRT data shown in separate sections below</div>
         </div>
         <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
           <select class="fs" id="combMonthFilter" onchange="renderCombinedLog()" style="padding:5px 8px;font-size:10px">
             <option value="all">All Months</option>
           </select>
-          <select class="fs" id="combTypeFilter" onchange="renderCombinedLog()" style="padding:5px 8px;font-size:10px">
-            <option value="all">All Types</option>
-            <option value="cvt">CVT Only</option>
-            <option value="mat">MAT Only</option>
-            <option value="trt">TRT Only</option>
-          </select>
           <button class="btn btn-p no-print" onclick="openCombAddModal()" style="font-size:10px;padding:5px 12px">+ Add Reading</button>
           <button class="btn btn-ghost no-print" onclick="exportCombinedLog()" style="font-size:10px;padding:5px 12px">Export CSV</button>
+          <button class="btn btn-ghost no-print" onclick="window.print()" style="font-size:10px;padding:5px 12px">Export PDF</button>
         </div>
       </div>
       <!-- Month folder cards -->
       <div id="combMonthCards" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px"></div>
-      <!-- Sequential Reading Log: CVT line, MAT line, TRT line per date -->
-      <div class="panel">
+
+      <!-- a) CVT SECTION -->
+      <div class="panel" style="border-left:3px solid var(--accent)">
         <div class="ph">
-          <span class="pt">Sequential Reading Log</span>
-          <span class="ptag i" id="combRowCount">0 Entries</span>
-          <div class="pa" style="margin-left:auto;gap:8px">
-            <span style="font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(0,212,170,.12);color:var(--accent)">■ CVT</span>
-            <span style="font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(96,165,250,.12);color:var(--info)">■ MAT</span>
-            <span style="font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(167,139,250,.12);color:#a78bfa">■ TRT</span>
-          </div>
+          <span class="pt">a) Convergence (CVT) Data</span>
+          <span class="ptag i" id="combCvtRowCount">0 Entries</span>
         </div>
         <div class="pb" style="padding:0">
-          <table class="tbl" id="combTable">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Month</th>
-                <th>Type</th>
-                <th>Instrument ID</th>
-                <th>Position/RD</th>
-                <th>Reading 1</th>
-                <th>Reading 2</th>
-                <th>Reading 3</th>
-                <th>Value (mm/T)</th>
-                <th>Status</th>
-                <th>Notes</th>
-                <th class="no-print">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="combTbody"></tbody>
+          <table class="tbl" id="combCvtTable">
+            <thead><tr><th>Date</th><th>Month</th><th>CVT ID</th><th>Position</th><th>Initial (mm)</th><th>Current (mm)</th><th>Convergence (mm)</th><th>Status</th><th>Notes</th><th class="no-print">Actions</th></tr></thead>
+            <tbody id="combCvtTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- b) MAT SECTION -->
+      <div class="panel" style="border-left:3px solid var(--info)">
+        <div class="ph">
+          <span class="pt">b) MAT Monitor Data</span>
+          <span class="ptag i" id="combMatRowCount">0 Entries</span>
+        </div>
+        <div class="pb" style="padding:0">
+          <table class="tbl" id="combMatTable">
+            <thead><tr><th>Date</th><th>Month</th><th>Instrument ID</th><th>RD (m)</th><th>CH-1 (T)</th><th>CH-2 (T)</th><th>CH-3 (T)</th><th>Avg (T)</th><th>Status</th><th>Notes</th><th class="no-print">Actions</th></tr></thead>
+            <tbody id="combMatTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- c) TRT SECTION -->
+      <div class="panel" style="border-left:3px solid #a78bfa">
+        <div class="ph">
+          <span class="pt">c) TRT Monitor Data</span>
+          <span class="ptag i" id="combTrtRowCount">0 Entries</span>
+        </div>
+        <div class="pb" style="padding:0">
+          <table class="tbl" id="combTrtTable">
+            <thead><tr><th>Date</th><th>Month</th><th>Instrument ID</th><th>RD (m)</th><th>CH-1 (T)</th><th>CH-2 (T)</th><th>CH-3 (T)</th><th>Avg (T)</th><th>Status</th><th>Notes</th><th class="no-print">Actions</th></tr></thead>
+            <tbody id="combTrtTbody"></tbody>
           </table>
         </div>
       </div>
@@ -3068,6 +3116,44 @@ function saveCVTData(){
   if(convergence>=CVT_ALERT)notifyAdmin('Alert: '+cvtId+' ('+position+') convergence '+convergence.toFixed(2)+'mm exceeds threshold.');
 }
 
+// ================================================================
+// CVT — IMPORT FROM EXCEL (mock)
+// ================================================================
+const CVT_MOCK_IMPORT_ROWS=[
+  {date:new Date().toISOString().split('T')[0], cvtId:'LC CVT - 01', position:'CVT CROWN', initial:0, current:4.10},
+  {date:new Date().toISOString().split('T')[0], cvtId:'LC CVT - 02', position:'CVT LHS',   initial:0, current:2.95},
+  {date:new Date().toISOString().split('T')[0], cvtId:'LC CVT - 03', position:'CVT RHS',   initial:0, current:3.40},
+];
+function openCVTImportModal(){
+  document.getElementById('cvtImportDropzone').style.display='block';
+  document.getElementById('cvtImportPreviewWrap').style.display='none';
+  document.getElementById('cvtImportParseBtn').style.display='inline-flex';
+  document.getElementById('cvtImportConfirmBtn').style.display='none';
+  openModal('cvtImportModal');
+}
+function parseCVTImport(){
+  const tbody=document.getElementById('cvtImportPreviewTbody');
+  tbody.innerHTML=CVT_MOCK_IMPORT_ROWS.map(r=>`<tr>
+    <td>${r.date}</td><td class="iid">${r.cvtId}</td><td>${r.position}</td>
+    <td class="iv">${r.initial.toFixed(2)}</td><td class="iv">${r.current.toFixed(2)}</td>
+  </tr>`).join('');
+  document.getElementById('cvtImportStatusMsg').textContent='✓ '+CVT_MOCK_IMPORT_ROWS.length+' rows parsed successfully';
+  document.getElementById('cvtImportPreviewWrap').style.display='block';
+  document.getElementById('cvtImportParseBtn').style.display='none';
+  document.getElementById('cvtImportConfirmBtn').style.display='inline-flex';
+}
+function confirmCVTImport(){
+  CVT_MOCK_IMPORT_ROWS.forEach(r=>{
+    const convergence=+(r.current-r.initial).toFixed(3);
+    cvtData.push({id:Date.now()+Math.floor(Math.random()*1000),cvtId:r.cvtId,position:r.position,date:r.date,initial:r.initial,current:r.current,convergence,notes:'Imported from Excel'});
+  });
+  renderCVTTable();renderCVTCharts();updateCVTMonthFilter();renderCVTPositionCards();updateReportCounts();updateEntryStats();
+  closeModal('cvtImportModal');saveToStorage();
+  if(document.getElementById('view-overview')?.classList.contains('active'))renderOverviewSummary();
+  if(document.getElementById('view-combinedlog')?.classList.contains('active'))renderCombinedLog();
+  showToast(CVT_MOCK_IMPORT_ROWS.length+' CVT rows imported from Excel');
+}
+
 function quickEntryCVT(){
   const cvtId=normalizeCVTId(document.getElementById('qeCVTId').value);
   const date=document.getElementById('qeCVTDate').value;
@@ -3303,6 +3389,46 @@ function initOverviewCharts(){
   const sg=Array.from({length:20},()=>+(300+Math.random()*400).toFixed(0));
   mkChart('telemetryChart',{type:'line',data:{labels:tlabels,datasets:[{label:'Avg LC (Ton)',data:lc,borderColor:'#00d4aa',backgroundColor:'rgba(0,212,170,0.08)',tension:0.4,pointRadius:0,yAxisID:'lc'},{label:'SG-01 (με)',data:sg,borderColor:'#60a5fa',backgroundColor:'rgba(96,165,250,0.08)',tension:0.4,pointRadius:0,yAxisID:'sg'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{lc:{type:'linear',position:'left',ticks:{color:'#4a5568',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'}},sg:{type:'linear',position:'right',ticks:{color:'#4a5568',font:{family:'Space Mono',size:9}},grid:{display:false}}}}});
   mkChart('donutChart',{type:'doughnut',data:{labels:['Load Cells (16)','Strain Gauges (6)','Inclinometers (4)','Piezometers (4)'],datasets:[{data:[16,6,4,4],backgroundColor:['#00d4aa','#60a5fa','#f5a623','#a78bfa'],borderColor:'#181c24',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#8892a4',font:{family:'Space Mono',size:9},boxWidth:10,padding:10}}},cutout:'60%'}});
+  renderOverviewSummary();
+}
+function renderOverviewSummary(){
+  const tbody=document.getElementById('ovSummaryTbody');
+  if(!tbody)return;
+
+  function summarize(rows, statusFn){
+    let normal=0,warn=0,crit=0;
+    rows.forEach(r=>{
+      const s=statusFn(r);
+      if(s.cls==='chip-ok')normal++;
+      else if(s.cls==='chip-w')warn++;
+      else crit++;
+    });
+    const latest=rows.length?rows.slice().sort((a,b)=>b.date.localeCompare(a.date))[0].date:'—';
+    const overall = crit>0?{cls:'chip-d',txt:'CRITICAL'}:warn>0?{cls:'chip-w',txt:'WARNING'}:{cls:'chip-ok',txt:'NORMAL'};
+    return {total:rows.length,normal,warn,crit,latest,overall};
+  }
+
+  const cats=[
+    {name:'Load Cell',  rows:lcData,  stat:r=>lcStatus(r.avg),        color:'var(--accent)'},
+    {name:'Convergence (CVT)', rows:cvtData, stat:r=>cvtStatus(r.convergence), color:'var(--info)'},
+    {name:'MAT Monitor', rows:matData, stat:r=>matStatus(r.avg),      color:'#a78bfa'},
+    {name:'TRT Monitor', rows:trtData, stat:r=>trtStatus(r.avg),      color:'#f5a623'},
+  ];
+
+  tbody.innerHTML = cats.map(c=>{
+    const sum = summarize(c.rows, c.stat);
+    return `<tr>
+      <td style="font-weight:700;color:${c.color}">${c.name}</td>
+      <td class="iv">${sum.total}</td>
+      <td class="iv" style="color:var(--accent)">${sum.normal}</td>
+      <td class="iv" style="color:var(--warn)">${sum.warn}</td>
+      <td class="iv" style="color:#ef4444">${sum.crit}</td>
+      <td style="font-family:var(--mono);font-size:10px;color:var(--txt2)">${sum.latest}</td>
+      <td><span class="chip ${sum.overall.cls}">${sum.overall.txt}</span></td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('ovSummaryCount').textContent = cats.length+' Categories';
 }
 function renderLCCharts(){
   const lcs=['LC MAT-LHS (4421)','LC MAT-CROWN (4422)','LC MAT-RHS (4423)'];
@@ -4038,77 +4164,91 @@ function doRename(){
 // ================================================================
 function renderCombinedLog(){
   updateCombMonthFilter();
-  const tbody=document.getElementById('combTbody');
-  if(!tbody)return;
   const monthFilter=document.getElementById('combMonthFilter')?.value||'all';
-  const typeFilter=document.getElementById('combTypeFilter')?.value||'all';
 
-  // Build unified rows
-  let allRows=[];
-  // CVT rows
-  if(typeFilter==='all'||typeFilter==='cvt'){
-    cvtData.forEach(r=>{
-      if(monthFilter!=='all'&&getMonthKey(r.date)!==monthFilter)return;
-      allRows.push({date:r.date,type:'cvt',inst:r.cvtId,pos:r.position,v1:r.initial.toFixed(2),v2:r.current.toFixed(2),v3:'—',val:r.convergence.toFixed(2),unit:'mm',statusCls:cvtStatus(r.convergence).cls,statusTxt:cvtStatus(r.convergence).txt,notes:r.notes||'—',id:r.id});
-    });
-  }
-  // MAT rows
-  if(typeFilter==='all'||typeFilter==='mat'){
-    matData.forEach(r=>{
-      if(monthFilter!=='all'&&getMonthKey(r.date)!==monthFilter)return;
-      const s=matStatus(r.avg);
-      allRows.push({date:r.date,type:'mat',inst:r.instId,pos:'RD '+r.rdm,v1:r.ch1.toFixed(2),v2:r.ch2.toFixed(2),v3:r.ch3.toFixed(2),val:r.avg.toFixed(3),unit:'T',statusCls:s.cls,statusTxt:s.txt,notes:r.notes||'—',id:r.id});
-    });
-  }
-  // TRT rows
-  if(typeFilter==='all'||typeFilter==='trt'){
-    trtData.forEach(r=>{
-      if(monthFilter!=='all'&&getMonthKey(r.date)!==monthFilter)return;
-      const s=trtStatus(r.avg);
-      allRows.push({date:r.date,type:'trt',inst:r.instId,pos:'RD '+r.rdm,v1:r.ch1.toFixed(2),v2:r.ch2.toFixed(2),v3:r.ch3.toFixed(2),val:r.avg.toFixed(3),unit:'T',statusCls:s.cls,statusTxt:s.txt,notes:r.notes||'—',id:r.id});
-    });
-  }
-
-  // Sort: date desc, then within same date: CVT first, MAT second, TRT third
-  const typeOrder={cvt:1,mat:2,trt:3};
-  allRows.sort((a,b)=>{
-    const dc=b.date.localeCompare(a.date);
-    if(dc!==0)return dc;
-    return (typeOrder[a.type]||9)-(typeOrder[b.type]||9);
-  });
-
-  if(!allRows.length){
-    tbody.innerHTML='<tr><td colspan="12" style="text-align:center;color:var(--txt3);font-family:var(--mono);font-size:10px;padding:20px">No data. Add readings from CVT, MAT, or TRT sections.</td></tr>';
-    document.getElementById('combRowCount').textContent='0 Entries';
-    renderCombMonthCards(monthFilter);return;
+  // ---- a) CVT section ----
+  const cvtTbody=document.getElementById('combCvtTbody');
+  if(cvtTbody){
+    let rows=cvtData.filter(r=>monthFilter==='all'||getMonthKey(r.date)===monthFilter);
+    rows.sort((a,b)=>b.date.localeCompare(a.date));
+    if(!rows.length){
+      cvtTbody.innerHTML='<tr><td colspan="10" style="text-align:center;color:var(--txt3);font-family:var(--mono);font-size:10px;padding:18px">No CVT data. Add a reading or import from Excel.</td></tr>';
+    } else {
+      cvtTbody.innerHTML=rows.map(r=>{
+        const s=cvtStatus(r.convergence);
+        return `<tr>
+          <td>${r.date}</td>
+          <td style="font-family:var(--mono);font-size:9px;color:var(--txt3)">${getMonthLabel(r.date)}</td>
+          <td class="iid">${r.cvtId}</td>
+          <td style="font-family:var(--mono);font-size:10px;color:var(--txt2)">${r.position}</td>
+          <td class="iv">${r.initial.toFixed(2)}</td>
+          <td class="iv">${r.current.toFixed(2)}</td>
+          <td class="iv" style="color:var(--accent)">${r.convergence.toFixed(2)}</td>
+          <td><span class="chip ${s.cls}">${s.txt}</span></td>
+          <td style="font-size:11px;color:var(--txt2)">${r.notes||'—'}</td>
+          <td class="no-print"><div class="tbl-actions"><button onclick="editCVTFromComb(${r.id})">Edit</button><button class="del" onclick="deleteCVT(${r.id});renderCombinedLog()">Del</button></div></td>
+        </tr>`;
+      }).join('');
+    }
+    document.getElementById('combCvtRowCount').textContent=rows.length+' Entries';
   }
 
-  const typeColors={cvt:'var(--accent)',mat:'var(--info)',trt:'#a78bfa'};
-  const typeLabels={cvt:'CVT',mat:'MAT',trt:'TRT'};
-  const typeActions={
-    cvt:(id)=>`<button onclick="editCVTFromComb(${id})">Edit</button><button class="del" onclick="deleteCVT(${id});renderCombinedLog()">Del</button>`,
-    mat:(id)=>`<button onclick="editMATFromComb(${id})">Edit</button><button class="del" onclick="deleteMAT(${id});renderCombinedLog()">Del</button>`,
-    trt:(id)=>`<button onclick="editTRTFromComb(${id})">Edit</button><button class="del" onclick="deleteTRT(${id});renderCombinedLog()">Del</button>`,
-  };
+  // ---- b) MAT section ----
+  const matTbody=document.getElementById('combMatTbody');
+  if(matTbody){
+    let rows=matData.filter(r=>monthFilter==='all'||getMonthKey(r.date)===monthFilter);
+    rows.sort((a,b)=>b.date.localeCompare(a.date));
+    if(!rows.length){
+      matTbody.innerHTML='<tr><td colspan="11" style="text-align:center;color:var(--txt3);font-family:var(--mono);font-size:10px;padding:18px">No MAT data. Add a reading from MAT Monitor.</td></tr>';
+    } else {
+      matTbody.innerHTML=rows.map(r=>{
+        const s=matStatus(r.avg);
+        return `<tr>
+          <td>${r.date}</td>
+          <td style="font-family:var(--mono);font-size:9px;color:var(--txt3)">${getMonthLabel(r.date)}</td>
+          <td class="iid">${r.instId}</td>
+          <td style="font-family:var(--mono);font-size:10px;color:var(--txt2)">${r.rdm}</td>
+          <td class="iv">${r.ch1.toFixed(2)}</td>
+          <td class="iv">${r.ch2.toFixed(2)}</td>
+          <td class="iv">${r.ch3.toFixed(2)}</td>
+          <td class="iv" style="color:var(--info)">${r.avg.toFixed(3)}</td>
+          <td><span class="chip ${s.cls}">${s.txt}</span></td>
+          <td style="font-size:11px;color:var(--txt2)">${r.notes||'—'}</td>
+          <td class="no-print"><div class="tbl-actions"><button onclick="editMATFromComb(${r.id})">Edit</button><button class="del" onclick="deleteMAT(${r.id});renderCombinedLog()">Del</button></div></td>
+        </tr>`;
+      }).join('');
+    }
+    document.getElementById('combMatRowCount').textContent=rows.length+' Entries';
+  }
 
-  tbody.innerHTML=allRows.map(r=>{
-    const col=typeColors[r.type]||'var(--accent)';
-    return `<tr style="border-left:3px solid ${col}">
-      <td>${r.date}</td>
-      <td style="font-family:var(--mono);font-size:9px;color:var(--txt3)">${getMonthLabel(r.date)}</td>
-      <td><span style="font-family:var(--mono);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;background:${col}22;color:${col}">${typeLabels[r.type]}</span></td>
-      <td class="iid">${r.inst}</td>
-      <td style="font-family:var(--mono);font-size:10px;color:var(--txt2)">${r.pos}</td>
-      <td class="iv">${r.v1}</td>
-      <td class="iv">${r.v2}</td>
-      <td class="iv">${r.v3}</td>
-      <td class="iv" style="color:${col}">${r.val} <span class="iu">${r.unit}</span></td>
-      <td><span class="chip ${r.statusCls}">${r.statusTxt}</span></td>
-      <td style="font-size:11px;color:var(--txt2)">${r.notes}</td>
-      <td class="no-print"><div class="tbl-actions">${typeActions[r.type](r.id)}</div></td>
-    </tr>`;
-  }).join('');
-  document.getElementById('combRowCount').textContent=allRows.length+' Entries';
+  // ---- c) TRT section ----
+  const trtTbody=document.getElementById('combTrtTbody');
+  if(trtTbody){
+    let rows=trtData.filter(r=>monthFilter==='all'||getMonthKey(r.date)===monthFilter);
+    rows.sort((a,b)=>b.date.localeCompare(a.date));
+    if(!rows.length){
+      trtTbody.innerHTML='<tr><td colspan="11" style="text-align:center;color:var(--txt3);font-family:var(--mono);font-size:10px;padding:18px">No TRT data. Add a reading from TRT Monitor.</td></tr>';
+    } else {
+      trtTbody.innerHTML=rows.map(r=>{
+        const s=trtStatus(r.avg);
+        return `<tr>
+          <td>${r.date}</td>
+          <td style="font-family:var(--mono);font-size:9px;color:var(--txt3)">${getMonthLabel(r.date)}</td>
+          <td class="iid">${r.instId}</td>
+          <td style="font-family:var(--mono);font-size:10px;color:var(--txt2)">${r.rdm}</td>
+          <td class="iv">${r.ch1.toFixed(2)}</td>
+          <td class="iv">${r.ch2.toFixed(2)}</td>
+          <td class="iv">${r.ch3.toFixed(2)}</td>
+          <td class="iv" style="color:#a78bfa">${r.avg.toFixed(3)}</td>
+          <td><span class="chip ${s.cls}">${s.txt}</span></td>
+          <td style="font-size:11px;color:var(--txt2)">${r.notes||'—'}</td>
+          <td class="no-print"><div class="tbl-actions"><button onclick="editTRTFromComb(${r.id})">Edit</button><button class="del" onclick="deleteTRT(${r.id});renderCombinedLog()">Del</button></div></td>
+        </tr>`;
+      }).join('');
+    }
+    document.getElementById('combTrtRowCount').textContent=rows.length+' Entries';
+  }
+
   renderCombMonthCards(monthFilter);
 }
 function renderCombMonthCards(activeMonth){
