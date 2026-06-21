@@ -6,6 +6,10 @@
 <title>A&amp;A Geotechnical Instrumentation – Dashboard v3</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@300;400;600;800&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<!-- Firebase (Realtime Database) — compat build so it works with plain <script> tags below -->
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
 <style>
 /* ================================================================
    ROOT & RESET
@@ -501,6 +505,7 @@ canvas{display:block}
         <button class="login-btn" onclick="doLoginStep1()" style="margin-top:6px">LOGIN →</button>
       </div>
       <div class="login-footer">A&amp;A Geotechnical Instrumentation Monitoring Service</div>
+      <div id="fbStatusBadge" style="margin-top:12px;text-align:center;font-family:var(--mono);font-size:9px;color:var(--txt3)">⏳ Connecting to shared database…</div>
     </div>
   </div>
 </div>
@@ -1568,6 +1573,88 @@ let charts = {};
 // ================================================================
 // LOCALSTORAGE PERSISTENCE
 // ================================================================
+// ================================================================
+// FIREBASE — shared cloud database (replaces localStorage as source of truth)
+// ================================================================
+const firebaseConfig = {
+  apiKey: "AIzaSyAWFFcFTkj-qWSRC-5Hbm-3JtDeflTHGlw",
+  authDomain: "aa-gims-dashboard.firebaseapp.com",
+  databaseURL: "https://aa-gims-dashboard-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "aa-gims-dashboard",
+  storageBucket: "aa-gims-dashboard.firebasestorage.app",
+  messagingSenderId: "99550946961",
+  appId: "1:99550946961:web:1028b8bfa201b016864130"
+};
+let fbApp=null, fbDB=null, fbAuth=null, fbReady=false, fbAuthed=false;
+
+// Robust init: the gstatic.com SDK scripts sometimes finish loading a beat
+// after this inline script runs (slow connection, first load, etc). Instead
+// of giving up immediately on "firebase is not defined", retry briefly.
+function fbTryInit(){
+  if(typeof firebase === 'undefined') return false;
+  try{
+    fbApp = firebase.initializeApp(firebaseConfig);
+    fbDB = firebase.database();
+    fbAuth = firebase.auth();
+    fbReady = true;
+    console.log('Firebase initialized successfully.');
+    return true;
+  }catch(e){
+    console.warn('Firebase init failed:', e);
+    fbReady = false;
+    return false;
+  }
+}
+function fbSetStatusBadge(text, color){
+  const el = document.getElementById('fbStatusBadge');
+  if(el){ el.textContent = text; if(color) el.style.color = color; }
+}
+if(!fbTryInit()){
+  let fbInitAttempts=0;
+  const fbInitRetry = setInterval(()=>{
+    fbInitAttempts++;
+    if(fbTryInit() || fbInitAttempts>=20){ // retry for up to ~10s (20 x 500ms)
+      clearInterval(fbInitRetry);
+      if(fbReady){
+        fbSetStatusBadge('✓ Connected to shared database', '#2dd4bf');
+      } else {
+        console.warn('Firebase SDK did not load after waiting — running in localStorage-only mode. Check your internet connection / firewall access to gstatic.com.');
+        fbSetStatusBadge('⚠ Offline mode — changes save to this device only', '#f5a623');
+      }
+    }
+  }, 500);
+} else {
+  document.addEventListener('DOMContentLoaded', ()=>fbSetStatusBadge('✓ Connected to shared database', '#2dd4bf'));
+}
+// Set true while WE are writing, so our own real-time listener echo doesn't re-render unnecessarily
+let fbWriting = false;
+
+// Called right after a successful username/password login on THIS dashboard.
+// Signs into Firebase anonymously so the database security rules (auth != null)
+// let this session read/write — anyone who never logs into the dashboard never gets a token.
+// Itself retries briefly in case Firebase was still mid-initialization when login happened.
+async function fbAuthenticate(){
+  if(!fbReady){
+    // Give the retry loop above a final chance to finish (covers the case where
+    // someone logs in within the first couple seconds of the page opening).
+    for(let i=0;i<10 && !fbReady;i++){
+      await new Promise(r=>setTimeout(r,300));
+    }
+  }
+  if(!fbReady || !fbAuth) return false;
+  try{
+    if(!fbAuth.currentUser){
+      await fbAuth.signInAnonymously();
+    }
+    fbAuthed = true;
+    return true;
+  }catch(e){
+    console.warn('Firebase auth failed — falling back to localStorage only.', e);
+    fbAuthed = false;
+    return false;
+  }
+}
+
 const LS_KEYS = {
   lcData: 'aageo_lcData',
   sgData: 'aageo_sgData',
@@ -1581,6 +1668,7 @@ const LS_KEYS = {
 };
 
 function saveToStorage(){
+  // Always keep a local backup so the app still works offline / if Firebase fails
   try {
     localStorage.setItem(LS_KEYS.lcData, JSON.stringify(lcData));
     localStorage.setItem(LS_KEYS.sgData, JSON.stringify(sgData));
@@ -1591,7 +1679,21 @@ function saveToStorage(){
     localStorage.setItem(LS_KEYS.matData, JSON.stringify(matData));
     localStorage.setItem(LS_KEYS.trtData, JSON.stringify(trtData));
     localStorage.setItem(LS_KEYS.customMonths, JSON.stringify(customMonths));
-  } catch(e){ console.warn('Storage save failed:', e); }
+  } catch(e){ console.warn('Local storage save failed:', e); }
+
+  // Primary: push the same snapshot to Firebase so every team member sees it
+  if(fbReady && fbDB && fbAuthed){
+    fbWriting = true;
+    fbDB.ref('gimsData').set({
+      lcData, sgData, incData, cvtData, sensorData,
+      kimiBoreholes: KIMI_BOREHOLES, matData, trtData, customMonths,
+      _updatedAt: Date.now()
+    }).catch(e=>{
+      console.warn('Firebase save failed (data still saved locally):', e);
+    }).finally(()=>{
+      setTimeout(()=>{ fbWriting = false; }, 300);
+    });
+  }
 }
 
 
@@ -2444,32 +2546,92 @@ const PRELOADED_SG_DATA = [
     {id:1800000692000,date:"2026-05-23",gauge:"SG-9 (6307)",project:"MAT",location:"Main Access Tunnel (RHS)",val:5.7,notes:""}
 ];
 
-function loadFromStorage(){
-  try {
-    const lc = localStorage.getItem(LS_KEYS.lcData);
-    const sg = localStorage.getItem(LS_KEYS.sgData);
-    const inc = localStorage.getItem(LS_KEYS.incData);
-    const cvt = localStorage.getItem(LS_KEYS.cvtData);
-    const sen = localStorage.getItem(LS_KEYS.sensorData);
-    const kimi = localStorage.getItem(LS_KEYS.kimiBoreholes);
-    if(lc) lcData = JSON.parse(lc);
+// Applies a data snapshot (from Firebase or localStorage) into the live in-memory arrays,
+// then re-renders every view so all team members see the same thing.
+function applyDataSnapshot(snap, opts){
+  opts = opts || {};
+  if(snap.lcData) lcData = snap.lcData;
+  if(snap.sgData) sgData = snap.sgData;
+  if(snap.incData) incData = snap.incData;
+  if(snap.cvtData) cvtData = snap.cvtData;
+  if(snap.sensorData) sensorData = snap.sensorData;
+  if(snap.kimiBoreholes){ KIMI_BOREHOLES.length=0; snap.kimiBoreholes.forEach(b=>KIMI_BOREHOLES.push(b)); }
+  if(snap.matData) matData = snap.matData;
+  if(snap.trtData) trtData = snap.trtData;
+  if(snap.customMonths) customMonths = {...customMonths, ...snap.customMonths};
+
+  if(!opts.skipFallbackDefaults){
     if(!lcData.length && typeof PRELOADED_LC_DATA !== 'undefined') lcData = [...PRELOADED_LC_DATA];
-    if(sg) sgData = JSON.parse(sg);
     if(!sgData.length && typeof PRELOADED_SG_DATA !== 'undefined') sgData = [...PRELOADED_SG_DATA];
-    if(inc) incData = JSON.parse(inc);
-    if(cvt) cvtData = JSON.parse(cvt);
-    if(sen) sensorData = JSON.parse(sen);
-    if(kimi){ const arr = JSON.parse(kimi); KIMI_BOREHOLES.length=0; arr.forEach(b=>KIMI_BOREHOLES.push(b)); }
-    const mat = localStorage.getItem(LS_KEYS.matData);
-    const trt = localStorage.getItem(LS_KEYS.trtData);
-    const months = localStorage.getItem(LS_KEYS.customMonths);
-    if(mat) matData = JSON.parse(mat);
     if(!matData.length && typeof PRELOADED_MAT_DATA !== 'undefined') matData = [...PRELOADED_MAT_DATA];
-    if(trt) trtData = JSON.parse(trt);
     if(!trtData.length && typeof PRELOADED_TRT_DATA !== 'undefined') trtData = [...PRELOADED_TRT_DATA];
-    if(months) customMonths = {...customMonths, ...JSON.parse(months)};
-  } catch(e){ console.warn('Storage load failed:', e); }
+  }
+
+  if(opts.rerender){
+    renderLCTable();renderLCCharts();
+    renderSGGauges();renderSGTable();renderSGCharts();
+    renderIncBoreholes();renderIncTable();renderIncCharts();
+    renderCVTTable();renderCVTPositionCards();renderCVTCharts();
+    renderMATTable();renderMATCharts();
+    renderTRTTable();renderTRTCharts();
+    renderCombinedLog();
+    renderSensorTable();
+    updateReportCounts();updateEntryStats();
+    if(document.getElementById('view-overview')?.classList.contains('active')) renderOverviewSummary();
+    if(typeof kimiInit==='function') kimiInit();
+  }
 }
+
+// One-time initial load. Tries Firebase first (so the team's shared data wins);
+// falls back to whatever is in localStorage if Firebase is unreachable/not configured.
+async function loadFromStorage(){
+  // Always read local copy first, so the app has *something* immediately even before Firebase responds
+  try {
+    const lc=localStorage.getItem(LS_KEYS.lcData), sg=localStorage.getItem(LS_KEYS.sgData),
+          inc=localStorage.getItem(LS_KEYS.incData), cvt=localStorage.getItem(LS_KEYS.cvtData),
+          sen=localStorage.getItem(LS_KEYS.sensorData), kimi=localStorage.getItem(LS_KEYS.kimiBoreholes),
+          mat=localStorage.getItem(LS_KEYS.matData), trt=localStorage.getItem(LS_KEYS.trtData),
+          months=localStorage.getItem(LS_KEYS.customMonths);
+    applyDataSnapshot({
+      lcData: lc?JSON.parse(lc):undefined, sgData: sg?JSON.parse(sg):undefined,
+      incData: inc?JSON.parse(inc):undefined, cvtData: cvt?JSON.parse(cvt):undefined,
+      sensorData: sen?JSON.parse(sen):undefined, kimiBoreholes: kimi?JSON.parse(kimi):undefined,
+      matData: mat?JSON.parse(mat):undefined, trtData: trt?JSON.parse(trt):undefined,
+      customMonths: months?JSON.parse(months):undefined,
+    }, {rerender:false});
+  } catch(e){ console.warn('Local storage load failed:', e); }
+
+  if(!fbReady || !fbDB) return; // offline/local-only mode
+
+  const authOK = await fbAuthenticate();
+  if(!authOK) return; // not authenticated — stay on local data only
+
+  try {
+    const snapshot = await fbDB.ref('gimsData').get();
+    if(snapshot.exists()){
+      applyDataSnapshot(snapshot.val(), {rerender:false, skipFallbackDefaults:true});
+    } else {
+      // Nothing in the cloud yet (first-ever run) — push whatever we have (local/sample data) so the team has a starting point
+      saveToStorage();
+    }
+  } catch(e){
+    console.warn('Firebase initial load failed — using local data instead.', e);
+  }
+}
+
+// Keeps every connected team member's screen in sync automatically.
+// Call once, after the first successful load.
+function startRealtimeSync(){
+  if(!fbReady || !fbDB || !fbAuthed) return;
+  fbDB.ref('gimsData').on('value', (snapshot)=>{
+    if(fbWriting) return; // ignore the echo of our own just-completed write
+    if(!snapshot.exists()) return;
+    applyDataSnapshot(snapshot.val(), {rerender:true, skipFallbackDefaults:true});
+    showToast('Data updated by a team member');
+  });
+}
+
+
 
 // OTP state
 let pendingOTPUser = null;
@@ -2654,8 +2816,8 @@ function notifyAdmin(msg){
 // ================================================================
 // INIT
 // ================================================================
-function initApp(){
-  loadFromStorage();
+async function initApp(){
+  await loadFromStorage();
   normalizeCVTData();
   normalizeSectionPositions();
   setupCVTQuickEntryLabels();
@@ -2679,7 +2841,10 @@ function initApp(){
   });
   ['qeLC1','qeLC2','qeLC3'].forEach(id=>document.getElementById(id).addEventListener('input',calcQEAvg));
   ['lcSensor1','lcSensor2','lcSensor3'].forEach(id=>document.getElementById(id).addEventListener('input',calcLCAvg));
+  startRealtimeSync();
 }
+
+
 
 function startClock(){
   function tick(){
