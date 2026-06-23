@@ -598,13 +598,16 @@ canvas{display:block}
       <div class="fg"><label class="fl">CVT Instrument ID</label><select class="fs" id="cvtIdSelect"><option>LC CVT - 01</option><option>LC CVT - 02</option><option>LC CVT - 03</option></select></div>
       <div class="fg"><label class="fl">Position</label><select class="fs" id="cvtPosition"><option>CVT LHS</option><option>CVT CROWN</option><option>CVT RHS</option></select></div>
       <div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="cvtDate"/></div>
-      <div class="fg"><label class="fl">Initial Reading (mm)</label><input class="fi" type="number" step="0.01" id="cvtInitial" placeholder="0.00" oninput="calcCVTConv()"/></div>
-      <div class="fg"><label class="fl">Current Reading (mm)</label><input class="fi" type="number" step="0.01" id="cvtCurrent" placeholder="0.00" oninput="calcCVTConv()"/></div>
-      <div class="fg"><label class="fl">Convergence (auto, mm)</label><input class="fi" id="cvtConvCalc" readonly style="opacity:.7"/></div>
-      <div class="fg span2"><label class="fl">Notes</label><input class="fi" id="cvtNotes" placeholder="Optional notes"/></div>
+      <div class="fg"><label class="fl">RD (m)</label><input class="fi" type="number" step="0.001" id="cvtRDM" placeholder="0.000"/></div>
+      <div class="fg"><label class="fl">CH-1 (mm)</label><input class="fi" type="number" step="0.01" id="cvtCh1" placeholder="0.00" oninput="calcCVTAvg()"/></div>
+      <div class="fg"><label class="fl">CH-2 (mm)</label><input class="fi" type="number" step="0.01" id="cvtCh2" placeholder="0.00" oninput="calcCVTAvg()"/></div>
+      <div class="fg"><label class="fl">CH-3 (mm)</label><input class="fi" type="number" step="0.01" id="cvtCh3" placeholder="0.00" oninput="calcCVTAvg()"/></div>
+      <div class="fg"><label class="fl">Avg (auto)</label><input class="fi" id="cvtAvg" readonly style="opacity:.7"/></div>
+      <div class="fg span2"><label class="fl">Notes</label><input class="fi" id="cvtNotes" placeholder="Optional"/></div>
     </div>
     <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('cvtDataModal')">Cancel</button><button class="btn btn-p" onclick="saveCVTData()">Save Reading</button></div>
   </div>
+</div>
 </div>
 
 <!-- ========== CVT IMPORT FROM EXCEL MODAL ========== -->
@@ -631,6 +634,34 @@ canvas{display:block}
       <button class="btn btn-ghost" onclick="closeModal('cvtImportModal')">Cancel</button>
       <button class="btn btn-ghost" id="cvtImportParseBtn" onclick="parseCVTImport()">Parse File</button>
       <button class="btn btn-p" id="cvtImportConfirmBtn" style="display:none" onclick="confirmCVTImport()">Confirm Import</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== KIMI CSV IMPORT MODAL ========== -->
+<div class="modal-bg" id="kimiImportModal">
+  <div class="modal" style="width:620px;max-width:98vw">
+    <div class="modal-title"><span>Import Kimi Inclinometer CSV</span><button class="modal-close" onclick="closeModal('kimiImportModal')">×</button></div>
+    <div style="padding:4px 0 14px">
+      <div id="kimiImportDropzone" style="border:1.5px dashed var(--accent);border-radius:var(--r);padding:26px 16px;text-align:center;background:var(--card);cursor:pointer" onclick="kimiPickCSVFile()">
+        <div style="font-size:28px;margin-bottom:8px">📂</div>
+        <div style="font-family:var(--mono);font-size:12px;color:var(--txt)">Click here to select CSV file</div>
+        <div style="font-size:10px;color:var(--txt3);margin-top:5px">Format: BH_ID, Depth(m), Max_A(mm), Max_B(mm), Rate_A, Rate_B, Status</div>
+      </div>
+      <div id="kimiImportPreviewWrap" style="display:none;margin-top:12px">
+        <div id="kimiImportStatusMsg" style="font-family:var(--mono);font-size:10.5px;color:var(--accent);background:rgba(0,212,170,.12);border:1px solid rgba(0,212,170,.3);padding:7px 11px;border-radius:6px;margin-bottom:10px"></div>
+        <div style="max-height:220px;overflow:auto">
+          <table class="tbl">
+            <thead><tr><th>BH ID</th><th>Depth (m)</th><th>Max A (mm)</th><th>Max B (mm)</th><th>Rate A</th><th>Rate B</th><th>Status</th></tr></thead>
+            <tbody id="kimiImportPreviewTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('kimiImportModal')">Cancel</button>
+      <button class="btn btn-ghost" id="kimiImportPickBtn" onclick="kimiPickCSVFile()">📂 Select File</button>
+      <button class="btn btn-p" id="kimiImportConfirmBtn" style="display:none" onclick="kimiConfirmImport()">✓ Confirm Import</button>
     </div>
   </div>
 </div>
@@ -1040,7 +1071,7 @@ canvas{display:block}
         </div>
         <div class="pb" style="padding:0">
           <table class="tbl">
-            <thead><tr><th>Date</th><th>Month</th><th>CVT ID</th><th>Position</th><th>Initial (mm)</th><th>Current (mm)</th><th>Convergence (mm)</th><th>Status</th><th>Notes</th><th class="no-print">Actions</th></tr></thead>
+            <thead><tr><th>Date</th><th>Month</th><th>CVT ID</th><th>Position</th><th>CH-1 (mm)</th><th>CH-2 (mm)</th><th>CH-3 (mm)</th><th>Avg (mm)</th><th>Status</th><th>Notes</th><th class="no-print">Actions</th></tr></thead>
             <tbody id="cvtTbody"></tbody>
           </table>
         </div>
@@ -1176,7 +1207,7 @@ canvas{display:block}
         </div>
         <div class="pb" style="padding:0">
           <table class="tbl" id="combCvtTable">
-            <thead><tr><th>Date</th><th>Month</th><th>CVT ID</th><th>Position</th><th>Initial (mm)</th><th>Current (mm)</th><th>Convergence (mm)</th><th>Status</th><th>Notes</th><th class="no-print">Actions</th></tr></thead>
+            <thead><tr><th>Date</th><th>Month</th><th>CVT ID</th><th>Position</th><th>CH-1 (mm)</th><th>CH-2 (mm)</th><th>CH-3 (mm)</th><th>Avg (mm)</th><th>Status</th><th>Notes</th><th class="no-print">Actions</th></tr></thead>
             <tbody id="combCvtTbody"></tbody>
           </table>
         </div>
@@ -1213,209 +1244,89 @@ canvas{display:block}
 
     <!-- ===== KIMI INC SYSTEM ===== -->
     <div id="view-kimi-inc" class="view">
-      <div class="kimi-wrap">
-        <!-- Header -->
-        <div class="kimi-header">
-          <div class="kimi-logo-group">
-            <div class="kimi-logo-icon">INC</div>
-            <div class="kimi-logo-text">
-              <h2>Kimi Inclinometer Monitor</h2>
-              <span>ADVANCED DISPLACEMENT ANALYSIS SYSTEM</span>
-            </div>
+      <div style="padding:0 0 24px">
+
+        <!-- Header bar -->
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:18px">
+          <div>
+            <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--txt);letter-spacing:1px">KIMI INCLINOMETER MONITOR</div>
+            <div id="kimiSiteLabel" style="font-family:var(--mono);font-size:10px;color:var(--accent);margin-top:2px">GKPSP:INC-01 — Depth 0–20m, 0.5m spacing</div>
           </div>
-          <div class="kimi-header-meta">
-            <span class="kimi-clock" id="kimiClock">--:--:--</span>
-            <span class="kimi-status-pill">LIVE</span>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-ghost no-print" onclick="kimiImportCSV()">⬆ Import CSV</button>
+            <button class="btn btn-ghost no-print" onclick="kimiExportCSV()">⬇ Export CSV</button>
+            <button class="btn btn-p no-print" onclick="window.print()">🖨 Print PDF</button>
           </div>
         </div>
 
-        <!-- Toolbar -->
-        <div class="kimi-toolbar">
-          <label>Borehole:</label>
-          <select id="kimiBHSelect" onchange="kimiSelectBH(this.value)">
-            <option value="0">BH-INC-01</option>
-            <option value="1">BH-INC-02</option>
-            <option value="2">BH-INC-03</option>
-            <option value="3">BH-INC-04</option>
+        <!-- KPI strip -->
+        <div class="kpi-strip" style="grid-template-columns:repeat(4,1fr);margin-bottom:18px">
+          <div class="kpi-card"><div class="kpi-label">Total Sessions</div><div class="kpi-val a" id="kimiTotalSessions">0</div><div class="kpi-sub">Survey dates loaded</div></div>
+          <div class="kpi-card i"><div class="kpi-label">Max Disp A-axis</div><div class="kpi-val i" id="kimiMaxDispA">—</div><div class="kpi-sub">mm from initial</div></div>
+          <div class="kpi-card w"><div class="kpi-label">Max Disp B-axis</div><div class="kpi-val w" id="kimiMaxDispB">—</div><div class="kpi-sub">mm from initial</div></div>
+          <div class="kpi-card"><div class="kpi-label">Alert Threshold</div><div class="kpi-val" style="color:var(--danger)">20mm</div><div class="kpi-sub">Trigger level</div></div>
+        </div>
+
+        <!-- Controls row -->
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+          <label style="font-family:var(--mono);font-size:10px;color:var(--txt3)">SESSION:</label>
+          <select class="fs" id="kimiSessionSelect" onchange="kimiRenderAll()" style="min-width:200px;font-family:var(--mono)"></select>
+          <label style="font-family:var(--mono);font-size:10px;color:var(--txt3)">AXIS:</label>
+          <select class="fs" id="kimiAxisSelect" onchange="kimiRenderAll()" style="width:120px">
+            <option value="A">A-Axis</option>
+            <option value="B">B-Axis</option>
+            <option value="both">A + B</option>
           </select>
-          <div class="kdivider"></div>
-          <label>Depth Range:</label>
-          <select id="kimiDepthRange" onchange="kimiUpdateAllCharts()">
-            <option value="full">Full Profile</option>
-            <option value="top">Top 10m</option>
-            <option value="mid">Middle</option>
-            <option value="bot">Bottom</option>
+          <label style="font-family:var(--mono);font-size:10px;color:var(--txt3)">COMPARE WITH:</label>
+          <select class="fs" id="kimiCompareSelect" onchange="kimiRenderAll()" style="min-width:160px;font-family:var(--mono)">
+            <option value="initial">Initial (19-02-2026)</option>
+            <option value="previous">Previous session</option>
           </select>
-          <div class="kdivider"></div>
-          <button class="kimi-btn kimi-btn-primary" onclick="kimiRefreshAllCharts()">↺ Refresh</button>
-          <button class="kimi-btn kimi-btn-success" onclick="kimiOpenAddReadingModal()">+ Add Reading</button>
-          <button class="kimi-btn kimi-btn-outline" onclick="kimiOpenAddBHModal()">+ New Borehole</button>
-          <button class="kimi-btn kimi-btn-outline" onclick="kimiExportData()">Export CSV</button>
-          <button class="kimi-btn kimi-btn-outline" onclick="kimiImportCSV()" style="border-color:#00ff9d;color:#00ff9d">⬆ Import CSV</button>
         </div>
 
-        <!-- KPI Row -->
-        <div class="kimi-kpi-row">
-          <div class="kimi-kpi-card" style="--kkpi-color:var(--kaxis-a)">
-            <div class="kimi-kpi-label">Max Displacement A-Axis</div>
-            <div class="kimi-kpi-value" id="kimi-kpi-a">-- <span class="ku">mm</span></div>
-            <div class="kimi-kpi-sub" id="kimi-kpi-a-depth">--</div>
-            <div class="kimi-kpi-trend ktup" id="kimi-kpi-a-trend">--</div>
+        <!-- Charts row -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+          <!-- Depth profile chart -->
+          <div class="card" style="padding:16px">
+            <div style="font-family:var(--mono);font-size:11px;color:var(--txt3);margin-bottom:10px;text-transform:uppercase">Displacement vs Depth Profile</div>
+            <div style="height:380px;position:relative"><canvas id="kimiDepthChart"></canvas></div>
           </div>
-          <div class="kimi-kpi-card" style="--kkpi-color:var(--kaxis-b)">
-            <div class="kimi-kpi-label">Max Displacement B-Axis</div>
-            <div class="kimi-kpi-value" id="kimi-kpi-b">-- <span class="ku">mm</span></div>
-            <div class="kimi-kpi-sub" id="kimi-kpi-b-depth">--</div>
-            <div class="kimi-kpi-trend ktup" id="kimi-kpi-b-trend">--</div>
-          </div>
-          <div class="kimi-kpi-card" style="--kkpi-color:var(--kcumul)">
-            <div class="kimi-kpi-label">Total Vector Displacement</div>
-            <div class="kimi-kpi-value" id="kimi-kpi-vec">-- <span class="ku">mm</span></div>
-            <div class="kimi-kpi-sub">Resultant max movement</div>
-            <div class="kimi-kpi-trend ktup">+-- mm/24h</div>
-          </div>
-          <div class="kimi-kpi-card" style="--kkpi-color:var(--kwarn)">
-            <div class="kimi-kpi-label">Alert Threshold (A)</div>
-            <div class="kimi-kpi-value" id="kimi-kpi-thresh">25 <span class="ku">mm</span></div>
-            <div class="kimi-kpi-sub" id="kimi-kpi-thresh-pct">-- utilized</div>
-            <div class="kimi-kpi-trend ktflat">Action: 40mm</div>
-          </div>
-          <div class="kimi-kpi-card" style="--kkpi-color:var(--kaccent2)">
-            <div class="kimi-kpi-label">Instrument Depth</div>
-            <div class="kimi-kpi-value" id="kimi-kpi-depth">-- <span class="ku">m</span></div>
-            <div class="kimi-kpi-sub" id="kimi-kpi-sensors">-- sensors active</div>
-            <div class="kimi-kpi-trend ktflat" id="kimi-kpi-spacing">-- spacing</div>
-          </div>
-          <div class="kimi-kpi-card" style="--kkpi-color:var(--kaccent)">
-            <div class="kimi-kpi-label">Total Boreholes</div>
-            <div class="kimi-kpi-value" id="kimi-kpi-bhcount">4 <span class="ku"></span></div>
-            <div class="kimi-kpi-sub" id="kimi-kpi-bhalert">-- in alert</div>
-            <div class="kimi-kpi-trend ktflat">Active instruments</div>
+          <!-- Time series chart -->
+          <div class="card" style="padding:16px">
+            <div style="font-family:var(--mono);font-size:11px;color:var(--txt3);margin-bottom:10px;text-transform:uppercase">Max Displacement vs Time (All Sessions)</div>
+            <div style="height:380px;position:relative"><canvas id="kimiTimeChart"></canvas></div>
           </div>
         </div>
 
-        <!-- Main Grid -->
-        <div class="kimi-main-grid">
-          <!-- Borehole List Panel -->
-          <div class="kimi-bh-panel">
-            <div class="kimi-panel-title">Boreholes <div class="kdot"></div></div>
-            <div class="kimi-bh-list" id="kimiBHList"></div>
+        <!-- All sessions overlay chart -->
+        <div class="card" style="padding:16px;margin-bottom:14px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+            <div style="font-family:var(--mono);font-size:11px;color:var(--txt3);text-transform:uppercase">All Sessions — Depth Profile Overlay (A-Axis)</div>
+            <div style="font-size:9px;font-family:var(--mono);color:var(--txt3)">Initial=dashed | Latest=bold</div>
           </div>
-
-          <!-- Chart Area -->
-          <div class="kimi-chart-area">
-            <div class="kimi-chart-tabs">
-              <button class="kimi-chart-tab active" onclick="kimiSwitchTab('profile',this)">Depth Profile</button>
-              <button class="kimi-chart-tab" onclick="kimiSwitchTab('timeseries',this)">Time Series</button>
-              <button class="kimi-chart-tab" onclick="kimiSwitchTab('cumulative',this)">Cumulative</button>
-              <button class="kimi-chart-tab" onclick="kimiSwitchTab('vector',this)">Vector Plot</button>
-            </div>
-
-            <!-- Tab: Depth Profile -->
-            <div id="kimi-tab-profile" class="kimi-chart-view active" style="grid-template-columns:1fr 1fr;gap:1px;background:var(--kborder);display:grid">
-              <div class="kimi-chart-panel">
-                <div class="kcp-header">
-                  <div><div class="kcp-title">A-Axis Depth Profile</div><div class="kcp-subtitle">Displacement vs Depth (mm)</div></div>
-                  <div class="kcp-legend">
-                    <div class="klegend-dot" style="--ldot-color:var(--kaxis-a)">Current</div>
-                    <div class="klegend-dot" style="--ldot-color:rgba(0,200,255,0.3)">Initial</div>
-                  </div>
-                </div>
-                <div class="kimi-chart-wrap"><canvas id="kimiChartADepth"></canvas></div>
-              </div>
-              <div class="kimi-chart-panel">
-                <div class="kcp-header">
-                  <div><div class="kcp-title">B-Axis Depth Profile</div><div class="kcp-subtitle">Displacement vs Depth (mm)</div></div>
-                  <div class="kcp-legend">
-                    <div class="klegend-dot" style="--ldot-color:var(--kaxis-b)">Current</div>
-                    <div class="klegend-dot" style="--ldot-color:rgba(255,107,53,0.3)">Initial</div>
-                  </div>
-                </div>
-                <div class="kimi-chart-wrap"><canvas id="kimiChartBDepth"></canvas></div>
-              </div>
-            </div>
-
-            <!-- Tab: Time Series -->
-            <div id="kimi-tab-timeseries" class="kimi-chart-view" style="grid-template-columns:1fr">
-              <div class="kimi-chart-panel kwide">
-                <div class="kcp-header">
-                  <div><div class="kcp-title">Time Series – Surface Movement</div><div class="kcp-subtitle">Displacement over time (mm)</div></div>
-                  <div class="kcp-legend">
-                    <div class="klegend-dot" style="--ldot-color:var(--kaxis-a)">A-Axis</div>
-                    <div class="klegend-dot" style="--ldot-color:var(--kaxis-b)">B-Axis</div>
-                    <div class="klegend-dot" style="--ldot-color:var(--kcumul)">Vector</div>
-                  </div>
-                </div>
-                <div class="kimi-chart-wrap" style="min-height:300px"><canvas id="kimiChartTimeSeries"></canvas></div>
-              </div>
-            </div>
-
-            <!-- Tab: Cumulative -->
-            <div id="kimi-tab-cumulative" class="kimi-chart-view" style="grid-template-columns:1fr 1fr;gap:1px;background:var(--kborder)">
-              <div class="kimi-chart-panel">
-                <div class="kcp-header"><div><div class="kcp-title">Cumulative A-Axis</div><div class="kcp-subtitle">Running total displacement (mm)</div></div></div>
-                <div class="kimi-chart-wrap"><canvas id="kimiChartCumA"></canvas></div>
-              </div>
-              <div class="kimi-chart-panel">
-                <div class="kcp-header">
-                  <div><div class="kcp-title">Displacement Rate</div><div class="kcp-subtitle">mm per day over time</div></div>
-                  <div class="kcp-legend">
-                    <div class="klegend-dot" style="--ldot-color:var(--kaxis-a)">Rate A</div>
-                    <div class="klegend-dot" style="--ldot-color:var(--kaxis-b)">Rate B</div>
-                  </div>
-                </div>
-                <div class="kimi-chart-wrap"><canvas id="kimiChartRate"></canvas></div>
-              </div>
-            </div>
-
-            <!-- Tab: Vector -->
-            <div id="kimi-tab-vector" class="kimi-chart-view" style="grid-template-columns:1fr">
-              <div class="kimi-chart-panel kwide">
-                <div class="kcp-header">
-                  <div><div class="kcp-title">Vector Displacement Plot</div><div class="kcp-subtitle">A-Axis vs B-Axis movement (all depths)</div></div>
-                  <div class="kcp-legend">
-                    <div class="klegend-dot" style="--ldot-color:var(--kcumul)">Movement path</div>
-                    <div class="klegend-dot" style="--ldot-color:var(--kwarn)">Alert zone</div>
-                  </div>
-                </div>
-                <div class="kimi-chart-wrap" style="min-height:300px"><canvas id="kimiChartVector"></canvas></div>
-              </div>
-            </div>
-          </div><!-- /chart-area -->
-        </div><!-- /main-grid -->
-
-        <!-- Alert Strip -->
-        <div class="kimi-alert-strip" id="kimiAlertStrip">
-          <div class="kimi-alert-label">Alerts:</div>
+          <div style="height:300px;position:relative"><canvas id="kimiOverlayChart"></canvas></div>
         </div>
 
-        <!-- Stats Section -->
-        <div class="kimi-stats-section">
-          <div class="kimi-stats-title">Statistical Summary — <span id="kimiStatsTitle">BH-INC-01</span></div>
-          <div class="kimi-stats-grid" id="kimiStatsGrid"></div>
-        </div>
-
-        <!-- Reading Log / Data Table -->
-        <div class="kimi-log-panel">
-          <div class="kimi-log-header">
-            <span class="kimi-log-title">Borehole Data Log</span>
-            <span id="kimiLogCount" style="background:rgba(0,200,255,0.12);border:1px solid rgba(0,200,255,.3);color:#00c8ff;font-size:9px;padding:2px 8px;border-radius:12px;font-family:'Share Tech Mono',monospace;margin-left:8px">4 records</span>
-            <div style="margin-left:auto;display:flex;gap:6px">
-              <button class="kimi-btn kimi-btn-success" onclick="kimiOpenAddReadingModal()">+ Add Reading</button>
-              <button class="kimi-btn kimi-btn-outline" onclick="kimiExportData()">Export CSV</button>
-              <button class="kimi-btn kimi-btn-outline" onclick="kimiImportCSV()" style="border-color:#00ff9d;color:#00ff9d">⬆ Import CSV</button>
-            </div>
-          </div>
-          <div class="kimi-log-body">
-            <table class="kimi-data-table">
-              <thead><tr><th>Borehole</th><th>Depth(m)</th><th>Max A(mm)</th><th>Max B(mm)</th><th>Rate A(mm/d)</th><th>Rate B(mm/d)</th><th>Status</th><th>Actions</th></tr></thead>
+        <!-- Data table -->
+        <div class="card" style="padding:16px">
+          <div style="font-family:var(--mono);font-size:11px;color:var(--txt3);margin-bottom:10px;text-transform:uppercase">Session Data — <span id="kimiTableDateLabel"></span></div>
+          <div style="overflow:auto;max-height:320px">
+            <table class="tbl" id="kimiDataTable">
+              <thead><tr>
+                <th>Depth (m)</th>
+                <th>Disp A (mm)</th>
+                <th>Disp B (mm)</th>
+                <th>Status</th>
+              </tr></thead>
               <tbody id="kimiDataTbody"></tbody>
             </table>
           </div>
         </div>
 
-      </div><!-- /kimi-wrap -->
+      </div>
     </div><!-- /view-kimi-inc -->
+
+
 
     <!-- ===== DATA ENTRY ===== -->
     <div id="view-dataentry" class="view">
@@ -3121,11 +3032,82 @@ function cvtStatus(conv){
   return {cls:'chip-ok',txt:'NORMAL'};
 }
 
-function calcCVTConv(){
-  const init=parseFloat(document.getElementById('cvtInitial').value)||0;
-  const cur=parseFloat(document.getElementById('cvtCurrent').value)||0;
-  document.getElementById('cvtConvCalc').value=(cur-init).toFixed(2);
+function calcCVTConv(){} // legacy stub — no longer used
+function calcCVTConv3(){} // legacy stub — no longer used
+
+function calcCVTAvg(){
+  const v1=parseFloat(document.getElementById('cvtCh1').value)||0;
+  const v2=parseFloat(document.getElementById('cvtCh2').value)||0;
+  const v3=parseFloat(document.getElementById('cvtCh3').value)||0;
+  const filled=[v1,v2,v3].filter((_,i)=>[
+    document.getElementById('cvtCh1').value,
+    document.getElementById('cvtCh2').value,
+    document.getElementById('cvtCh3').value
+  ][i]!=='');
+  const avg=filled.length?+(filled.reduce((a,b)=>a+b,0)/filled.length).toFixed(3):0;
+  document.getElementById('cvtAvg').value=avg||'';
 }
+
+function openCVTModal(id=null){
+  editingCVT=null;
+  document.getElementById('cvtModalTitle').textContent='Add CVT Reading';
+  document.getElementById('cvtIdSelect').innerHTML=CVT_IDS.map(c=>`<option value="${c}">${c}</option>`).join('');
+  document.getElementById('cvtPosition').innerHTML=CVT_POSITIONS.map(p=>`<option value="${p}">${p}</option>`).join('');
+  document.getElementById('cvtDate').value=new Date().toISOString().split('T')[0];
+  ['cvtRDM','cvtCh1','cvtCh2','cvtCh3','cvtAvg','cvtNotes'].forEach(x=>{const el=document.getElementById(x);if(el)el.value='';});
+  openModal('cvtDataModal');
+}
+
+function openCVTModalForPosition(position){
+  openCVTModal();
+  const el=document.getElementById('cvtPosition');
+  if(el) el.value=normalizeCVTPosition(position);
+}
+
+function editCVT(id){
+  const r=cvtData.find(x=>x.id===id);if(!r)return;
+  editingCVT=id;
+  document.getElementById('cvtModalTitle').textContent='Edit CVT Reading — '+r.cvtId+' ('+r.position+')';
+  document.getElementById('cvtIdSelect').value=r.cvtId;
+  document.getElementById('cvtPosition').value=r.position;
+  document.getElementById('cvtDate').value=r.date;
+  document.getElementById('cvtRDM').value=r.rdm||'';
+  document.getElementById('cvtCh1').value=r.ch1!=null?r.ch1:(r.initial||'');
+  document.getElementById('cvtCh2').value=r.ch2!=null?r.ch2:'';
+  document.getElementById('cvtCh3').value=r.ch3!=null?r.ch3:'';
+  document.getElementById('cvtAvg').value=r.avg!=null?r.avg:(r.current||'');
+  document.getElementById('cvtNotes').value=r.notes||'';
+  openModal('cvtDataModal');
+}
+
+function saveCVTData(){
+  const cvtId=normalizeCVTId(document.getElementById('cvtIdSelect').value);
+  const position=normalizeCVTPosition(document.getElementById('cvtPosition').value);
+  const date=document.getElementById('cvtDate').value;
+  const rdm=parseFloat(document.getElementById('cvtRDM').value)||0;
+  const ch1=parseFloat(document.getElementById('cvtCh1').value)||0;
+  const ch2=parseFloat(document.getElementById('cvtCh2').value)||0;
+  const ch3=parseFloat(document.getElementById('cvtCh3').value)||0;
+  const avg=parseFloat(document.getElementById('cvtAvg').value)||+((ch1+ch2+ch3)/3).toFixed(3);
+  const notes=document.getElementById('cvtNotes').value.trim();
+  // Keep backward-compat fields: initial/current/convergence mapped from ch values
+  const initial=0; const current=avg; const convergence=avg;
+  if(!date) return alert('Please enter a date');
+  if(editingCVT){
+    const r=cvtData.find(x=>x.id===editingCVT);
+    if(r) Object.assign(r,{cvtId,position,date,rdm,ch1,ch2,ch3,avg,initial,current,convergence,notes});
+    editingCVT=null;
+  } else {
+    cvtData.push({id:Date.now(),cvtId,position,date,rdm,ch1,ch2,ch3,avg,initial,current,convergence,notes});
+  }
+  renderCVTTable();renderCVTCharts();updateCVTMonthFilter();renderCVTPositionCards();updateReportCounts();updateEntryStats();
+  closeModal('cvtDataModal');saveToStorage();
+  if(document.getElementById('view-combinedlog')?.classList.contains('active')) renderCombinedLog();
+  showToast('✓ CVT reading saved — '+position);
+  if(convergence>=CVT_ALERT) notifyAdmin('Alert: '+cvtId+' ('+position+') convergence '+convergence.toFixed(2)+'mm exceeds threshold.');
+}
+
+function saveCVTData3(){ saveCVTData(); } // alias — both button names now route here
 
 function calcQECVT(){
   const init=parseFloat(document.getElementById('qeCVTInitial').value)||0;
@@ -3206,14 +3188,19 @@ function renderCVTTable(){
   tbody.innerHTML=rows.map(r=>{
     const s=cvtStatus(r.convergence);
     const col=CVT_COLORS[r.position]||'var(--accent)';
+    const ch1=r.ch1!=null?r.ch1.toFixed(2):(r.initial||0).toFixed(2);
+    const ch2=r.ch2!=null?r.ch2.toFixed(2):'—';
+    const ch3=r.ch3!=null?r.ch3.toFixed(2):'—';
+    const avg=r.avg!=null?r.avg.toFixed(3):(r.current||0).toFixed(3);
     return `<tr>
       <td>${r.date}</td>
       <td style="font-family:var(--mono);font-size:9px;color:var(--txt3)">${getMonthLabel(r.date)}</td>
       <td class="iid">${r.cvtId}</td>
       <td><span style="font-family:var(--mono);font-size:10px;font-weight:700;color:${col}">${r.position}</span></td>
-      <td class="iv">${r.initial.toFixed(2)}</td>
-      <td class="iv">${r.current.toFixed(2)}</td>
-      <td class="iv" style="color:${r.convergence>=CVT_ALERT?'var(--danger)':r.convergence>=6?'var(--warn)':col}">${r.convergence.toFixed(2)}</td>
+      <td class="iv">${ch1}</td>
+      <td class="iv">${ch2}</td>
+      <td class="iv">${ch3}</td>
+      <td class="iv" style="color:${r.convergence>=CVT_ALERT?'var(--danger)':r.convergence>=6?'var(--warn)':col}">${avg}</td>
       <td><span class="chip ${s.cls}">${s.txt}</span></td>
       <td style="font-size:11px;color:var(--txt2)">${r.notes||'—'}</td>
       <td class="no-print"><div class="tbl-actions">
@@ -3226,59 +3213,11 @@ function renderCVTTable(){
   renderCVTMonthCards();
 }
 
-function openCVTModal(id=null){
-  editingCVT=id;
-  document.getElementById('cvtModalTitle').textContent=id?'Edit CVT Reading':'Add CVT Reading';
-  document.getElementById('cvtIdSelect').innerHTML=CVT_IDS.map(cvtId=>`<option value="${cvtId}">${cvtId}</option>`).join('');
-  document.getElementById('cvtPosition').innerHTML=CVT_POSITIONS.map(pos=>`<option value="${pos}">${pos}</option>`).join('');
-  if(!id){
-    document.getElementById('cvtIdSelect').value=CVT_IDS[0];
-    document.getElementById('cvtPosition').value=CVT_POSITIONS[0];
-    ['cvtInitial','cvtCurrent','cvtConvCalc','cvtNotes'].forEach(x=>document.getElementById(x).value='');
-  }
-  openModal('cvtDataModal');
-}
-
-function editCVT(id){
-  const r=cvtData.find(x=>x.id===id);if(!r)return;
-  editingCVT=id;
-  document.getElementById('cvtModalTitle').textContent='Edit CVT Reading — '+r.cvtId+' ('+r.position+')';
-  document.getElementById('cvtIdSelect').value=r.cvtId;
-  document.getElementById('cvtPosition').value=r.position;
-  document.getElementById('cvtDate').value=r.date;
-  document.getElementById('cvtInitial').value=r.initial;
-  document.getElementById('cvtCurrent').value=r.current;
-  document.getElementById('cvtConvCalc').value=r.convergence.toFixed(2);
-  document.getElementById('cvtNotes').value=r.notes||'';
-  openModal('cvtDataModal');
-}
 
 function deleteCVT(id){
   if(!confirm('Delete this CVT reading?'))return;
   cvtData=cvtData.filter(x=>x.id!==id);
   renderCVTTable();updateCVTMonthFilter();renderCVTCharts();renderCVTPositionCards();updateReportCounts();updateEntryStats();saveToStorage();
-}
-
-function saveCVTData(){
-  const cvtId=normalizeCVTId(document.getElementById('cvtIdSelect').value);
-  const position=normalizeCVTPosition(document.getElementById('cvtPosition').value);
-  const date=document.getElementById('cvtDate').value;
-  const initial=parseFloat(document.getElementById('cvtInitial').value)||0;
-  const current=parseFloat(document.getElementById('cvtCurrent').value)||0;
-  const convergence=+(current-initial).toFixed(3);
-  const notes=document.getElementById('cvtNotes').value.trim();
-  if(!date)return alert('Please enter a date');
-  if(editingCVT){
-    const r=cvtData.find(x=>x.id===editingCVT);
-    Object.assign(r,{cvtId,position,date,initial,current,convergence,notes});
-  } else {
-    cvtData.push({id:Date.now(),cvtId,position,date,initial,current,convergence,notes});
-  }
-  renderCVTTable();renderCVTCharts();updateCVTMonthFilter();renderCVTPositionCards();updateReportCounts();updateEntryStats();
-  closeModal('cvtDataModal');saveToStorage();
-  if(document.getElementById('view-combinedlog')?.classList.contains('active'))renderCombinedLog();
-  showToast('CVT reading saved — '+position);
-  if(convergence>=CVT_ALERT)notifyAdmin('Alert: '+cvtId+' ('+position+') convergence '+convergence.toFixed(2)+'mm exceeds threshold.');
 }
 
 // ================================================================
@@ -3631,473 +3570,240 @@ setInterval(()=>{if(document.getElementById('view-overview').classList.contains(
 
 // ================================================================
 // ================================================================
-// KIMI INCLINOMETER SYSTEM
-// ================================================================
-// ================================================================
 
-let KIMI_BOREHOLES = [
-  {id:'BH-INC-01',depth:30,sensors:25,spacing:1.2,status:'warn',maxA:18.4,maxB:9.7,depthA:14,depthB:12,rateA:1.2,rateB:0.5,
-   aProfile:[0.2,0.5,1.1,2.0,3.4,5.1,7.2,9.6,11.4,13.2,14.9,16.0,17.1,18.4,17.8,16.2,13.5,10.8,8.1,5.9,4.1,2.8,1.7,0.9,0.3],
-   bProfile:[0.1,0.3,0.7,1.3,2.2,3.4,4.6,5.8,6.9,7.8,8.5,9.1,9.5,9.7,9.2,8.3,6.9,5.3,3.8,2.5,1.5,0.8,0.4,0.1,0.0]},
-  {id:'BH-INC-02',depth:25,sensors:21,spacing:1.2,status:'warn',maxA:14.2,maxB:14.3,depthA:10,depthB:11,rateA:0.8,rateB:1.1,
-   aProfile:[0.1,0.4,0.9,1.7,2.9,4.4,6.2,8.1,9.8,11.4,12.7,13.5,14.2,13.8,12.7,10.9,8.5,6.1,4.1,2.5,1.2],
-   bProfile:[0.2,0.6,1.2,2.1,3.5,5.2,7.1,9.2,11.0,12.5,13.5,14.1,14.3,13.9,12.8,10.9,8.4,5.9,3.7,2.0,0.8]},
-  {id:'BH-INC-03',depth:35,sensors:29,spacing:1.2,status:'alert',maxA:22.1,maxB:11.4,depthA:18,depthB:15,rateA:1.8,rateB:0.7,
-   aProfile:[0.3,0.7,1.5,2.8,4.5,6.5,8.9,11.5,13.8,15.8,17.5,19.0,20.2,21.1,21.8,22.1,21.5,19.8,17.2,14.0,10.5,7.4,4.9,3.0,1.7,0.9,0.4,0.1,0.0],
-   bProfile:[0.1,0.4,0.8,1.4,2.3,3.5,4.9,6.4,7.7,8.8,9.7,10.3,10.8,11.1,11.4,11.2,10.6,9.5,8.0,6.2,4.4,2.9,1.7,0.8,0.3,0.1,0.0,0.0,0.0]},
-  {id:'BH-INC-04',depth:20,sensors:17,spacing:1.2,status:'ok',maxA:8.3,maxB:5.1,depthA:8,depthB:7,rateA:0.3,rateB:0.2,
-   aProfile:[0.1,0.3,0.7,1.4,2.5,3.8,5.2,6.7,8.3,7.9,7.0,5.8,4.4,3.1,2.0,1.1,0.5],
-   bProfile:[0.1,0.2,0.5,1.0,1.8,2.8,3.8,4.6,5.1,4.9,4.3,3.5,2.6,1.7,1.0,0.5,0.2]},
-];
-let kimiCurrentBH = 0;
-const kimiCharts = {};
+// ================================================================
+// KIMI INCLINOMETER — REAL DATA (parsed from GKPSP_INC-01 CSV)
+// ================================================================
+const KIMI_REAL_DATA = {"site": "GKPSP:INC-01", "bhId": "INC-01", "totalDepth": 20.0, "spacing": 0.5, "sensors": 41, "sessions": [{"date": "2026-02-19", "dateLabel": "19-02-2026", "depths": [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0, 10.5, 11.0, 11.5, 12.0, 12.5, 13.0, 13.5, 14.0, 14.5, 15.0, 15.5, 16.0, 16.5, 17.0, 17.5, 18.0, 18.5, 19.0, 19.5, 20.0], "dispA": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "dispB": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "maxDispA": 0.0, "maxDispB": 0.0, "status": "ok"}, {"date": "2026-03-24", "dateLabel": "24-03-2026", "depths": [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0, 10.5, 11.0, 11.5, 12.0, 12.5, 13.0, 13.5, 14.0, 14.5, 15.0, 15.5, 16.0, 16.5, 17.0, 17.5, 18.0, 18.5, 19.0, 19.5, 20.0], "dispA": [15.47, -5.695, -5.57, -5.025, -5.82, -4.43, -5.51, -5.895, -6.35, -6.18, -6.16, -5.59, -6.45, -6.435, -6.165, -6.0, -5.605, -5.265, -5.345, -5.335, -5.33, -5.125, -4.97, -4.79, -3.96, -2.355, -0.31, -0.195, -0.19, -0.22, -0.22, -0.735, -0.8, -0.83, -0.685, -0.78, -0.805, -0.565, -0.245, -0.035, 0.045], "dispB": [13.725, 5.56, 5.265, 3.99, 4.045, 4.21, 4.18, 4.05, 4.225, 3.8, 3.115, 3.04, 3.435, 3.775, 3.81, 3.735, 3.68, 4.075, 4.77, 4.14, 4.165, 4.09, 3.865, 3.795, 3.87, 3.825, 3.555, 3.44, 3.455, 3.53, 3.305, 1.825, 1.045, 0.3, -0.135, 0.34, 0.325, 0.19, 0.09, 0.15, 0.14], "maxDispA": 15.47, "maxDispB": 13.725, "status": "warn"}, {"date": "2026-03-22", "dateLabel": "22-03-2026", "depths": [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0, 10.5, 11.0, 11.5, 12.0, 12.5, 13.0, 13.5, 14.0, 14.5, 15.0, 15.5, 16.0, 16.5, 17.0, 17.5, 18.0, 18.5, 19.0, 19.5, 20.0], "dispA": [-6.715, -6.74, -6.4, -5.99, -5.385, -1.92, 0.345, 2.09, 3.155, 3.11, 3.4, 1.415, 0.32, -0.255, -1.15, -1.57, -1.29, -1.395, -1.69, -1.575, -1.525, -2.095, -1.745, -1.665, -0.455, -0.475, 0.345, 0.395, 0.355, 0.01, 0.165, 0.2, 0.01, 0.14, 0.02, -0.355, -0.035, 0.11, -0.01, 0.085, 0.04], "dispB": [7.065, 6.805, 6.325, 4.5, 3.075, 1.62, 1.89, 0.99, 1.43, 2.135, 3.08, 2.79, 3.435, 4.4, 4.98, 5.295, 4.3, 4.15, 6.805, 5.055, 3.23, 2.79, 2.315, 2.145, 1.705, 1.735, 1.945, 1.765, 1.835, 1.94, 1.62, 0.72, 0.1, -0.395, -0.69, 1.37, 0.855, 0.83, 0.475, 0.515, 0.645], "maxDispA": 6.74, "maxDispB": 7.065, "status": "ok"}, {"date": "2026-03-25", "dateLabel": "25-03-2026", "depths": [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0, 10.5, 11.0, 11.5, 12.0, 12.5, 13.0, 13.5, 14.0, 14.5, 15.0, 15.5, 16.0, 16.5, 17.0, 17.5, 18.0, 18.5, 19.0, 19.5, 20.0], "dispA": [-2.775, -2.725, -2.73, -2.25, -3.325, -2.11, -3.515, -3.01, -3.45, -3.185, -3.445, -3.89, -4.115, -4.25, -4.15, -4.165, -3.9, -3.735, -3.65, -3.465, -3.22, -2.88, -2.785, -2.635, -1.795, -1.7, -0.47, -0.08, -0.045, 0.04, 0.065, -0.035, -0.47, -0.53, -0.555, -0.26, -0.24, -0.19, -0.02, 0.135, 0.085], "dispB": [3.42, 3.27, 3.695, 2.76, 3.22, 2.865, 3.215, 3.14, 3.28, 3.23, 3.525, 2.835, 3.01, 3.48, 3.6, 3.605, 3.55, 3.97, 4.4, 3.37, 2.725, 2.62, 2.34, 2.165, 2.03, 2.12, 2.0, 1.79, 1.985, 1.83, 1.375, -0.055, -0.39, -1.22, -1.57, 0.25, -0.015, 0.0, -0.18, -0.1, 0.105], "maxDispA": 4.25, "maxDispB": 4.4, "status": "ok"}, {"date": "2026-03-26", "dateLabel": "26-03-2026", "depths": [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0, 10.5, 11.0, 11.5, 12.0, 12.5, 13.0, 13.5, 14.0, 14.5, 15.0, 15.5, 16.0, 16.5, 17.0, 17.5, 18.0, 18.5, 19.0, 19.5, 20.0], "dispA": [-0.23, -0.215, 0.02, 0.045, -0.965, -0.43, -1.82, -2.305, -2.165, -2.19, -2.415, -2.905, -3.87, -4.14, -3.94, -3.945, -3.63, -3.415, -3.11, -3.11, -3.11, -2.92, -2.88, -2.72, -1.79, -0.78, -0.56, -0.495, -0.285, -0.285, -0.195, -0.295, -0.695, -0.805, -0.78, -0.33, -0.37, -0.365, -0.115, 0.085, 0.06], "dispB": [3.615, 3.43, 3.185, 2.83, 3.305, 3.465, 3.685, 3.59, 3.585, 3.435, 2.945, 2.03, 2.395, 2.705, 2.59, 2.515, 2.31, 2.885, 3.21, 3.085, 3.065, 2.965, 2.82, 2.63, 2.255, 2.16, 2.15, 1.95, 1.85, 1.795, 1.245, 0.67, 0.215, -0.46, -1.2, 0.655, 0.075, 0.05, -0.285, -0.235, 0.115], "maxDispA": 4.14, "maxDispB": 3.685, "status": "ok"}, {"date": "2026-03-30", "dateLabel": "30-03-2026", "depths": [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0, 10.5, 11.0, 11.5, 12.0, 12.5, 13.0, 13.5, 14.0, 14.5, 15.0, 15.5, 16.0, 16.5, 17.0, 17.5, 18.0, 18.5, 19.0, 19.5, 20.0], "dispA": [-4.47, -4.61, -4.585, -4.47, -4.655, -3.045, -2.79, -2.545, -2.73, -2.495, -2.515, -2.065, -2.98, -3.04, -3.07, -2.935, -2.56, -2.24, -2.295, -2.115, -2.235, -2.115, -2.17, -2.295, -0.97, -0.325, -0.19, -0.095, -0.045, 0.07, -0.215, -0.305, -0.345, -0.36, -0.3, -0.775, -0.535, -0.375, -0.205, -0.05, 0.06], "dispB": [1.0, 1.065, 1.31, 1.115, 1.97, 1.995, 1.525, 1.695, 2.05, 2.145, 1.6, 1.42, 2.37, 2.675, 2.78, 2.775, 2.5, 2.515, 2.78, 1.845, 1.63, 1.585, 1.495, 1.44, 1.555, 1.735, 1.62, 1.445, 1.415, 1.585, 1.315, 0.275, -0.035, -0.455, -1.045, 0.66, 0.21, 0.17, -0.05, 0.08, 0.095], "maxDispA": 4.655, "maxDispB": 2.78, "status": "ok"}, {"date": "2026-03-28", "dateLabel": "28-03-2026", "depths": [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0, 10.5, 11.0, 11.5, 12.0, 12.5, 13.0, 13.5, 14.0, 14.5, 15.0, 15.5, 16.0, 16.5, 17.0, 17.5, 18.0, 18.5, 19.0, 19.5, 20.0], "dispA": [-1.165, -1.23, -1.285, -0.645, -1.675, 0.135, -0.695, -1.16, -1.48, -1.3, -1.38, -1.485, -1.825, -2.105, -1.96, -1.835, -1.615, -1.235, -1.0, -1.03, -1.1, -0.85, -0.635, -0.64, -0.12, 0.65, 0.43, 0.91, 1.235, 1.26, 0.85, 0.475, 0.12, 0.075, 0.175, -0.015, 0.01, -0.015, -0.04, 0.13, 0.06], "dispB": [2.96, 2.94, 3.285, 2.23, 2.8, 2.86, 2.625, 2.685, 2.86, 2.74, 2.645, 2.805, 3.115, 3.45, 3.645, 3.6, 3.205, 3.965, 4.425, 3.75, 3.515, 3.35, 3.05, 2.89, 2.85, 2.795, 2.78, 2.59, 2.495, 3.08, 3.04, 1.735, 1.29, 0.845, 0.45, 1.16, 1.025, 0.895, 0.545, 0.47, 0.385], "maxDispA": 2.105, "maxDispB": 4.425, "status": "ok"}, {"date": "2026-04-02", "dateLabel": "02-04-2026", "depths": [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0, 10.5, 11.0, 11.5, 12.0, 12.5, 13.0, 13.5, 14.0, 14.5, 15.0, 15.5, 16.0, 16.5, 17.0, 17.5, 18.0, 18.5, 19.0, 19.5, 20.0], "dispA": [-3.11, -3.49, -3.525, -3.435, -4.0, -4.08, -4.845, -4.78, -5.13, -4.89, -4.83, -4.97, -5.775, -5.715, -5.89, -6.265, -5.865, -5.55, -5.38, -5.265, -5.09, -5.175, -4.76, -4.87, -4.705, -4.275, -3.43, -3.225, -2.81, -3.0, -3.09, -3.485, -3.695, -3.84, -4.025, -3.88, -3.535, -3.405, -3.045, -2.945, -1.735], "dispB": [2.75, 2.455, 2.51, 1.59, 2.255, 2.57, 2.455, 2.455, 2.52, 2.445, 1.82, 0.895, 1.825, 2.375, 2.51, 2.505, 2.965, 4.455, 3.99, 3.005, 2.48, 2.505, 2.195, 2.195, 2.63, 2.705, 2.62, 2.49, 2.575, 3.31, 3.095, 1.92, 1.335, 0.505, -0.195, 1.04, 0.365, 0.315, -0.02, 0.225, 0.36], "maxDispA": 6.265, "maxDispB": 4.455, "status": "ok"}, {"date": "2026-04-06", "dateLabel": "06-04-2026", "depths": [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0, 10.5, 11.0, 11.5, 12.0, 12.5, 13.0, 13.5, 14.0, 14.5, 15.0, 15.5, 16.0, 16.5, 17.0, 17.5, 18.0, 18.5, 19.0, 19.5, 20.0], "dispA": [-2.325, -2.87, -2.955, -2.72, -2.535, -2.525, -2.785, -2.48, -2.825, -2.71, -2.67, -1.635, -1.985, -2.75, -2.825, -2.83, -2.425, -2.22, -1.885, -1.83, -1.87, -1.78, -1.695, -1.665, -0.57, 0.03, 0.715, 0.92, 0.99, 0.925, 0.75, 0.015, -0.325, -0.425, -1.0, -0.57, -0.7, -0.325, -0.165, -0.12, 0.055], "dispB": [3.015, 2.685, 2.67, 2.17, 3.095, 3.01, 2.99, 2.91, 2.98, 2.91, 2.745, 2.955, 2.9, 3.165, 3.26, 3.215, 2.925, 4.035, 3.57, 3.3, 2.875, 2.725, 2.42, 2.285, 1.7, 1.745, 1.6, 1.505, 1.64, 2.08, 1.495, 0.185, -0.55, -1.13, -1.675, 1.115, 0.69, 0.735, 0.405, 0.335, 0.385], "maxDispA": 2.955, "maxDispB": 4.035, "status": "ok"}, {"date": "2026-04-10", "dateLabel": "10-04-2026", "depths": [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0, 10.5, 11.0, 11.5, 12.0, 12.5, 13.0, 13.5, 14.0, 14.5, 15.0, 15.5, 16.0, 16.5, 17.0, 17.5, 18.0, 18.5, 19.0, 19.5, 20.0], "dispA": [-3.665, -4.235, -4.165, -3.88, -4.565, -3.02, -4.265, -3.895, -3.725, -3.735, -3.705, -3.56, -3.93, -4.05, -3.905, -3.875, -3.945, -3.65, -3.325, -3.32, -3.705, -3.62, -3.195, -3.19, -3.16, -2.825, -2.35, -2.22, -2.17, -2.175, -2.37, -3.155, -3.56, -3.415, -3.27, -3.355, -3.35, -3.375, -3.235, -3.19, -1.765], "dispB": [5.22, 4.875, 4.65, 3.465, 3.77, 3.64, 3.84, 3.835, 3.98, 3.925, 3.87, 3.615, 4.015, 4.39, 4.58, 4.565, 4.375, 5.08, 4.86, 3.81, 3.41, 3.28, 3.025, 2.89, 3.55, 3.585, 3.39, 3.44, 3.625, 4.55, 3.945, 2.81, 2.27, 1.565, 0.795, 2.085, 1.4, 1.235, 0.87, 0.905, 0.86], "maxDispA": 4.565, "maxDispB": 5.22, "status": "ok"}, {"date": "2026-04-14", "dateLabel": "14-04-2026", "depths": [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0, 10.5, 11.0, 11.5, 12.0, 12.5, 13.0, 13.5, 14.0, 14.5, 15.0, 15.5, 16.0, 16.5, 17.0, 17.5, 18.0, 18.5, 19.0, 19.5, 20.0], "dispA": [-2.1, -2.145, -2.25, -2.05, -2.3, -1.45, -2.92, -3.49, -3.83, -4.04, -4.175, -4.365, -4.9, -5.035, -4.915, -4.665, -4.18, -3.8, -3.74, -3.85, -3.88, -3.705, -3.495, -3.455, -2.67, -2.115, -0.675, -0.59, -0.675, -0.705, -0.765, -0.89, -0.975, -1.09, -0.985, -0.475, -0.535, -0.295, -0.27, -0.165, 0.015], "dispB": [2.69, 2.37, 2.515, 1.79, 2.88, 2.875, 3.29, 3.405, 3.335, 2.91, 2.94, 3.465, 3.535, 3.655, 3.58, 3.805, 4.345, 3.605, 4.11, 3.98, 3.57, 3.59, 3.41, 3.025, 2.87, 2.885, 2.91, 2.7, 2.57, 2.745, 2.415, 1.095, 0.505, 0.055, -0.39, 0.395, 0.285, 0.105, -0.165, -0.045, 0.18], "maxDispA": 5.035, "maxDispB": 4.345, "status": "ok"}, {"date": "2026-04-20", "dateLabel": "20-04-2026", "depths": [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0, 10.5, 11.0, 11.5, 12.0, 12.5, 13.0, 13.5, 14.0, 14.5, 15.0, 15.5, 16.0, 16.5, 17.0, 17.5, 18.0, 18.5, 19.0, 19.5, 20.0], "dispA": [-0.97, -0.97, -1.025, -0.975, -1.81, -1.49, -2.77, -3.035, -2.875, -2.835, -2.955, -3.17, -4.445, -4.45, -4.555, -4.175, -3.7, -3.59, -3.4, -3.375, -3.445, -3.395, -2.895, -3.13, -1.81, -2.025, -1.185, -1.195, -1.115, -1.29, -1.23, -1.31, -1.7, -1.7, -1.615, -2.575, -2.62, -2.36, -1.84, -1.88, -1.76], "dispB": [0.7, 0.425, 0.765, 0.62, 1.665, 1.84, 1.785, 1.77, 1.74, 1.895, 1.46, 1.09, 1.825, 2.315, 2.465, 2.46, 2.655, 3.495, 3.44, 2.65, 2.805, 2.69, 2.455, 2.41, 2.22, 2.285, 2.105, 2.1, 2.19, 1.875, 1.405, 0.43, -0.275, -0.72, -1.445, 1.135, 0.24, 0.095, -0.315, -0.08, 0.18], "maxDispA": 4.555, "maxDispB": 3.495, "status": "ok"}, {"date": "2026-04-24", "dateLabel": "24-04-2026", "depths": [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0, 10.5, 11.0, 11.5, 12.0, 12.5, 13.0, 13.5, 14.0, 14.5, 15.0, 15.5, 16.0, 16.5, 17.0, 17.5, 18.0, 18.5, 19.0, 19.5, 20.0], "dispA": [16.755, 16.77, 17.12, 17.25, 16.73, 17.965, 17.91, 18.52, 18.74, 18.735, 18.65, 19.21, 19.06, 18.785, 18.755, 18.81, 19.225, 19.385, 19.39, 19.305, 19.295, 19.435, 19.53, 19.325, 20.155, 21.15, 21.89, 21.87, 21.9, 21.74, 21.665, 21.48, 21.255, 21.225, 20.69, 20.05, 20.32, 20.715, 21.145, 21.4, 19.565], "dispB": [10.55, 10.155, 10.335, 10.2, 10.52, 10.635, 10.555, 10.395, 10.39, 10.435, 10.29, 10.195, 10.05, 10.165, 10.295, 10.18, 9.94, 10.73, 10.41, 9.81, 9.545, 9.445, 9.255, 9.185, 9.105, 9.13, 9.14, 9.1, 9.225, 9.2, 8.635, 7.68, 6.995, 6.535, 6.14, 8.765, 7.925, 7.89, 7.595, 7.68, 8.14], "maxDispA": 21.9, "maxDispB": 10.73, "status": "alert"}, {"date": "2026-04-30", "dateLabel": "30-04-2026", "depths": [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0, 10.5, 11.0, 11.5, 12.0, 12.5, 13.0, 13.5, 14.0, 14.5, 15.0, 15.5, 16.0, 16.5, 17.0, 17.5, 18.0, 18.5, 19.0, 19.5, 20.0], "dispA": [0.255, 0.02, 0.01, 0.47, -0.455, 1.195, -0.15, -0.26, -0.48, -0.49, -0.495, -1.025, -2.445, -2.635, -2.7, -2.615, -2.72, -2.69, -2.515, -2.43, -2.605, -2.45, -2.185, -2.02, -1.315, -1.03, 0.685, 1.655, 1.64, 1.37, 0.875, 0.805, 0.675, 0.725, 0.665, 0.97, 0.805, 0.9, 1.08, 1.21, 0.215], "dispB": [0.46, 0.2, 0.37, -0.465, 0.135, 0.07, 0.165, 0.185, 0.57, 0.645, 0.02, -0.465, 0.055, 0.47, 0.655, 0.54, 0.725, 2.015, 2.1, 1.585, 1.275, 1.195, 0.86, 0.675, 0.8, 0.845, 0.595, 0.3, 0.305, 0.87, 0.48, -0.44, -0.95, -1.7, -2.22, 0.62, 0.51, 0.7, 0.66, 0.65, 0.46], "maxDispA": 2.72, "maxDispB": 2.22, "status": "ok"}, {"date": "2026-05-02", "dateLabel": "02-05-2026", "depths": [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0, 10.5, 11.0, 11.5, 12.0, 12.5, 13.0, 13.5, 14.0, 14.5, 15.0, 15.5, 16.0, 16.5, 17.0, 17.5, 18.0, 18.5, 19.0, 19.5, 20.0], "dispA": [-16.03, -16.22, -15.74, -14.785, -13.58, -7.545, -5.7, -3.24, -1.925, -1.18, -1.145, -3.485, -6.35, -8.065, -8.35, -8.76, -8.445, -8.67, -8.92, -8.725, -9.085, -8.835, -8.36, -8.205, -7.655, -6.035, -3.24, -2.605, -2.66, -2.81, -2.835, -2.91, -3.14, -3.03, -2.905, -3.375, -3.33, -3.275, -3.325, -3.505, -1.745], "dispB": [5.42, 5.43, 4.855, 1.95, -0.015, -1.235, -1.51, -2.315, -2.24, -1.165, 1.17, 1.485, 1.32, 2.63, 3.195, 3.43, 2.01, 3.505, 4.895, 3.21, 1.695, 1.095, 0.585, 0.17, 0.935, 1.83, 1.675, 1.585, 1.51, 2.36, 1.955, 1.005, 0.245, -0.375, -0.975, 1.765, 1.21, 0.995, 0.645, 0.835, 0.63], "maxDispA": 16.22, "maxDispB": 5.43, "status": "warn"}, {"date": "2026-05-04", "dateLabel": "04-05-2026", "depths": [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0, 10.5, 11.0, 11.5, 12.0, 12.5, 13.0, 13.5, 14.0, 14.5, 15.0, 15.5, 16.0, 16.5, 17.0, 17.5, 18.0, 18.5, 19.0, 19.5, 20.0], "dispA": [-5.56, -5.725, -5.505, -4.915, -4.065, -1.13, -0.945, -0.33, -0.04, 0.135, 0.33, -0.505, -1.925, -3.005, -4.025, -4.625, -4.675, -4.45, -4.315, -4.215, -4.33, -4.165, -3.86, -3.975, -2.85, -0.15, 2.52, 4.765, 5.35, 5.025, 4.585, 3.57, 2.965, 2.44, 1.895, 1.015, 0.76, 1.565, 2.36, 2.49, 0.675], "dispB": [8.24, 8.395, 8.31, 6.4, 4.725, 3.27, 2.765, 2.08, 2.045, 2.605, 3.235, 2.605, 2.605, 3.72, 4.31, 4.415, 3.32, 4.19, 5.1, 3.315, 2.055, 1.66, 1.08, 0.79, 1.465, 2.205, 1.86, 1.4, 1.465, 2.355, 2.585, 0.805, -0.475, -1.595, -2.705, -0.165, 1.16, 0.965, 0.415, 0.42, 0.37], "maxDispA": 5.725, "maxDispB": 8.395, "status": "ok"}, {"date": "2026-05-08", "dateLabel": "08-05-2026", "depths": [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0, 10.5, 11.0, 11.5, 12.0, 12.5, 13.0, 13.5, 14.0, 14.5, 15.0, 15.5, 16.0, 16.5, 17.0, 17.5, 18.0, 18.5, 19.0, 19.5, 20.0], "dispA": [-1.535, -1.74, -1.405, -1.19, -1.1, 0.035, -0.95, -0.665, -0.935, -1.15, -1.115, -2.315, -3.28, -3.335, -3.44, -3.22, -3.33, -3.925, -3.85, -3.86, -3.88, -3.62, -3.445, -3.64, -2.26, -1.965, -0.155, -0.085, -0.315, -0.17, -0.225, -0.365, -1.02, -0.94, -1.12, -1.17, -1.185, -0.96, -0.645, -0.845, 0.17], "dispB": [5.37, 5.39, 5.46, 4.38, 5.105, 5.345, 5.16, 5.205, 5.335, 5.475, 5.305, 3.785, 3.775, 4.17, 4.265, 3.945, 3.79, 4.185, 3.875, 2.87, 2.45, 2.305, 1.915, 1.9, 2.19, 2.105, 1.955, 1.95, 2.055, 3.085, 2.775, 1.89, 1.08, 0.46, -0.005, 1.335, 0.885, 0.88, 0.675, 0.695, 0.66], "maxDispA": 3.925, "maxDispB": 5.475, "status": "ok"}]};
 
-function kimiDestroyChart(id){if(kimiCharts[id]){kimiCharts[id].destroy();delete kimiCharts[id];}}
-function kimiMkChart(id,cfg){kimiDestroyChart(id);const c=document.getElementById(id);if(!c)return;kimiCharts[id]=new Chart(c,cfg);return kimiCharts[id];}
+let kimiDepthChartInst=null, kimiTimeChartInst=null, kimiOverlayChartInst=null;
 
 function kimiInit(){
-  kimiBuildBHList();
   kimiUpdateKPIs();
-  kimiUpdateStats();
-  kimiRenderDataTable();
-  kimiUpdateAlertStrip();
-  setTimeout(()=>kimiBuildDepthCharts(),120);
-}
-
-function kimiBuildBHList(){
-  const list=document.getElementById('kimiBHList');
-  if(!list)return;
-  const sel=document.getElementById('kimiBHSelect');
-  list.innerHTML=KIMI_BOREHOLES.map((bh,i)=>{
-    const pctA=(bh.maxA/25*100).toFixed(0);
-    const pctB=(bh.maxB/25*100).toFixed(0);
-    const fillA=Math.min(pctA,100);const fillB=Math.min(pctB,100);
-    const colA=bh.maxA>20?'#ff3355':bh.maxA>15?'#ffcc00':'#00c8ff';
-    const colB=bh.maxB>20?'#ff3355':bh.maxB>15?'#ffcc00':'#ff6b35';
-    return `<div class="kimi-bh-item ${i===kimiCurrentBH?'active':''}" onclick="kimiSelectBH(${i})">
-      <div class="kimi-bh-status ${bh.status}">${bh.status.toUpperCase()}</div>
-      <div class="kimi-bh-name">${bh.id}</div>
-      <div class="kimi-bh-meta"><span>${bh.depth}m</span><span>${bh.sensors} sensors</span></div>
-      <div class="kimi-bh-bars">
-        <div class="kimi-bh-bar-row"><span class="kimi-bh-bar-label">A</span><div class="kimi-bh-bar-track"><div class="kimi-bh-bar-fill" style="width:${fillA}%;background:${colA}"></div></div><span class="kimi-bh-bar-val">${bh.maxA}mm</span></div>
-        <div class="kimi-bh-bar-row"><span class="kimi-bh-bar-label">B</span><div class="kimi-bh-bar-track"><div class="kimi-bh-bar-fill" style="width:${fillB}%;background:${colB}"></div></div><span class="kimi-bh-bar-val">${bh.maxB}mm</span></div>
-      </div>
-      <div class="kimi-bh-actions">
-        <button class="kimi-btn-edit" onclick="event.stopPropagation();kimiOpenEditBHModal(${i})">Edit</button>
-        <button class="kimi-btn-del" onclick="event.stopPropagation();kimiDeleteBH(${i})">Del</button>
-      </div>
-    </div>`;
-  }).join('');
-  // Update select options
-  if(sel){sel.innerHTML=KIMI_BOREHOLES.map((bh,i)=>`<option value="${i}">${bh.id}</option>`).join('');sel.value=kimiCurrentBH;}
+  kimiPopulateSessionSelect();
+  kimiRenderAll();
 }
 
 function kimiUpdateKPIs(){
-  const bh=KIMI_BOREHOLES[kimiCurrentBH];
-  if(!bh)return;
-  const vec=Math.sqrt(bh.maxA**2+bh.maxB**2).toFixed(1);
-  const pctA=(bh.maxA/25*100).toFixed(0);
-  const alerts=KIMI_BOREHOLES.filter(b=>b.status==='alert').length;
-  document.getElementById('kimi-kpi-a').innerHTML=bh.maxA+'<span class="ku">mm</span>';
-  document.getElementById('kimi-kpi-a-depth').textContent='At -'+bh.depthA+'.0 m depth';
-  document.getElementById('kimi-kpi-a-trend').textContent='+'+bh.rateA+' mm/24h';
-  document.getElementById('kimi-kpi-b').innerHTML=bh.maxB+'<span class="ku">mm</span>';
-  document.getElementById('kimi-kpi-b-depth').textContent='At -'+bh.depthB+'.0 m depth';
-  document.getElementById('kimi-kpi-b-trend').textContent='+'+bh.rateB+' mm/24h';
-  document.getElementById('kimi-kpi-vec').innerHTML=vec+'<span class="ku">mm</span>';
-  document.getElementById('kimi-kpi-thresh-pct').textContent=pctA+'% of 25mm used';
-  document.getElementById('kimi-kpi-depth').innerHTML=bh.depth+'<span class="ku">m</span>';
-  document.getElementById('kimi-kpi-sensors').textContent=bh.sensors+'/'+bh.sensors+' sensors active';
-  document.getElementById('kimi-kpi-spacing').textContent='@ '+bh.spacing+'m spacing';
-  document.getElementById('kimi-kpi-bhcount').innerHTML=KIMI_BOREHOLES.length+'<span class="ku"></span>';
-  document.getElementById('kimi-kpi-bhalert').textContent=alerts+' in alert';
+  const d=KIMI_REAL_DATA;
+  document.getElementById('kimiTotalSessions').textContent=d.sessions.length;
+  const maxA=Math.max(...d.sessions.map(s=>s.maxDispA));
+  const maxB=Math.max(...d.sessions.map(s=>s.maxDispB));
+  document.getElementById('kimiMaxDispA').textContent=maxA.toFixed(2)+' mm';
+  document.getElementById('kimiMaxDispB').textContent=maxB.toFixed(2)+' mm';
+  // color
+  document.getElementById('kimiMaxDispA').style.color=maxA>=20?'var(--danger)':maxA>=10?'var(--warn)':'var(--accent)';
+  document.getElementById('kimiMaxDispB').style.color=maxB>=20?'var(--danger)':maxB>=10?'var(--warn)':'var(--info)';
 }
 
-function kimiSelectBH(idx){
-  kimiCurrentBH=idx;
-  kimiBuildBHList();
-  kimiUpdateKPIs();
-  kimiUpdateStats();
-  document.getElementById('kimiStatsTitle').textContent=KIMI_BOREHOLES[idx].id;
-  kimiRebuildActiveTab();
-  kimiUpdateAlertStrip();
+function kimiPopulateSessionSelect(){
+  const sel=document.getElementById('kimiSessionSelect');
+  if(!sel)return;
+  const d=KIMI_REAL_DATA;
+  sel.innerHTML=d.sessions.map((s,i)=>{
+    const label=s.dateLabel+' ('+['Initial',''][Math.min(i,1)]+( i===0?'Initial':s.status==='alert'?'⚠ ALERT':s.status==='warn'?'⚠ WARN':'OK')+')';
+    return `<option value="${i}">${s.dateLabel} — ${i===0?'Initial':s.status==='alert'?'⚠ ALERT':s.status==='warn'?'WARN':'OK'} (maxA=${s.maxDispA}mm)</option>`;
+  }).join('');
+  sel.selectedIndex=d.sessions.length-1; // default to latest
 }
 
-function kimiUpdateAlertStrip(){
-  const strip=document.getElementById('kimiAlertStrip');
-  if(!strip)return;
-  let html='<div class="kimi-alert-label">Alerts:</div>';
-  KIMI_BOREHOLES.forEach(bh=>{
-    if(bh.status==='alert')html+=`<div class="kalert-tag danger"><div class="kadt"></div>${bh.id} A-Axis ${bh.maxA}mm — Approaching Alert Level</div>`;
-    else if(bh.status==='warn')html+=`<div class="kalert-tag warn"><div class="kadt"></div>${bh.id} Rate ${bh.rateA}mm/day — Elevated Velocity</div>`;
-    else html+=`<div class="kalert-tag ok"><div class="kadt"></div>${bh.id} — Within Limits</div>`;
+function kimiRenderAll(){
+  const selIdx=parseInt(document.getElementById('kimiSessionSelect')?.value||0);
+  kimiRenderDepthChart(selIdx);
+  kimiRenderTimeChart();
+  kimiRenderOverlayChart();
+  kimiRenderTable(selIdx);
+}
+
+function kimiRenderDepthChart(idx){
+  const d=KIMI_REAL_DATA;
+  const sess=d.sessions[idx];
+  const axis=document.getElementById('kimiAxisSelect')?.value||'A';
+  const compareMode=document.getElementById('kimiCompareSelect')?.value||'initial';
+  const initial=d.sessions[0];
+  const prev=d.sessions[Math.max(0,idx-1)];
+  const depths=sess.depths;
+
+  const datasets=[];
+  if(axis==='A'||axis==='both'){
+    datasets.push({
+      label:sess.dateLabel+' A-Axis',
+      data:depths.map((_,i)=>{return{x:sess.dispA[i],y:-depths[i]}}),
+      borderColor:'#00d4aa',backgroundColor:'rgba(0,212,170,0.15)',
+      borderWidth:2,pointRadius:3,fill:true,tension:0.2
+    });
+    const ref=compareMode==='previous'?prev:initial;
+    if(idx>0){
+      datasets.push({
+        label:(compareMode==='previous'?prev.dateLabel:initial.dateLabel)+' A (ref)',
+        data:depths.map((_,i)=>{return{x:ref.dispA[i],y:-depths[i]}}),
+        borderColor:'rgba(0,212,170,0.35)',borderDash:[5,5],
+        borderWidth:1,pointRadius:0,fill:false,tension:0.2
+      });
+    }
+  }
+  if(axis==='B'||axis==='both'){
+    datasets.push({
+      label:sess.dateLabel+' B-Axis',
+      data:depths.map((_,i)=>{return{x:sess.dispB[i],y:-depths[i]}}),
+      borderColor:'#f5a623',backgroundColor:'rgba(245,166,35,0.1)',
+      borderWidth:2,pointRadius:3,fill:true,tension:0.2
+    });
+  }
+
+  // Alert threshold line
+  datasets.push({
+    label:'Alert (20mm)',
+    data:[{x:20,y:0},{x:20,y:-20}],
+    borderColor:'rgba(255,51,85,0.6)',borderDash:[4,4],
+    borderWidth:1,pointRadius:0,fill:false
   });
-  strip.innerHTML=html;
+
+  const ctx=document.getElementById('kimiDepthChart');
+  if(!ctx)return;
+  if(kimiDepthChartInst)kimiDepthChartInst.destroy();
+  kimiDepthChartInst=new Chart(ctx,{
+    type:'scatter',
+    data:{datasets},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      scales:{
+        x:{title:{display:true,text:'Displacement (mm)',color:'#8892a4'},
+           grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#8892a4'}},
+        y:{title:{display:true,text:'Depth (m)',color:'#8892a4'},
+           min:-20,max:0,
+           ticks:{color:'#8892a4',callback:v=>Math.abs(v)+'m'},
+           grid:{color:'rgba(255,255,255,0.05)'}},
+      },
+      plugins:{legend:{labels:{color:'#8892a4',font:{size:10}}},
+               tooltip:{callbacks:{
+                 label:ctx=>`Depth: ${Math.abs(ctx.parsed.y).toFixed(1)}m | Disp: ${ctx.parsed.x.toFixed(3)}mm`
+               }}},
+      showLine:true,
+    }
+  });
 }
 
-function kimiUpdateStats(){
-  const bh=KIMI_BOREHOLES[kimiCurrentBH];if(!bh)return;
-  const vec=Math.sqrt(bh.maxA**2+bh.maxB**2).toFixed(1);
-  const pctA=(bh.maxA/25*100).toFixed(0);
-  const pctAct=(bh.maxA/40*100).toFixed(0);
-  const rows=[
-    ['Max A-Axis Displacement',bh.maxA+'mm',bh.maxA>20?'danger':bh.maxA>15?'warn':'ok'],
-    ['Max B-Axis Displacement',bh.maxB+'mm',bh.maxB>20?'danger':bh.maxB>15?'warn':'ok'],
-    ['Vector Displacement',vec+'mm',parseFloat(vec)>22?'danger':parseFloat(vec)>18?'warn':'ok'],
-    ['Alert Level (A)','25mm / '+pctA+'% used',pctA>80?'danger':pctA>60?'warn':'ok'],
-    ['Action Level','40mm / '+pctAct+'% used',pctAct>80?'danger':pctAct>60?'warn':'ok'],
-    ['A-Axis Rate',bh.rateA+'mm/day',bh.rateA>1.5?'danger':bh.rateA>0.8?'warn':'ok'],
-    ['B-Axis Rate',bh.rateB+'mm/day',bh.rateB>1.5?'danger':bh.rateB>0.8?'warn':'ok'],
-    ['Instrument Depth',bh.depth+'m','ok'],
-    ['Active Sensors',bh.sensors+'/'+bh.sensors,'ok'],
-    ['Sensor Spacing',bh.spacing+'m','ok'],
-  ];
-  const grid=document.getElementById('kimiStatsGrid');
-  if(grid)grid.innerHTML=rows.map(([name,val,cls])=>`<div class="kimi-stat-row"><span class="kimi-stat-name">${name}</span><span class="kimi-stat-val ${cls}">${val}</span></div>`).join('');
+function kimiRenderTimeChart(){
+  const d=KIMI_REAL_DATA;
+  const ctx=document.getElementById('kimiTimeChart');
+  if(!ctx)return;
+  if(kimiTimeChartInst)kimiTimeChartInst.destroy();
+
+  const labels=d.sessions.map(s=>s.dateLabel);
+  kimiTimeChartInst=new Chart(ctx,{
+    type:'line',
+    data:{
+      labels,
+      datasets:[
+        {label:'Max Disp A-Axis (mm)',data:d.sessions.map(s=>s.maxDispA),
+          borderColor:'#00d4aa',backgroundColor:'rgba(0,212,170,0.1)',
+          borderWidth:2,pointRadius:4,fill:true,tension:0.3},
+        {label:'Max Disp B-Axis (mm)',data:d.sessions.map(s=>s.maxDispB),
+          borderColor:'#f5a623',backgroundColor:'rgba(245,166,35,0.1)',
+          borderWidth:2,pointRadius:4,fill:false,tension:0.3},
+        {label:'Alert (20mm)',data:d.sessions.map(()=>20),
+          borderColor:'rgba(255,51,85,0.6)',borderDash:[5,5],
+          borderWidth:1,pointRadius:0,fill:false},
+        {label:'Warning (10mm)',data:d.sessions.map(()=>10),
+          borderColor:'rgba(245,166,35,0.4)',borderDash:[3,3],
+          borderWidth:1,pointRadius:0,fill:false},
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      scales:{
+        x:{ticks:{color:'#8892a4',maxRotation:45,font:{size:9}},grid:{color:'rgba(255,255,255,0.05)'}},
+        y:{title:{display:true,text:'Displacement (mm)',color:'#8892a4'},
+           ticks:{color:'#8892a4'},grid:{color:'rgba(255,255,255,0.05)'},min:0}
+      },
+      plugins:{legend:{labels:{color:'#8892a4',font:{size:10}}}},
+    }
+  });
 }
 
-// ── Kimi Chart Builders ──
-function kimiBuildDepthCharts(){
-  const bh=KIMI_BOREHOLES[kimiCurrentBH];if(!bh)return;
-  const depths=bh.aProfile.map((_,i)=>-(i*bh.spacing).toFixed(1));
-  const alertLine=bh.aProfile.map(()=>25);
-  const common={type:'line',options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(0,200,255,0.06)'},ticks:{color:'#3a6070',callback:v=>v+'mm'},title:{display:true,text:'Displacement (mm)',color:'#3a6070',font:{size:9}}},y:{grid:{color:'rgba(0,200,255,0.06)'},ticks:{color:'#3a6070'},title:{display:true,text:'Depth (m)',color:'#3a6070',font:{size:9}}}}}};
-  kimiMkChart('kimiChartADepth',{...common,data:{labels:depths,datasets:[{label:'A-Axis Current',data:bh.aProfile,borderColor:'#00c8ff',backgroundColor:'rgba(0,200,255,0.08)',borderWidth:2,pointRadius:3,fill:true,tension:0.3},{label:'Alert (25mm)',data:alertLine,borderColor:'rgba(255,51,85,0.5)',borderDash:[5,5],pointRadius:0,borderWidth:1,backgroundColor:'transparent'}]}});
-  const alertLineB=bh.bProfile.map(()=>25);
-  kimiMkChart('kimiChartBDepth',{...common,data:{labels:depths,datasets:[{label:'B-Axis Current',data:bh.bProfile,borderColor:'#ff6b35',backgroundColor:'rgba(255,107,53,0.08)',borderWidth:2,pointRadius:3,fill:true,tension:0.3},{label:'Alert (25mm)',data:alertLineB,borderColor:'rgba(255,51,85,0.5)',borderDash:[5,5],pointRadius:0,borderWidth:1,backgroundColor:'transparent'}]}});
+function kimiRenderOverlayChart(){
+  const d=KIMI_REAL_DATA;
+  const ctx=document.getElementById('kimiOverlayChart');
+  if(!ctx)return;
+  if(kimiOverlayChartInst)kimiOverlayChartInst.destroy();
+
+  const colors=['#4a5568','#6b7280','#9ca3af','#60a5fa','#34d399','#fbbf24','#f87171',
+                '#a78bfa','#06b6d4','#84cc16','#f472b6','#fb923c',
+                '#00d4aa','#f5a623','#60a5fa','#e879f9','#22d3ee'];
+
+  const datasets=d.sessions.map((s,i)=>{
+    const isLast=i===d.sessions.length-1;
+    const isFirst=i===0;
+    return {
+      label:s.dateLabel,
+      data:s.depths.map((_,j)=>{return{x:s.dispA[j],y:-s.depths[j]}}),
+      borderColor:isLast?'#00d4aa':isFirst?'rgba(255,255,255,0.5)':colors[i%colors.length],
+      borderWidth:isLast?3:isFirst?1.5:1.5,
+      borderDash:isFirst?[5,5]:[],
+      pointRadius:0,fill:false,tension:0.2,showLine:true,
+    };
+  });
+
+  kimiOverlayChartInst=new Chart(ctx,{
+    type:'scatter',
+    data:{datasets},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      scales:{
+        x:{title:{display:true,text:'A-Axis Displacement from Initial (mm)',color:'#8892a4'},
+           grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#8892a4'}},
+        y:{title:{display:true,text:'Depth (m)',color:'#8892a4'},min:-20,max:0,
+           ticks:{color:'#8892a4',callback:v=>Math.abs(v)+'m'},
+           grid:{color:'rgba(255,255,255,0.05)'}},
+      },
+      plugins:{
+        legend:{labels:{color:'#8892a4',font:{size:9},boxWidth:12},
+                position:'right'},
+        tooltip:{callbacks:{label:c=>`${c.dataset.label} | ${Math.abs(c.parsed.y).toFixed(1)}m: ${c.parsed.x.toFixed(2)}mm`}}
+      },
+      showLine:true
+    }
+  });
 }
 
-function kimiBuildTimeSeries(){
-  const bh=KIMI_BOREHOLES[kimiCurrentBH];if(!bh)return;
-  const days=90;const labels=[];const dataA=[],dataB=[],dataVec=[];
-  for(let i=days;i>=0;i--){
-    const d=new Date(Date.now()-i*86400000);
-    labels.push(d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'}));
-    const p=(days-i)/days;
-    const a=+(bh.maxA*Math.pow(p,0.65)).toFixed(2);
-    const b=+(bh.maxB*Math.pow(p,0.6)).toFixed(2);
-    dataA.push(a);dataB.push(b);dataVec.push(+Math.sqrt(a**2+b**2).toFixed(2));
-  }
-  kimiMkChart('kimiChartTimeSeries',{type:'line',data:{labels,datasets:[{label:'A-Axis',data:dataA,borderColor:'#00c8ff',backgroundColor:'rgba(0,200,255,0.06)',borderWidth:2,pointRadius:0,fill:true,tension:0.4},{label:'B-Axis',data:dataB,borderColor:'#ff6b35',backgroundColor:'rgba(255,107,53,0.06)',borderWidth:2,pointRadius:0,fill:true,tension:0.4},{label:'Vector',data:dataVec,borderColor:'#00ff9d',backgroundColor:'transparent',borderWidth:1.5,pointRadius:0,borderDash:[3,3],tension:0.4},{label:'Alert',data:labels.map(()=>25),borderColor:'rgba(255,51,85,0.4)',borderDash:[5,5],pointRadius:0,borderWidth:1,backgroundColor:'transparent'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(0,200,255,0.06)'},ticks:{color:'#3a6070',maxRotation:45}},y:{title:{display:true,text:'Displacement (mm)',color:'#3a6070',font:{size:9}},grid:{color:'rgba(0,200,255,0.06)'},ticks:{color:'#3a6070',callback:v=>v+'mm'},min:0}},animation:{duration:700}}});
-}
-
-function kimiBuildCumulativeCharts(){
-  const bh=KIMI_BOREHOLES[kimiCurrentBH];if(!bh)return;
-  const days=90;const labels=[];const cumA=[],cumB=[],rateA=[],rateB=[];
-  for(let i=days;i>=0;i--){
-    const d=new Date(Date.now()-i*86400000);
-    labels.push(d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'}));
-    const p=(days-i)/days;
-    cumA.push(+(bh.maxA*Math.pow(p,0.65)).toFixed(2));
-    cumB.push(+(bh.maxB*Math.pow(p,0.6)).toFixed(2));
-    rateA.push(+(bh.rateA*(0.5+Math.random()*0.8)).toFixed(3));
-    rateB.push(+(bh.rateB*(0.5+Math.random()*0.8)).toFixed(3));
-  }
-  kimiMkChart('kimiChartCumA',{type:'line',data:{labels,datasets:[{label:'Cumulative A',data:cumA,borderColor:'#00c8ff',backgroundColor:'rgba(0,200,255,0.08)',borderWidth:2,pointRadius:0,fill:true,tension:0.4},{label:'Cumulative B',data:cumB,borderColor:'#ff6b35',backgroundColor:'rgba(255,107,53,0.08)',borderWidth:2,pointRadius:0,fill:true,tension:0.4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(0,200,255,0.06)'},ticks:{color:'#3a6070',maxTicksLimit:8}},y:{grid:{color:'rgba(0,200,255,0.06)'},ticks:{color:'#3a6070',callback:v=>v+'mm'},min:0}},animation:{duration:600}}});
-  kimiMkChart('kimiChartRate',{type:'bar',data:{labels,datasets:[{label:'Rate A',data:rateA,backgroundColor:'rgba(0,200,255,0.5)',borderColor:'#00c8ff',borderWidth:1},{label:'Rate B',data:rateB,backgroundColor:'rgba(255,107,53,0.5)',borderColor:'#ff6b35',borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(0,200,255,0.06)'},ticks:{color:'#3a6070',maxTicksLimit:8}},y:{grid:{color:'rgba(0,200,255,0.06)'},ticks:{color:'#3a6070',callback:v=>v+'mm/d'},min:0}},animation:{duration:600}}});
-}
-
-function kimiBuildVectorChart(){
-  const bh=KIMI_BOREHOLES[kimiCurrentBH];if(!bh)return;
-  const pts=bh.aProfile.map((a,i)=>({x:a,y:bh.bProfile[i]||0}));
-  const alertCircle=[];
-  for(let angle=0;angle<=360;angle+=5)alertCircle.push({x:25*Math.cos(angle*Math.PI/180),y:25*Math.sin(angle*Math.PI/180)});
-  kimiMkChart('kimiChartVector',{type:'scatter',data:{datasets:[{label:'Depth Points',data:pts,backgroundColor:pts.map((_,i)=>`hsl(${200-i*4},80%,${50+i*0.8}%)`),borderColor:'transparent',pointRadius:6,pointHoverRadius:9},{label:'Alert Circle',data:alertCircle,borderColor:'rgba(255,51,85,0.4)',backgroundColor:'rgba(255,51,85,0.03)',pointRadius:0,showLine:true,borderWidth:1.5,borderDash:[5,5],fill:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'A-Axis Displacement (mm)',color:'#3a6070',font:{size:9}},grid:{color:'rgba(0,200,255,0.06)'},ticks:{color:'#3a6070'},min:0},y:{title:{display:true,text:'B-Axis Displacement (mm)',color:'#3a6070',font:{size:9}},grid:{color:'rgba(0,200,255,0.06)'},ticks:{color:'#3a6070'},min:0}},animation:{duration:700}}});
-}
-
-function kimiSwitchTab(name,btn){
-  document.querySelectorAll('.kimi-chart-tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.kimi-chart-view').forEach(v=>v.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('kimi-tab-'+name).classList.add('active');
-  setTimeout(()=>{
-    if(name==='profile')kimiBuildDepthCharts();
-    if(name==='timeseries')kimiBuildTimeSeries();
-    if(name==='cumulative')kimiBuildCumulativeCharts();
-    if(name==='vector')kimiBuildVectorChart();
-  },50);
-}
-
-function kimiRebuildActiveTab(){
-  const active=document.querySelector('.kimi-chart-tab.active');
-  if(!active)return;
-  const name=active.textContent.toLowerCase().replace(/\s+/g,'');
-  if(name.includes('depth'))kimiBuildDepthCharts();
-  else if(name.includes('time'))kimiBuildTimeSeries();
-  else if(name.includes('cumul'))kimiBuildCumulativeCharts();
-  else if(name.includes('vector'))kimiBuildVectorChart();
-  else kimiBuildDepthCharts();
-}
-
-function kimiUpdateAllCharts(){kimiRebuildActiveTab();}
-function kimiRefreshAllCharts(){
-  kimiBuildDepthCharts();
-  const kRow=document.getElementById('kimi-kpi-a');
-  if(kRow){kRow.closest('.kimi-kpi-row').style.opacity='0.5';setTimeout(()=>{kRow.closest('.kimi-kpi-row').style.opacity='1';},300);}
-}
-
-function kimiExportData(){
-  const csv=['Borehole,Depth(m),Sensors,Spacing(m),MaxA(mm),MaxB(mm),RateA(mm/d),RateB(mm/d),Status',...KIMI_BOREHOLES.map(bh=>`${bh.id},${bh.depth},${bh.sensors},${bh.spacing},${bh.maxA},${bh.maxB},${bh.rateA},${bh.rateB},${bh.status}`)].join('\n');
-  downloadCSV(csv,'KimiInclinometer_Data.csv');
+function kimiRenderTable(idx){
+  const d=KIMI_REAL_DATA;
+  const sess=d.sessions[idx];
+  const lbl=document.getElementById('kimiTableDateLabel');
+  if(lbl)lbl.textContent=sess.dateLabel+(idx===0?' (Initial)':'');
+  const tbody=document.getElementById('kimiDataTbody');
+  if(!tbody)return;
+  tbody.innerHTML=sess.depths.map((dep,i)=>{
+    const dA=sess.dispA[i], dB=sess.dispB[i];
+    const abs=Math.abs(dA);
+    const color=abs>=20?'var(--danger)':abs>=10?'var(--warn)':abs>=5?'var(--info)':'var(--txt2)';
+    const status=abs>=20?'ALERT':abs>=10?'WARN':abs>=5?'MONITOR':'OK';
+    return `<tr>
+      <td style="font-family:var(--mono)">${dep.toFixed(1)}</td>
+      <td style="font-family:var(--mono);color:${color}">${dA.toFixed(3)}</td>
+      <td style="font-family:var(--mono);color:var(--info)">${dB.toFixed(3)}</td>
+      <td><span class="chip ${abs>=20?'chip-r':abs>=10?'chip-w':'chip-g'}">${status}</span></td>
+    </tr>`;
+  }).join('');
 }
 
 function kimiImportCSV(){
-  const input=document.createElement('input');
-  input.type='file';
-  input.accept='.csv,.xls,.xlsx';
-  input.onchange=e=>{
-    const f=e.target.files[0];if(!f)return;
-    const reader=new FileReader();
-    reader.onload=ev=>{
-      try{
-        const lines=ev.target.result.split('\n');
-        // Auto-detect inclinometer format from Excel export
-        // Depth row is identified by "Cable mark" or numeric depth headers
-        let depthRow=null, faceARow=null, faceBRow=null, faceCRow=null, faceDRow=null;
-        let cumulABRow=null, cumulCDRow=null;
-        let imported=0;
-        const bhId='INC-MAT-254'; // Default borehole ID from the file
-        // Find structured rows
-        lines.forEach((line,idx)=>{
-          const cols=line.split(',');
-          const rowLabel=(cols[1]||'').trim();
-          if(rowLabel.includes('Cable mark'))depthRow=cols.slice(2);
-          if(rowLabel==='Face A'&&!faceARow)faceARow={data:cols.slice(2),rowIdx:idx};
-          if(rowLabel==='Face B'&&!faceBRow)faceBRow={data:cols.slice(2),rowIdx:idx};
-          if(rowLabel==='Face C'&&!faceCRow)faceCRow={data:cols.slice(2),rowIdx:idx};
-          if(rowLabel==='Face D'&&!faceDRow)faceDRow={data:cols.slice(2),rowIdx:idx};
-          if(rowLabel==='Plane AB'&&!cumulABRow)cumulABRow={data:cols.slice(2)};
-          if(rowLabel==='Plane CD'&&!cumulCDRow)cumulCDRow={data:cols.slice(2)};
-        });
-
-        if(depthRow && faceARow){
-          // Build depth profile arrays from Face A and Face B columns
-          // Depths: from -20.5m to 0.0m (step 0.5)
-          const depths=depthRow.map(d=>parseFloat(d)||0).filter((d,i)=>depthRow[i]!==undefined&&depthRow[i].trim()!=='');
-          const aVals=faceARow.data.map(v=>Math.abs(parseFloat(v)||0));
-          const bVals=faceBRow?faceBRow.data.map(v=>Math.abs(parseFloat(v)||0)):aVals.map(()=>0);
-
-          // Check if BH already exists
-          const existIdx=KIMI_BOREHOLES.findIndex(b=>b.id===bhId);
-          const maxA=Math.max(...aVals.map(v=>isNaN(v)?0:v)).toFixed(2)*1;
-          const maxB=Math.max(...bVals.map(v=>isNaN(v)?0:v)).toFixed(2)*1;
-          const maxDepth=20.5; // Fixed: 20.0 to 20.5 meter depth
-          const sensors=aVals.length;
-          const spacing=0.5;
-
-          const newBH={
-            id:bhId,
-            status:maxA>=40?'alert':maxA>=25?'warn':'ok',
-            depth:maxDepth,
-            sensors:sensors,
-            spacing:spacing,
-            maxA:maxA,
-            maxB:maxB,
-            rateA:0,
-            rateB:0,
-            depthA:depths[aVals.indexOf(Math.max(...aVals))]||0,
-            depthB:depths[bVals.indexOf(Math.max(...bVals))]||0,
-            aProfile:aVals,
-            bProfile:bVals,
-          };
-
-          if(existIdx>=0){KIMI_BOREHOLES[existIdx]=newBH;}
-          else{KIMI_BOREHOLES.push(newBH);}
-          imported++;
-        } else {
-          // Fallback: parse as simple CSV rows: BH,Depth,MaxA,MaxB,RateA,RateB,Status
-          lines.slice(1).forEach(line=>{
-            const cols=line.split(',');
-            if(cols.length<3||!cols[0].trim())return;
-            const id=cols[0].trim();
-            const depth=parseFloat(cols[1])||20.5;
-            const maxA=Math.abs(parseFloat(cols[2])||0);
-            const maxB=Math.abs(parseFloat(cols[3])||0);
-            const rateA=parseFloat(cols[4])||0;
-            const rateB=parseFloat(cols[5])||0;
-            const status=cols[6]?cols[6].trim():'ok';
-            const n=Math.round(depth/0.5)+1;
-            const aProfile=Array.from({length:n},(_,i)=>+(maxA*(i/n)).toFixed(2));
-            const bProfile=Array.from({length:n},(_,i)=>+(maxB*(i/n)).toFixed(2));
-            const existIdx=KIMI_BOREHOLES.findIndex(b=>b.id===id);
-            const bh={id,status,depth,sensors:n,spacing:0.5,maxA,maxB,rateA,rateB,depthA:depth*0.7,depthB:depth*0.6,aProfile,bProfile};
-            if(existIdx>=0)KIMI_BOREHOLES[existIdx]=bh;
-            else KIMI_BOREHOLES.push(bh);
-            imported++;
-          });
-        }
-
-        kimiBuildBHList();
-        kimiUpdateKPIs();
-        kimiUpdateStats();
-        kimiRenderDataTable();
-        kimiUpdateAlertStrip();
-        setTimeout(()=>kimiBuildDepthCharts(),150);
-        showToast('✓ Imported '+imported+' borehole(s) from CSV');
-      }catch(err){
-        showToast('Import error: '+err.message);
-      }
-    };
-    reader.readAsText(f);
-  };
-  input.click();
+  showToast('CSV import: Naya file select karo — abhi GKPSP:INC-01 ka data pre-loaded hai');
 }
 
-// ── Kimi Data Table ──
-function kimiRenderDataTable(){
-  const tbody=document.getElementById('kimiDataTbody');
-  if(!tbody)return;
-  tbody.innerHTML=KIMI_BOREHOLES.map((bh,i)=>{
-    const sc=bh.status==='alert'?'danger':bh.status==='warn'?'warn':'ok';
-    const scTxt={'ok':'NORMAL','warn':'WARNING','alert':'ALERT'}[bh.status];
-    return `<tr>
-      <td style="color:#00c8ff;font-weight:700">${bh.id}</td>
-      <td>${bh.depth}</td>
-      <td style="color:${bh.maxA>20?'#ff3355':bh.maxA>15?'#ffcc00':'#00c8ff'}">${bh.maxA}</td>
-      <td style="color:${bh.maxB>20?'#ff3355':bh.maxB>15?'#ffcc00':'#ff6b35'}">${bh.maxB}</td>
-      <td style="color:${bh.rateA>1.5?'#ff3355':bh.rateA>0.8?'#ffcc00':'#00ff9d'}">${bh.rateA}</td>
-      <td style="color:${bh.rateB>1.5?'#ff3355':bh.rateB>0.8?'#ffcc00':'#00ff9d'}">${bh.rateB}</td>
-      <td><span style="padding:2px 8px;border-radius:10px;font-size:9px;font-family:'Share Tech Mono',monospace;background:rgba(${sc==='danger'?'255,51,85':sc==='warn'?'255,204,0':'0,255,157'},.12);color:${sc==='danger'?'#ff3355':sc==='warn'?'#ffcc00':'#00ff9d'};border:1px solid ${sc==='danger'?'rgba(255,51,85,.4)':sc==='warn'?'rgba(255,204,0,.4)':'rgba(0,255,157,.4)'}">${scTxt}</span></td>
-      <td><div class="kimi-data-actions">
-        <button class="kimi-btn-edit" onclick="kimiOpenEditBHModal(${i})">Edit</button>
-        <button class="kimi-btn-del" onclick="kimiDeleteBH(${i})">Del</button>
-      </div></td>
-    </tr>`;
-  }).join('');
-  const cnt=document.getElementById('kimiLogCount');
-  if(cnt)cnt.textContent=KIMI_BOREHOLES.length+' records';
+function kimiExportCSV(){  const d=KIMI_REAL_DATA;
+  const rows=[['Site',d.site],['BH',d.bhId],['Depth(m)','DispA(mm)','DispB(mm)','Date']];
+  // Export latest session
+  const selIdx=parseInt(document.getElementById('kimiSessionSelect')?.value||d.sessions.length-1);
+  const sess=d.sessions[selIdx];
+  sess.depths.forEach((dep,i)=>rows.push([dep,sess.dispA[i],sess.dispB[i],sess.dateLabel]));
+  const csv=rows.map(r=>r.join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv,'+encodeURIComponent(csv);
+  a.download='GKPSP_INC-01_'+sess.dateLabel.replace(/[\/:]/g,'-')+'.csv';
+  a.click();
 }
-
-// ── Kimi Modals ──
-function kimiCloseModal(id){document.getElementById(id).classList.remove('open');}
-document.querySelectorAll('.kimi-modal-bg').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
-
-function kimiOpenAddBHModal(){
-  document.getElementById('kimiAddBHTitle').textContent='ADD NEW BOREHOLE';
-  ['kimiBHId','kimiBHDepth','kimiBHSensors','kimiBHSpacing','kimiBHMaxA','kimiBHMaxB','kimiBHRateA','kimiBHRateB','kimiBHDepthA','kimiBHDepthB','kimiBHAProfile','kimiBHBProfile'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  document.getElementById('kimiBHStatus').value='ok';
-  document.getElementById('kimiAddBHModal').dataset.editIdx='';
-  document.getElementById('kimiAddBHModal').classList.add('open');
-}
-
-function kimiOpenEditBHModal(idx){
-  const bh=KIMI_BOREHOLES[idx];
-  document.getElementById('kimiAddBHTitle').textContent='EDIT BOREHOLE — '+bh.id;
-  document.getElementById('kimiBHId').value=bh.id;
-  document.getElementById('kimiBHStatus').value=bh.status;
-  document.getElementById('kimiBHDepth').value=bh.depth;
-  document.getElementById('kimiBHSensors').value=bh.sensors;
-  document.getElementById('kimiBHSpacing').value=bh.spacing;
-  document.getElementById('kimiBHMaxA').value=bh.maxA;
-  document.getElementById('kimiBHMaxB').value=bh.maxB;
-  document.getElementById('kimiBHRateA').value=bh.rateA;
-  document.getElementById('kimiBHRateB').value=bh.rateB;
-  document.getElementById('kimiBHDepthA').value=bh.depthA;
-  document.getElementById('kimiBHDepthB').value=bh.depthB;
-  document.getElementById('kimiBHAProfile').value=bh.aProfile.join(',');
-  document.getElementById('kimiBHBProfile').value=bh.bProfile.join(',');
-  document.getElementById('kimiAddBHModal').dataset.editIdx=idx;
-  document.getElementById('kimiAddBHModal').classList.add('open');
-}
-
-function kimiSaveBorehole(){
-  const id=document.getElementById('kimiBHId').value.trim();
-  if(!id)return alert('Borehole ID is required');
-  const parseProfile=str=>str.split(',').map(v=>parseFloat(v.trim())||0).filter(v=>!isNaN(v));
-  const newBH={
-    id,
-    status:document.getElementById('kimiBHStatus').value,
-    depth:parseFloat(document.getElementById('kimiBHDepth').value)||30,
-    sensors:parseInt(document.getElementById('kimiBHSensors').value)||25,
-    spacing:parseFloat(document.getElementById('kimiBHSpacing').value)||1.2,
-    maxA:parseFloat(document.getElementById('kimiBHMaxA').value)||0,
-    maxB:parseFloat(document.getElementById('kimiBHMaxB').value)||0,
-    rateA:parseFloat(document.getElementById('kimiBHRateA').value)||0,
-    rateB:parseFloat(document.getElementById('kimiBHRateB').value)||0,
-    depthA:parseFloat(document.getElementById('kimiBHDepthA').value)||0,
-    depthB:parseFloat(document.getElementById('kimiBHDepthB').value)||0,
-    aProfile:parseProfile(document.getElementById('kimiBHAProfile').value||'0'),
-    bProfile:parseProfile(document.getElementById('kimiBHBProfile').value||'0'),
-  };
-  const editIdx=document.getElementById('kimiAddBHModal').dataset.editIdx;
-  if(editIdx!==''){
-    KIMI_BOREHOLES[parseInt(editIdx)]=newBH;
-    if(kimiCurrentBH===parseInt(editIdx))kimiCurrentBH=parseInt(editIdx);
-  } else {
-    KIMI_BOREHOLES.push(newBH);
-    kimiCurrentBH=KIMI_BOREHOLES.length-1;
-  }
-  kimiCloseModal('kimiAddBHModal');
-  kimiBuildBHList();kimiUpdateKPIs();kimiUpdateStats();kimiRenderDataTable();kimiRebuildActiveTab();kimiUpdateAlertStrip();
-  showToast(editIdx!==''?'Borehole updated!':'New borehole added!');
-  saveToStorage();
-}
-
-function kimiDeleteBH(idx){
-  if(!confirm('Delete '+KIMI_BOREHOLES[idx].id+'?'))return;
-  KIMI_BOREHOLES.splice(idx,1);
-  if(kimiCurrentBH>=KIMI_BOREHOLES.length)kimiCurrentBH=Math.max(0,KIMI_BOREHOLES.length-1);
-  kimiBuildBHList();kimiUpdateKPIs();kimiUpdateStats();kimiRenderDataTable();kimiRebuildActiveTab();kimiUpdateAlertStrip();
-  showToast('Borehole deleted.');saveToStorage();
-}
-
-function kimiOpenAddReadingModal(){
-  const bh=KIMI_BOREHOLES[kimiCurrentBH];if(!bh)return;
-  document.getElementById('kimiReadingBHLabel').textContent=bh.id;
-  document.getElementById('kimiReadDepth').value='';
-  document.getElementById('kimiReadA').value='';
-  document.getElementById('kimiReadB').value='';
-  document.getElementById('kimiReadMaxA').value=bh.maxA;
-  document.getElementById('kimiReadMaxB').value=bh.maxB;
-  document.getElementById('kimiReadRateA').value=bh.rateA;
-  document.getElementById('kimiAddReadingModal').classList.add('open');
-}
-
-function kimiSaveReading(){
-  const bh=KIMI_BOREHOLES[kimiCurrentBH];if(!bh)return;
-  const depth=parseFloat(document.getElementById('kimiReadDepth').value)||0;
-  const a=parseFloat(document.getElementById('kimiReadA').value)||0;
-  const b=parseFloat(document.getElementById('kimiReadB').value)||0;
-  const maxA=parseFloat(document.getElementById('kimiReadMaxA').value)||bh.maxA;
-  const maxB=parseFloat(document.getElementById('kimiReadMaxB').value)||bh.maxB;
-  const rateA=parseFloat(document.getElementById('kimiReadRateA').value)||bh.rateA;
-  // Update profile at depth index
-  const idx=Math.round(depth/bh.spacing);
-  if(idx>=0&&idx<bh.sensors){
-    // Extend profiles if needed
-    while(bh.aProfile.length<=idx)bh.aProfile.push(0);
-    while(bh.bProfile.length<=idx)bh.bProfile.push(0);
-    bh.aProfile[idx]=a;
-    bh.bProfile[idx]=b;
-  }
-  // Update metadata
-  bh.maxA=maxA;bh.maxB=maxB;bh.rateA=rateA;
-  // Recalc depthA/B
-  const peakA=Math.max(...bh.aProfile);
-  bh.depthA=+(bh.aProfile.indexOf(peakA)*bh.spacing).toFixed(1);
-  const peakB=Math.max(...bh.bProfile);
-  bh.depthB=+(bh.bProfile.indexOf(peakB)*bh.spacing).toFixed(1);
-  // Auto-update status
-  if(maxA>20||maxB>20)bh.status='alert';
-  else if(maxA>12||maxB>12||rateA>0.8)bh.status='warn';
-  else bh.status='ok';
-  kimiCloseModal('kimiAddReadingModal');
-  kimiBuildBHList();kimiUpdateKPIs();kimiUpdateStats();kimiRenderDataTable();kimiRebuildActiveTab();kimiUpdateAlertStrip();
-  showToast('Reading added to '+bh.id+'!');saveToStorage();
-  if(maxA>20||maxB>20)notifyAdmin('Alert: '+bh.id+' displacement exceeds alert threshold!');
-}
-
-// Live nudge for kimi
-setInterval(()=>{
-  if(!document.getElementById('view-kimi-inc').classList.contains('active'))return;
-  KIMI_BOREHOLES.forEach(bh=>{
-    bh.maxA=+Math.max(0,bh.maxA+(Math.random()-0.3)*0.05).toFixed(2);
-    bh.maxB=+Math.max(0,bh.maxB+(Math.random()-0.3)*0.04).toFixed(2);
-    bh.aProfile=bh.aProfile.map(v=>+Math.max(0,v+(Math.random()-0.35)*0.03).toFixed(3));
-    bh.bProfile=bh.bProfile.map(v=>+Math.max(0,v+(Math.random()-0.35)*0.02).toFixed(3));
-  });
-  kimiUpdateKPIs();kimiBuildBHList();
-},8000);
 
 
 // Month helpers moved above CVT section
