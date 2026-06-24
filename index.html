@@ -1321,6 +1321,7 @@ canvas{display:block}
           <div style="overflow:auto;max-height:320px">
             <table class="tbl" id="kimiDataTable">
               <thead><tr>
+                <th>Date</th>
                 <th>Depth (m)</th>
                 <th>Disp A (mm)</th>
                 <th>Disp B (mm)</th>
@@ -1916,8 +1917,6 @@ const PRELOADED_TRT_DATA = [
     {id:238754518,date:"2026-01-30",instId:"TRT-LHS (4369)",position:"TRT LHS",rdm:"9.25",ch1:1.2,ch2:0.3,ch3:0.9,avg:0.8,notes:""},
     {id:238755518,date:"2026-02-02",instId:"TRT-LHS (4369)",position:"TRT LHS",rdm:"9.25",ch1:1.0,ch2:0.5,ch3:0.5556597222222223,avg:0.685,notes:""},
     {id:238756518,date:"2026-02-03",instId:"TRT-LHS (4369)",position:"TRT LHS",rdm:"9.25",ch1:1.1,ch2:0.6,ch3:0.7,avg:0.8,notes:""},
-    {id:238757518,date:"2026-02-02",instId:"TRT-LHS (4369)",position:"TRT LHS",rdm:"9.25",ch1:1.0,ch2:0.5,ch3:0.5556597222222223,avg:0.685,notes:""},
-    {id:238758518,date:"2026-02-03",instId:"TRT-LHS (4369)",position:"TRT LHS",rdm:"9.25",ch1:1.1,ch2:0.6,ch3:0.7,avg:0.8,notes:""},
     {id:238759518,date:"2026-02-06",instId:"TRT-LHS (4369)",position:"TRT LHS",rdm:"9.25",ch1:1.1,ch2:0.3,ch3:0.7,avg:0.7,notes:""},
     {id:238760518,date:"2026-02-09",instId:"TRT-LHS (4369)",position:"TRT LHS",rdm:"9.25",ch1:1.0,ch2:0.4,ch3:0.06,avg:0.487,notes:""},
     {id:238761518,date:"2026-02-11",instId:"TRT-LHS (4369)",position:"TRT LHS",rdm:"9.25",ch1:1.4,ch2:0.5,ch3:0.3,avg:0.733,notes:""},
@@ -3834,6 +3833,7 @@ function kimiRenderTable(idx){
     const color=abs>=20?'var(--danger)':abs>=10?'var(--warn)':abs>=5?'var(--info)':'var(--txt2)';
     const status=abs>=20?'ALERT':abs>=10?'WARN':abs>=5?'MONITOR':'OK';
     return `<tr>
+      <td style="font-family:var(--mono);font-size:9px;color:var(--accent)">${sess.dateLabel}</td>
       <td style="font-family:var(--mono)">${dep.toFixed(1)}</td>
       <td style="font-family:var(--mono);color:${color}">${dA.toFixed(3)}</td>
       <td style="font-family:var(--mono);color:var(--info)">${dB.toFixed(3)}</td>
@@ -3922,6 +3922,11 @@ function kimiDeleteSessionByIdx(idx){
 
 function kimiEditRow(sessIdx, rowIdx){
   const sess=KIMI_REAL_DATA.sessions[sessIdx];
+  if(!sess)return;
+  const dep=sess.depths[rowIdx];
+  const a=sess.dispA[rowIdx];
+  const b=sess.dispB[rowIdx];
+  const newA=prompt(`Edit A-Axis (mm) for Depth ${dep.toFixed(1)}m\nCurrent: ${a.toFixed(3)}`, a.toFixed(3));
   if(newA===null)return;
   const newB=prompt(`Edit B-Axis (mm) for Depth ${dep.toFixed(1)}m\nCurrent: ${b.toFixed(3)}`, b.toFixed(3));
   if(newB===null)return;
@@ -4366,8 +4371,10 @@ function renderCombinedLog(){
   // ---- a) CVT section ----
   const cvtTbody=document.getElementById('combCvtTbody');
   if(cvtTbody){
-    let rows=cvtData.filter(r=>monthFilter==='all'||getMonthKey(r.date)===monthFilter);
-    rows.sort((a,b)=>b.date.localeCompare(a.date));
+    const seenCVT=new Set();
+    let rows=cvtData.filter(r=>{if(seenCVT.has(r.id))return false;seenCVT.add(r.id);return true;});
+    rows=rows.filter(r=>monthFilter==='all'||getMonthKey(r.date)===monthFilter);
+    rows.sort((a,b)=>a.date.localeCompare(b.date));
     if(!rows.length){
       cvtTbody.innerHTML='<tr><td colspan="10" style="text-align:center;color:var(--txt3);font-family:var(--mono);font-size:10px;padding:18px">No CVT data. Add a reading or import from Excel.</td></tr>';
     } else {
@@ -4393,8 +4400,10 @@ function renderCombinedLog(){
   // ---- b) MAT section ----
   const matTbody=document.getElementById('combMatTbody');
   if(matTbody){
-    let rows=matData.filter(r=>monthFilter==='all'||getMonthKey(r.date)===monthFilter);
-    rows.sort((a,b)=>b.date.localeCompare(a.date));
+    const seenMAT=new Set();
+    let rows=matData.filter(r=>{if(seenMAT.has(r.id))return false;seenMAT.add(r.id);return true;});
+    rows=rows.filter(r=>monthFilter==='all'||getMonthKey(r.date)===monthFilter);
+    rows.sort((a,b)=>a.date.localeCompare(b.date));
     if(!rows.length){
       matTbody.innerHTML='<tr><td colspan="11" style="text-align:center;color:var(--txt3);font-family:var(--mono);font-size:10px;padding:18px">No MAT data. Add a reading from MAT Monitor.</td></tr>';
     } else {
@@ -4421,8 +4430,10 @@ function renderCombinedLog(){
   // ---- c) TRT section ----
   const trtTbody=document.getElementById('combTrtTbody');
   if(trtTbody){
-    let rows=trtData.filter(r=>monthFilter==='all'||getMonthKey(r.date)===monthFilter);
-    rows.sort((a,b)=>b.date.localeCompare(a.date));
+    const seenTRT=new Set();
+    let rows=trtData.filter(r=>{if(seenTRT.has(r.id))return false;seenTRT.add(r.id);return true;});
+    rows=rows.filter(r=>monthFilter==='all'||getMonthKey(r.date)===monthFilter);
+    rows.sort((a,b)=>a.date.localeCompare(b.date));
     if(!rows.length){
       trtTbody.innerHTML='<tr><td colspan="11" style="text-align:center;color:var(--txt3);font-family:var(--mono);font-size:10px;padding:18px">No TRT data. Add a reading from TRT Monitor.</td></tr>';
     } else {
