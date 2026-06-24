@@ -640,27 +640,29 @@ canvas{display:block}
 
 <!-- ========== KIMI CSV IMPORT MODAL ========== -->
 <div class="modal-bg" id="kimiImportModal">
-  <div class="modal" style="width:620px;max-width:98vw">
-    <div class="modal-title"><span>Import Kimi Inclinometer CSV</span><button class="modal-close" onclick="closeModal('kimiImportModal')">×</button></div>
+  <div class="modal" style="width:680px;max-width:98vw">
+    <div class="modal-title"><span>📂 Import Kimi Inclinometer CSV</span><button class="modal-close" onclick="closeModal('kimiImportModal')">×</button></div>
     <div style="padding:4px 0 14px">
       <div id="kimiImportDropzone" style="border:1.5px dashed var(--accent);border-radius:var(--r);padding:26px 16px;text-align:center;background:var(--card);cursor:pointer" onclick="kimiPickCSVFile()">
-        <div style="font-size:28px;margin-bottom:8px">📂</div>
-        <div style="font-family:var(--mono);font-size:12px;color:var(--txt)">Click here to select CSV file</div>
-        <div style="font-size:10px;color:var(--txt3);margin-top:5px">Format: BH_ID, Depth(m), Max_A(mm), Max_B(mm), Rate_A, Rate_B, Status</div>
+        <div style="font-size:32px;margin-bottom:8px">📂</div>
+        <div style="font-family:var(--mono);font-size:13px;color:var(--txt);font-weight:700">Click to select one or multiple CSV files</div>
+        <div style="font-size:10px;color:var(--txt3);margin-top:6px">Format: Row = Depth(m), DispA(mm), DispB(mm) — Date auto-detected from filename or meta row</div>
+        <div style="font-size:9px;color:var(--txt3);margin-top:4px">Multiple files supported — each file = one session date. Data appends date-wise, no overwrite.</div>
       </div>
       <div id="kimiImportPreviewWrap" style="display:none;margin-top:12px">
         <div id="kimiImportStatusMsg" style="font-family:var(--mono);font-size:10.5px;color:var(--accent);background:rgba(0,212,170,.12);border:1px solid rgba(0,212,170,.3);padding:7px 11px;border-radius:6px;margin-bottom:10px"></div>
-        <div style="max-height:220px;overflow:auto">
+        <div style="max-height:240px;overflow:auto">
           <table class="tbl">
-            <thead><tr><th>BH ID</th><th>Depth (m)</th><th>Max A (mm)</th><th>Max B (mm)</th><th>Rate A</th><th>Rate B</th><th>Status</th></tr></thead>
+            <thead><tr><th>Date</th><th>File Name</th><th>Sensors</th><th>Max A (mm)</th><th>Max B (mm)</th><th>Status</th></tr></thead>
             <tbody id="kimiImportPreviewTbody"></tbody>
           </table>
         </div>
+        <div style="margin-top:8px;font-family:var(--mono);font-size:10px;color:var(--txt3)">ℹ Same-date sessions will be updated; new dates will be appended. All sessions sorted date-wise after import.</div>
       </div>
     </div>
     <div class="modal-foot">
       <button class="btn btn-ghost" onclick="closeModal('kimiImportModal')">Cancel</button>
-      <button class="btn btn-ghost" id="kimiImportPickBtn" onclick="kimiPickCSVFile()">📂 Select File</button>
+      <button class="btn btn-ghost" id="kimiImportPickBtn" onclick="kimiPickCSVFile()">📂 Select CSV File(s)</button>
       <button class="btn btn-p" id="kimiImportConfirmBtn" style="display:none" onclick="kimiConfirmImport()">✓ Confirm Import</button>
     </div>
   </div>
@@ -1309,7 +1311,13 @@ canvas{display:block}
 
         <!-- Data table -->
         <div class="card" style="padding:16px">
-          <div style="font-family:var(--mono);font-size:11px;color:var(--txt3);margin-bottom:10px;text-transform:uppercase">Session Data — <span id="kimiTableDateLabel"></span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+            <div style="font-family:var(--mono);font-size:11px;color:var(--txt3);text-transform:uppercase">Session Data — <span id="kimiTableDateLabel"></span></div>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-ghost no-print" style="font-size:10px" onclick="kimiEditSession()">✏ Edit Session Date</button>
+              <button class="btn btn-d no-print" style="font-size:10px" onclick="kimiDeleteSession()">🗑 Delete Session</button>
+            </div>
+          </div>
           <div style="overflow:auto;max-height:320px">
             <table class="tbl" id="kimiDataTable">
               <thead><tr>
@@ -1317,8 +1325,25 @@ canvas{display:block}
                 <th>Disp A (mm)</th>
                 <th>Disp B (mm)</th>
                 <th>Status</th>
+                <th class="no-print">Actions</th>
               </tr></thead>
               <tbody id="kimiDataTbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- All Sessions Overview Table -->
+        <div class="card" style="padding:16px;margin-top:14px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+            <div style="font-family:var(--mono);font-size:11px;color:var(--txt3);text-transform:uppercase">All Sessions Overview <span id="kimiAllSessionCount" style="color:var(--accent);margin-left:6px"></span></div>
+            <button class="btn btn-ghost no-print" style="font-size:10px" onclick="kimiImportCSV()">⬆ Import More CSV</button>
+          </div>
+          <div style="overflow:auto;max-height:300px">
+            <table class="tbl">
+              <thead><tr>
+                <th>#</th><th>Date</th><th>Sensors</th><th>Max A (mm)</th><th>Max B (mm)</th><th>Status</th><th class="no-print">Actions</th>
+              </tr></thead>
+              <tbody id="kimiAllSessionsTbody"></tbody>
             </table>
           </div>
         </div>
@@ -1590,6 +1615,8 @@ function saveToStorage(){
     localStorage.setItem(LS_KEYS.matData, JSON.stringify(matData));
     localStorage.setItem(LS_KEYS.trtData, JSON.stringify(trtData));
     localStorage.setItem(LS_KEYS.customMonths, JSON.stringify(customMonths));
+    // Save Kimi sessions so imported CSV data persists
+    localStorage.setItem('gims_kimiSessions', JSON.stringify(KIMI_REAL_DATA.sessions));
   } catch(e){ console.warn('Local storage save failed:', e); }
 
   // Primary: push the same snapshot to Firebase so every team member sees it
@@ -1598,6 +1625,7 @@ function saveToStorage(){
     fbDB.ref('gimsData').set({
       lcData, sgData, incData, cvtData, sensorData,
       kimiBoreholes: KIMI_BOREHOLES, matData, trtData, customMonths,
+      kimiSessions: KIMI_REAL_DATA.sessions,
       _updatedAt: Date.now()
     }).catch(e=>{
       console.warn('Firebase save failed (data still saved locally):', e);
@@ -2470,6 +2498,10 @@ function applyDataSnapshot(snap, opts){
   if(snap.matData) matData = snap.matData;
   if(snap.trtData) trtData = snap.trtData;
   if(snap.customMonths) customMonths = {...customMonths, ...snap.customMonths};
+  // Restore Kimi sessions from Firebase/snapshot
+  if(snap.kimiSessions && Array.isArray(snap.kimiSessions) && snap.kimiSessions.length>0){
+    KIMI_REAL_DATA.sessions = snap.kimiSessions;
+  }
 
   if(!opts.skipFallbackDefaults){
     if(!lcData.length && typeof PRELOADED_LC_DATA !== 'undefined') lcData = [...PRELOADED_LC_DATA];
@@ -2502,7 +2534,17 @@ async function loadFromStorage(){
           inc=localStorage.getItem(LS_KEYS.incData), cvt=localStorage.getItem(LS_KEYS.cvtData),
           sen=localStorage.getItem(LS_KEYS.sensorData), kimi=localStorage.getItem(LS_KEYS.kimiBoreholes),
           mat=localStorage.getItem(LS_KEYS.matData), trt=localStorage.getItem(LS_KEYS.trtData),
-          months=localStorage.getItem(LS_KEYS.customMonths);
+          months=localStorage.getItem(LS_KEYS.customMonths),
+          kimiSess=localStorage.getItem('gims_kimiSessions');
+    // Restore Kimi sessions if saved
+    if(kimiSess){
+      try{
+        const parsedSess=JSON.parse(kimiSess);
+        if(Array.isArray(parsedSess)&&parsedSess.length>0){
+          KIMI_REAL_DATA.sessions=parsedSess;
+        }
+      }catch(e2){console.warn('Kimi sessions load failed',e2);}
+    }
     applyDataSnapshot({
       lcData: lc?JSON.parse(lc):undefined, sgData: sg?JSON.parse(sg):undefined,
       incData: inc?JSON.parse(inc):undefined, cvtData: cvt?JSON.parse(cvt):undefined,
@@ -2520,7 +2562,12 @@ async function loadFromStorage(){
   try {
     const snapshot = await fbDB.ref('gimsData').get();
     if(snapshot.exists()){
-      applyDataSnapshot(snapshot.val(), {rerender:false, skipFallbackDefaults:true});
+      const fbVal=snapshot.val();
+      // Restore Kimi sessions from Firebase if available
+      if(fbVal.kimiSessions && Array.isArray(fbVal.kimiSessions) && fbVal.kimiSessions.length>0){
+        KIMI_REAL_DATA.sessions=fbVal.kimiSessions;
+      }
+      applyDataSnapshot(fbVal, {rerender:false, skipFallbackDefaults:true});
     } else {
       // Nothing in the cloud yet (first-ever run) — push whatever we have (local/sample data) so the team has a starting point
       saveToStorage();
@@ -2537,7 +2584,13 @@ function startRealtimeSync(){
   fbDB.ref('gimsData').on('value', (snapshot)=>{
     if(fbWriting) return; // ignore the echo of our own just-completed write
     if(!snapshot.exists()) return;
-    applyDataSnapshot(snapshot.val(), {rerender:true, skipFallbackDefaults:true});
+    const fbVal=snapshot.val();
+    if(fbVal.kimiSessions && Array.isArray(fbVal.kimiSessions) && fbVal.kimiSessions.length>0){
+      KIMI_REAL_DATA.sessions=fbVal.kimiSessions;
+      // Re-render kimi if currently visible
+      if(document.getElementById('view-kimi-inc')?.classList.contains('active')) kimiInit();
+    }
+    applyDataSnapshot(fbVal, {rerender:true, skipFallbackDefaults:true});
     showToast('Data updated by a team member');
   });
 }
@@ -3582,6 +3635,7 @@ function kimiInit(){
   kimiUpdateKPIs();
   kimiPopulateSessionSelect();
   kimiRenderAll();
+  kimiRenderAllSessions();
 }
 
 function kimiUpdateKPIs(){
@@ -3783,13 +3837,267 @@ function kimiRenderTable(idx){
       <td style="font-family:var(--mono)">${dep.toFixed(1)}</td>
       <td style="font-family:var(--mono);color:${color}">${dA.toFixed(3)}</td>
       <td style="font-family:var(--mono);color:var(--info)">${dB.toFixed(3)}</td>
-      <td><span class="chip ${abs>=20?'chip-r':abs>=10?'chip-w':'chip-g'}">${status}</span></td>
+      <td><span class="chip ${abs>=20?'chip-d':abs>=10?'chip-w':'chip-ok'}">${status}</span></td>
+      <td class="no-print"><div class="tbl-actions">
+        <button onclick="kimiEditRow(${idx},${i})">Edit</button>
+        <button class="del" onclick="kimiDeleteRow(${idx},${i})">Del</button>
+      </div></td>
     </tr>`;
   }).join('');
 }
 
+function kimiEditSession(){
+  const sel=document.getElementById('kimiSessionSelect');
+  const idx=parseInt(sel?.value||0);
+  const sess=KIMI_REAL_DATA.sessions[idx];
+  if(!sess)return;
+  if(idx===0){alert('Initial session (baseline) ki date edit nahi ki ja sakti.');return;}
+  const newDate=prompt('Naya date enter karo (YYYY-MM-DD format):\nCurrent: '+sess.date, sess.date);
+  if(!newDate)return;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(newDate)){alert('Date format galat hai. YYYY-MM-DD use karo.');return;}
+  sess.date=newDate;
+  const p=newDate.split('-');
+  sess.dateLabel=p[2]+'-'+p[1]+'-'+p[0];
+  KIMI_REAL_DATA.sessions.sort((a,b)=>a.date.localeCompare(b.date));
+  saveToStorage();
+  kimiInit();
+  showToast('Session date updated to '+newDate);
+}
+
+function kimiDeleteSession(){
+  const sel=document.getElementById('kimiSessionSelect');
+  const idx=parseInt(sel?.value||0);
+  if(idx===0){alert('Initial session (baseline) delete nahi ki ja sakti.');return;}
+  const sess=KIMI_REAL_DATA.sessions[idx];
+  if(!confirm('Session "'+sess.dateLabel+'" delete karein? Ye data permanently remove ho jayega.'))return;
+  KIMI_REAL_DATA.sessions.splice(idx,1);
+  saveToStorage();
+  kimiInit();
+  showToast('Session deleted');
+}
+
+function kimiRenderAllSessions(){
+  const tbody=document.getElementById('kimiAllSessionsTbody');
+  const countEl=document.getElementById('kimiAllSessionCount');
+  if(!tbody)return;
+  const sessions=KIMI_REAL_DATA.sessions;
+  if(countEl)countEl.textContent='('+sessions.length+' total)';
+  if(!sessions.length){
+    tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--txt3);font-family:var(--mono);font-size:10px;padding:16px">No sessions. Import CSV to add sessions.</td></tr>';
+    return;
+  }
+  tbody.innerHTML=sessions.map((s,i)=>{
+    const isInit=i===0;
+    return `<tr style="${i===parseInt(document.getElementById('kimiSessionSelect')?.value||0)?'background:var(--card)':''}">
+      <td style="font-family:var(--mono);color:var(--txt3)">${i+1}</td>
+      <td style="font-family:var(--mono);color:var(--accent)">${s.dateLabel}${isInit?' <span style="color:var(--txt3);font-size:9px">(Initial)</span>':''}</td>
+      <td style="font-family:var(--mono)">${s.depths?s.depths.length:0}</td>
+      <td style="font-family:var(--mono);color:${s.maxDispA>=20?'var(--danger)':s.maxDispA>=10?'var(--warn)':'var(--accent)'}">${(s.maxDispA||0).toFixed(3)}</td>
+      <td style="font-family:var(--mono);color:${s.maxDispB>=20?'var(--danger)':s.maxDispB>=10?'var(--warn)':'var(--info)'}">${(s.maxDispB||0).toFixed(3)}</td>
+      <td><span class="chip ${s.status==='alert'?'chip-d':s.status==='warn'?'chip-w':'chip-ok'}">${(s.status||'ok').toUpperCase()}</span></td>
+      <td class="no-print"><div class="tbl-actions">
+        <button onclick="document.getElementById('kimiSessionSelect').value=${i};kimiRenderAll()">View</button>
+        ${!isInit?`<button onclick="kimiEditRowSession(${i})">Edit</button><button class="del" onclick="kimiDeleteSessionByIdx(${i})">Del</button>`:''}
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function kimiEditRowSession(idx){
+  // Select this session then trigger edit
+  document.getElementById('kimiSessionSelect').value=idx;
+  kimiRenderAll();
+  kimiEditSession();
+}
+
+function kimiDeleteSessionByIdx(idx){
+  if(idx===0){alert('Initial session delete nahi ki ja sakti.');return;}
+  const sess=KIMI_REAL_DATA.sessions[idx];
+  if(!confirm('Session "'+sess.dateLabel+'" delete karein?'))return;
+  KIMI_REAL_DATA.sessions.splice(idx,1);
+  saveToStorage();
+  kimiInit();
+  showToast('Session deleted');
+}
+
+function kimiEditRow(sessIdx, rowIdx){
+  const sess=KIMI_REAL_DATA.sessions[sessIdx];
+  if(newA===null)return;
+  const newB=prompt(`Edit B-Axis (mm) for Depth ${dep.toFixed(1)}m\nCurrent: ${b.toFixed(3)}`, b.toFixed(3));
+  if(newB===null)return;
+  sess.dispA[rowIdx]=parseFloat(newA)||0;
+  sess.dispB[rowIdx]=parseFloat(newB)||0;
+  // Recalc max
+  sess.maxDispA=Math.max(...sess.dispA.map(v=>Math.abs(v)));
+  sess.maxDispB=Math.max(...sess.dispB.map(v=>Math.abs(v)));
+  sess.status=sess.maxDispA>=20||sess.maxDispB>=20?'alert':sess.maxDispA>=10||sess.maxDispB>=10?'warn':'ok';
+  saveToStorage();
+  kimiInit();
+  showToast(`Row depth ${dep.toFixed(1)}m updated ✓`);
+}
+
+function kimiDeleteRow(sessIdx, rowIdx){
+  if(!confirm('This depth sensor reading ko delete karein?'))return;
+  const sess=KIMI_REAL_DATA.sessions[sessIdx];
+  sess.depths.splice(rowIdx,1);
+  sess.dispA.splice(rowIdx,1);
+  sess.dispB.splice(rowIdx,1);
+  sess.maxDispA=Math.max(...sess.dispA.map(v=>Math.abs(v)));
+  sess.maxDispB=Math.max(...sess.dispB.map(v=>Math.abs(v)));
+  saveToStorage();
+  kimiInit();
+  showToast('Row deleted');
+}
+
 function kimiImportCSV(){
-  showToast('CSV import: Naya file select karo — abhi GKPSP:INC-01 ka data pre-loaded hai');
+  // Reset modal state
+  document.getElementById('kimiImportDropzone').style.display='block';
+  document.getElementById('kimiImportPreviewWrap').style.display='none';
+  document.getElementById('kimiImportPickBtn').style.display='inline-flex';
+  document.getElementById('kimiImportConfirmBtn').style.display='none';
+  kimiParsedSessions=[];
+  openModal('kimiImportModal');
+}
+
+let kimiParsedSessions=[];
+
+function kimiPickCSVFile(){
+  const input=document.createElement('input');
+  input.type='file';
+  input.accept='.csv';
+  input.multiple=true; // multiple CSV files support
+  input.onchange=function(e){
+    const files=Array.from(e.target.files);
+    if(!files.length)return;
+    kimiParsedSessions=[];
+    let processed=0;
+    files.forEach(file=>{
+      const reader=new FileReader();
+      reader.onload=ev=>{
+        const text=ev.target.result;
+        const lines=text.split('\n').map(l=>l.trim()).filter(Boolean);
+        // Try to detect date from filename or first line
+        let fileDate=null;
+        // Try filename pattern: YYYY-MM-DD or DD-MM-YYYY
+        const dnm1=file.name.match(/(\d{4}-\d{2}-\d{2})/);
+        const dnm2=file.name.match(/(\d{2}-\d{2}-\d{4})/);
+        if(dnm1)fileDate=dnm1[1];
+        else if(dnm2){const p=dnm2[1].split('-');fileDate=`${p[2]}-${p[1]}-${p[0]}`;}
+
+        // Parse CSV — try multiple formats
+        // Format 1: header row then Depth,DispA,DispB per row
+        // Format 2: Date in column / meta rows
+        let headerIdx=0;
+        let depths=[],dispA=[],dispB=[];
+        let sessionDate=fileDate;
+        let maxA=0,maxB=0;
+
+        // Scan for header row
+        for(let i=0;i<Math.min(5,lines.length);i++){
+          const low=lines[i].toLowerCase();
+          if(low.includes('depth')||low.includes('disp')||low.includes('distance')){
+            // Look for date in meta rows above
+            for(let j=0;j<i;j++){
+              const dm=lines[j].match(/(\d{4}-\d{2}-\d{2})/)||lines[j].match(/date[:\s,]+(\d{2}[\/\-]\d{2}[\/\-]\d{4})/i)||lines[j].match(/(\d{2}[\/\-]\d{2}[\/\-]\d{4})/);
+              if(dm){
+                const raw=dm[1]||dm[0];
+                const p=raw.replace(/\//g,'-').split('-');
+                if(p[0].length===4)sessionDate=raw.replace(/\//g,'-');
+                else sessionDate=`${p[2]}-${p[1]}-${p[0]}`;
+                break;
+              }
+            }
+            headerIdx=i+1;
+            break;
+          }
+        }
+
+        // Parse data rows
+        for(let i=headerIdx;i<lines.length;i++){
+          const parts=lines[i].split(',');
+          if(parts.length<2)continue;
+          const d=parseFloat(parts[0]);
+          if(isNaN(d))continue;
+          const a=parseFloat(parts[1])||0;
+          const b=parseFloat(parts[2])||0;
+          depths.push(d);
+          dispA.push(a);
+          dispB.push(b);
+          if(Math.abs(a)>maxA)maxA=Math.abs(a);
+          if(Math.abs(b)>maxB)maxB=Math.abs(b);
+        }
+
+        // If still no date, use today
+        if(!sessionDate)sessionDate=new Date().toISOString().split('T')[0];
+
+        if(depths.length>0){
+          const status=maxA>=20||maxB>=20?'alert':maxA>=10||maxB>=10?'warn':'ok';
+          const dp=sessionDate.split('-');
+          const dateLabel=dp[2]+'-'+dp[1]+'-'+dp[0];
+          kimiParsedSessions.push({
+            fileName:file.name,date:sessionDate,dateLabel,
+            depths,dispA,dispB,maxDispA:maxA,maxDispB:maxB,status
+          });
+        }
+
+        processed++;
+        if(processed===files.length){
+          kimiShowImportPreview();
+        }
+      };
+      reader.readAsText(file);
+    });
+  };
+  input.click();
+}
+
+function kimiShowImportPreview(){
+  if(!kimiParsedSessions.length){
+    alert('Koi valid data nahi mila CSV files mein. Format check karo: Depth, DispA, DispB columns hone chahiye.');
+    return;
+  }
+  // Sort by date
+  kimiParsedSessions.sort((a,b)=>a.date.localeCompare(b.date));
+
+  const tbody=document.getElementById('kimiImportPreviewTbody');
+  tbody.innerHTML=kimiParsedSessions.map((s,i)=>`<tr>
+    <td style="font-family:var(--mono);font-size:10px;color:var(--accent)">${s.dateLabel}</td>
+    <td style="font-family:var(--mono);font-size:9px;color:var(--txt3)">${s.fileName}</td>
+    <td style="font-family:var(--mono)">${s.depths.length}</td>
+    <td style="font-family:var(--mono);color:${s.maxDispA>=20?'var(--danger)':s.maxDispA>=10?'var(--warn)':'var(--accent)'}">${s.maxDispA.toFixed(3)}</td>
+    <td style="font-family:var(--mono);color:${s.maxDispB>=20?'var(--danger)':s.maxDispB>=10?'var(--warn)':'var(--info)'}">${s.maxDispB.toFixed(3)}</td>
+    <td><span class="chip ${s.status==='alert'?'chip-d':s.status==='warn'?'chip-w':'chip-ok'}">${s.status.toUpperCase()}</span></td>
+  </tr>`).join('');
+
+  document.getElementById('kimiImportStatusMsg').textContent='✓ '+kimiParsedSessions.length+' session(s) parsed — '+kimiParsedSessions.map(s=>s.dateLabel).join(', ');
+  document.getElementById('kimiImportPreviewWrap').style.display='block';
+  document.getElementById('kimiImportDropzone').style.display='none';
+  document.getElementById('kimiImportPickBtn').style.display='none';
+  document.getElementById('kimiImportConfirmBtn').style.display='inline-flex';
+}
+
+function kimiConfirmImport(){
+  if(!kimiParsedSessions.length)return;
+  let added=0,updated=0;
+  kimiParsedSessions.forEach(newSess=>{
+    // Check if date already exists — update it (append mode)
+    const existing=KIMI_REAL_DATA.sessions.findIndex(s=>s.date===newSess.date);
+    if(existing>=0){
+      KIMI_REAL_DATA.sessions[existing]=newSess;
+      updated++;
+    } else {
+      KIMI_REAL_DATA.sessions.push(newSess);
+      added++;
+    }
+  });
+  // Sort all sessions by date
+  KIMI_REAL_DATA.sessions.sort((a,b)=>a.date.localeCompare(b.date));
+
+  saveToStorage();
+  kimiInit();
+  closeModal('kimiImportModal');
+  showToast(`✓ ${added} new session(s) added, ${updated} updated — data date-wise sorted`);
+  kimiParsedSessions=[];
 }
 
 function kimiExportCSV(){  const d=KIMI_REAL_DATA;
@@ -3826,9 +4134,12 @@ function calcMATAvg(){
 function openMATModal(id=null){
   editingMAT=id;
   document.getElementById('matModalTitle').textContent=id?'Edit MAT Reading':'Add MAT Reading';
-  if(!id){['matCh1','matCh2','matCh3','matAvg','matNotes'].forEach(x=>document.getElementById(x).value='');
+  if(!id){
+    // Clear all fields for new entry
+    ['matCh1','matCh2','matCh3','matAvg','matNotes'].forEach(x=>document.getElementById(x).value='');
     document.getElementById('matRDM').value='';
     document.getElementById('matPositionSelect').value='MAT LHS';
+    document.getElementById('matInstSelect').selectedIndex=0;
     const today=new Date().toISOString().split('T')[0];
     document.getElementById('matDate').value=today;
   }
@@ -3874,7 +4185,13 @@ function saveMATData(){
   if(!date)return alert('Please enter a date');
   if(editingMAT){
     const r=matData.find(x=>x.id===editingMAT);
-    Object.assign(r,{instId,position,date,rdm,ch1,ch2,ch3,avg,notes});
+    if(r){
+      Object.assign(r,{instId,position,date,rdm,ch1,ch2,ch3,avg,notes});
+    } else {
+      // Stale edit ref — add as new entry
+      matData.push({id:Date.now(),instId,position,date,rdm,ch1,ch2,ch3,avg,notes});
+    }
+    editingMAT=null;
   } else {
     matData.push({id:Date.now(),instId,position,date,rdm,ch1,ch2,ch3,avg,notes});
   }
@@ -3926,9 +4243,12 @@ function calcTRTAvg(){
 function openTRTModal(id=null){
   editingTRT=id;
   document.getElementById('trtModalTitle').textContent=id?'Edit TRT Reading':'Add TRT Reading';
-  if(!id){['trtCh1','trtCh2','trtCh3','trtAvg','trtNotes'].forEach(x=>document.getElementById(x).value='');
+  if(!id){
+    // Clear all fields for new entry
+    ['trtCh1','trtCh2','trtCh3','trtAvg','trtNotes'].forEach(x=>document.getElementById(x).value='');
     document.getElementById('trtRDM').value='';
     document.getElementById('trtPositionSelect').value='TRT LHS';
+    document.getElementById('trtInstSelect').selectedIndex=0;
     const today=new Date().toISOString().split('T')[0];
     document.getElementById('trtDate').value=today;
   }
@@ -3974,7 +4294,13 @@ function saveTRTData(){
   if(!date)return alert('Please enter a date');
   if(editingTRT){
     const r=trtData.find(x=>x.id===editingTRT);
-    Object.assign(r,{instId,position,date,rdm,ch1,ch2,ch3,avg,notes});
+    if(r){
+      Object.assign(r,{instId,position,date,rdm,ch1,ch2,ch3,avg,notes});
+    } else {
+      // Stale edit ref — add as new entry
+      trtData.push({id:Date.now(),instId,position,date,rdm,ch1,ch2,ch3,avg,notes});
+    }
+    editingTRT=null;
   } else {
     trtData.push({id:Date.now(),instId,position,date,rdm,ch1,ch2,ch3,avg,notes});
   }
