@@ -779,6 +779,10 @@ canvas{display:block}
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M2 14 Q2 4 8 2 Q14 4 14 14"/><line x1="5" y1="8" x2="11" y2="8"/><line x1="4" y1="11" x2="12" y2="11"/></svg>
       TRT Monitor
     </div>
+    <div class="ni" onclick="switchView('rockbolt',this)">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><line x1="8" y1="1" x2="8" y2="15"/><line x1="5" y1="4" x2="11" y2="4"/><line x1="5" y1="7" x2="11" y2="7"/><line x1="6" y1="10" x2="10" y2="10"/><circle cx="8" cy="13" r="1.5"/></svg>
+      Rock Bolt LC
+    </div>
     <div class="nav-sec">DATA</div>
     <div class="ni" onclick="switchView('combinedlog',this)">
       <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 2h12v2H2V2zm0 3h12v2H2V5zm0 3h8v2H2V8zm0 3h10v2H2v-2z" opacity=".8"/></svg>
@@ -816,6 +820,7 @@ canvas{display:block}
     </div>
     <div class="tb-right">
       <div class="ts" id="liveClock">-- : -- : --</div>
+      <div id="saveStatusBadge" style="font-family:var(--mono);font-size:9px;padding:4px 8px;border-radius:4px;background:var(--acc-dim);color:var(--accent);border:1px solid rgba(0,212,170,.2);display:none">✓ Saved</div>
       <button class="btn btn-ghost" onclick="simulateRefresh()">
         <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2v4H9M1 12V8h4M1.5 8A5.5 5.5 0 0112 4.5M13 8a5.5 5.5 0 01-10.5 3.5"/></svg>
         Refresh
@@ -1073,7 +1078,7 @@ canvas{display:block}
         </div>
         <div class="pb" style="padding:0">
           <table class="tbl">
-            <thead><tr><th>Date</th><th>Month</th><th>CVT ID</th><th>Position</th><th>CH-1 (mm)</th><th>CH-2 (mm)</th><th>CH-3 (mm)</th><th>Avg (mm)</th><th>Status</th><th>Notes</th><th class="no-print">Actions</th></tr></thead>
+            <thead><tr><th>#</th><th>Date</th><th>Month</th><th>CVT ID</th><th>Position</th><th>CH-1 (mm)</th><th>CH-2 (mm)</th><th>CH-3 (mm)</th><th>Avg (mm)</th><th>Status</th><th>Notes</th><th class="no-print">Actions</th></tr></thead>
             <tbody id="cvtTbody"></tbody>
           </table>
         </div>
@@ -1181,6 +1186,61 @@ canvas{display:block}
       </div>
     </div>
 
+
+    <!-- ===== ROCK BOLT LOAD CELL ===== -->
+    <div id="view-rockbolt" class="view">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div>
+          <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--txt)">Rock Bolt Load Cell Monitor</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--txt3);margin-top:2px">3-Gauge Rock Bolt Load Cell — CH-1 · CH-2 · CH-3 · Average Load (Ton)</div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <select class="fs" id="rbMonthFilter" onchange="renderRBTable()" style="padding:5px 8px;font-size:10px">
+            <option value="all">All Months</option>
+          </select>
+          <select class="fs" id="rbInstFilter" onchange="renderRBTable();renderRBCharts()" style="padding:5px 8px;font-size:10px">
+            <option value="all">All Instruments</option>
+            <option value="RB-01">RB-01</option>
+            <option value="RB-02">RB-02</option>
+            <option value="RB-03">RB-03</option>
+          </select>
+          <button class="btn btn-ghost no-print" onclick="openRBModal()">+ Add Reading</button>
+          <button class="btn btn-ghost no-print" onclick="exportRBData()">Export CSV</button>
+        </div>
+      </div>
+      <!-- KPI cards -->
+      <div class="kpi-strip" style="grid-template-columns:repeat(3,1fr);margin-bottom:14px" id="rbKpiStrip">
+        <div class="kpi-card"><div class="kpi-label">Total Readings</div><div class="kpi-val a" id="rbTotalCount">0</div><div class="kpi-sub">All Rock Bolt entries</div></div>
+        <div class="kpi-card w"><div class="kpi-label">Alert Limit</div><div class="kpi-val w">7.5 T</div><div class="kpi-sub">Rock Bolt threshold</div></div>
+        <div class="kpi-card"><div class="kpi-label">Latest Avg Load</div><div class="kpi-val a" id="rbLatestAvg">—</div><div class="kpi-sub">Most recent reading</div></div>
+      </div>
+      <!-- Month cards -->
+      <div id="rbMonthCards" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px"></div>
+      <!-- Charts -->
+      <div class="g2" style="margin-bottom:14px">
+        <div class="panel">
+          <div class="ph"><span class="pt">Rock Bolt Avg Load Trend</span><span class="ptag" style="background:rgba(251,191,36,.12);color:#fbbf24">Ton</span></div>
+          <div class="pb"><div class="ch" style="height:200px"><canvas id="rbTrendChart"></canvas></div></div>
+        </div>
+        <div class="panel">
+          <div class="ph"><span class="pt">Channel Comparison (Latest)</span></div>
+          <div class="pb"><div class="ch" style="height:200px"><canvas id="rbBarChart"></canvas></div></div>
+        </div>
+      </div>
+      <!-- Reading Log -->
+      <div class="panel">
+        <div class="ph">
+          <span class="pt">Rock Bolt Reading Log</span>
+          <span class="ptag i" id="rbRowCount">0 Entries</span>
+        </div>
+        <div class="pb" style="padding:0">
+          <table class="tbl">
+            <thead><tr><th>#</th><th>Date</th><th>Month</th><th>Instrument ID</th><th>RD (m)</th><th>CH-1 (T)</th><th>CH-2 (T)</th><th>CH-3 (T)</th><th>Avg (T)</th><th>Status</th><th>Notes</th><th class="no-print">Actions</th></tr></thead>
+            <tbody id="rbTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
 
     <!-- ===== COMBINED READING LOG ===== -->
     <div id="view-combinedlog" class="view">
@@ -1602,39 +1662,101 @@ const LS_KEYS = {
   matData: 'aageo_matData',
   trtData: 'aageo_trtData',
   customMonths: 'aageo_customMonths',
+  rbData: 'aageo_rbData',
 };
 
 function saveToStorage(){
-  // Always keep a local backup so the app still works offline / if Firebase fails
+  // ── 1. ALWAYS save to localStorage first (instant, offline-safe backup) ──
   try {
-    localStorage.setItem(LS_KEYS.lcData, JSON.stringify(lcData));
-    localStorage.setItem(LS_KEYS.sgData, JSON.stringify(sgData));
-    localStorage.setItem(LS_KEYS.incData, JSON.stringify(incData));
-    localStorage.setItem(LS_KEYS.cvtData, JSON.stringify(cvtData));
-    localStorage.setItem(LS_KEYS.sensorData, JSON.stringify(sensorData));
+    localStorage.setItem(LS_KEYS.lcData,        JSON.stringify(lcData));
+    localStorage.setItem(LS_KEYS.sgData,        JSON.stringify(sgData));
+    localStorage.setItem(LS_KEYS.incData,       JSON.stringify(incData));
+    localStorage.setItem(LS_KEYS.cvtData,       JSON.stringify(cvtData));
+    localStorage.setItem(LS_KEYS.sensorData,    JSON.stringify(sensorData));
     localStorage.setItem(LS_KEYS.kimiBoreholes, JSON.stringify(KIMI_BOREHOLES));
-    localStorage.setItem(LS_KEYS.matData, JSON.stringify(matData));
-    localStorage.setItem(LS_KEYS.trtData, JSON.stringify(trtData));
-    localStorage.setItem(LS_KEYS.customMonths, JSON.stringify(customMonths));
-    // Save Kimi sessions so imported CSV data persists
-    localStorage.setItem('gims_kimiSessions', JSON.stringify(KIMI_REAL_DATA.sessions));
-  } catch(e){ console.warn('Local storage save failed:', e); }
+    localStorage.setItem(LS_KEYS.matData,       JSON.stringify(matData));
+    localStorage.setItem(LS_KEYS.trtData,       JSON.stringify(trtData));
+    localStorage.setItem(LS_KEYS.customMonths,  JSON.stringify(customMonths));
+    localStorage.setItem(LS_KEYS.rbData,        JSON.stringify(rbData));
+    localStorage.setItem('gims_kimiSessions',   JSON.stringify(KIMI_REAL_DATA.sessions));
+    // Mark that localStorage has real user data (prevents sample-data fallback on next load)
+    localStorage.setItem('aageo_hasUserData', '1');
+  } catch(e){ console.warn('localStorage save failed:', e); }
 
-  // Primary: push the same snapshot to Firebase so every team member sees it
+  // ── Show "Saved" badge in topbar ──
+  const badge = document.getElementById('saveStatusBadge');
+  if(badge){
+    badge.style.display='block';
+    badge.style.background='var(--acc-dim)';
+    badge.style.color='var(--accent)';
+    badge.style.borderColor='rgba(0,212,170,.2)';
+    badge.textContent='✓ Saved locally';
+    clearTimeout(badge._timer);
+    badge._timer = setTimeout(()=>{ badge.style.display='none'; }, 3000);
+  }
+
+  // ── 2. Push to Firebase using update() not set() ──
+  // update() does a MERGE — only the listed keys are written; nothing else is deleted.
+  // set() would wipe all other fields if any key was missing. Never use set() on the root node.
   if(fbReady && fbDB && fbAuthed){
     fbWriting = true;
-    fbDB.ref('gimsData').set({
+    const payload = {
       lcData, sgData, incData, cvtData, sensorData,
-      kimiBoreholes: KIMI_BOREHOLES, matData, trtData, customMonths,
+      kimiBoreholes: KIMI_BOREHOLES,
+      matData, trtData, customMonths, rbData,
       kimiSessions: KIMI_REAL_DATA.sessions,
-      _updatedAt: Date.now()
+      _updatedAt: Date.now(),
+      _updatedBy: currentUser ? currentUser.name : 'unknown'
+    };
+    fbDB.ref('gimsData').update(payload).then(()=>{
+      const badge = document.getElementById('saveStatusBadge');
+      if(badge){
+        badge.style.display='block';
+        badge.style.background='var(--acc-dim)';
+        badge.style.color='var(--accent)';
+        badge.style.borderColor='rgba(0,212,170,.2)';
+        badge.textContent='☁ Synced to cloud';
+        clearTimeout(badge._timer);
+        badge._timer = setTimeout(()=>{ badge.style.display='none'; }, 3000);
+      }
     }).catch(e=>{
-      console.warn('Firebase save failed (data still saved locally):', e);
+      console.warn('Firebase save failed — data is still safe in localStorage:', e);
+      showToast('⚠ Cloud sync failed — data saved locally', 4000, 'warn');
+      const badge = document.getElementById('saveStatusBadge');
+      if(badge){
+        badge.style.display='block';
+        badge.style.background='var(--warn-dim)';
+        badge.style.color='var(--warn)';
+        badge.style.borderColor='rgba(245,166,35,.2)';
+        badge.textContent='⚠ Local only';
+        clearTimeout(badge._timer);
+        badge._timer = setTimeout(()=>{ badge.style.display='none'; }, 5000);
+      }
     }).finally(()=>{
-      setTimeout(()=>{ fbWriting = false; }, 300);
+      setTimeout(()=>{ fbWriting = false; }, 500);
     });
   }
 }
+
+// ── Emergency save on page close/refresh ──
+// This fires synchronously before the page unloads, ensuring the latest in-memory
+// state is always flushed to localStorage even if the user closes the tab mid-session.
+window.addEventListener('beforeunload', ()=>{
+  try {
+    localStorage.setItem(LS_KEYS.lcData,        JSON.stringify(lcData));
+    localStorage.setItem(LS_KEYS.sgData,        JSON.stringify(sgData));
+    localStorage.setItem(LS_KEYS.incData,       JSON.stringify(incData));
+    localStorage.setItem(LS_KEYS.cvtData,       JSON.stringify(cvtData));
+    localStorage.setItem(LS_KEYS.sensorData,    JSON.stringify(sensorData));
+    localStorage.setItem(LS_KEYS.kimiBoreholes, JSON.stringify(KIMI_BOREHOLES));
+    localStorage.setItem(LS_KEYS.matData,       JSON.stringify(matData));
+    localStorage.setItem(LS_KEYS.trtData,       JSON.stringify(trtData));
+    localStorage.setItem(LS_KEYS.customMonths,  JSON.stringify(customMonths));
+    localStorage.setItem(LS_KEYS.rbData,        JSON.stringify(rbData));
+    localStorage.setItem('gims_kimiSessions',   JSON.stringify(KIMI_REAL_DATA.sessions));
+    localStorage.setItem('aageo_hasUserData', '1');
+  } catch(e){ /* silent — browser is closing */ }
+});
 
 
 // ================================================================
@@ -2488,15 +2610,18 @@ const PRELOADED_SG_DATA = [
 // then re-renders every view so all team members see the same thing.
 function applyDataSnapshot(snap, opts){
   opts = opts || {};
-  if(snap.lcData) lcData = snap.lcData;
-  if(snap.sgData) sgData = snap.sgData;
-  if(snap.incData) incData = snap.incData;
-  if(snap.cvtData) cvtData = snap.cvtData;
-  if(snap.sensorData) sensorData = snap.sensorData;
-  if(snap.kimiBoreholes){ KIMI_BOREHOLES.length=0; snap.kimiBoreholes.forEach(b=>KIMI_BOREHOLES.push(b)); }
-  if(snap.matData) matData = snap.matData;
-  if(snap.trtData) trtData = snap.trtData;
-  if(snap.customMonths) customMonths = {...customMonths, ...snap.customMonths};
+  // CRITICAL: use Array.isArray check — NOT just `if(snap.x)` — because an empty array [] is falsy
+  // and would cause saved data (even empty after deletes) to be ignored, loading stale sample data instead.
+  if(Array.isArray(snap.lcData)) lcData = snap.lcData;
+  if(Array.isArray(snap.sgData)) sgData = snap.sgData;
+  if(Array.isArray(snap.incData)) incData = snap.incData;
+  if(Array.isArray(snap.cvtData)) cvtData = snap.cvtData;
+  if(Array.isArray(snap.sensorData)) sensorData = snap.sensorData;
+  if(Array.isArray(snap.kimiBoreholes)){ KIMI_BOREHOLES.length=0; snap.kimiBoreholes.forEach(b=>KIMI_BOREHOLES.push(b)); }
+  if(Array.isArray(snap.matData)) matData = snap.matData;
+  if(Array.isArray(snap.trtData)) trtData = snap.trtData;
+  if(Array.isArray(snap.rbData)) rbData = snap.rbData;
+  if(snap.customMonths && typeof snap.customMonths === 'object') customMonths = {...customMonths, ...snap.customMonths};
   // Restore Kimi sessions from Firebase/snapshot
   if(snap.kimiSessions && Array.isArray(snap.kimiSessions) && snap.kimiSessions.length>0){
     KIMI_REAL_DATA.sessions = snap.kimiSessions;
@@ -2516,6 +2641,7 @@ function applyDataSnapshot(snap, opts){
     renderCVTTable();renderCVTPositionCards();renderCVTCharts();
     renderMATTable();renderMATCharts();
     renderTRTTable();renderTRTCharts();
+    renderRBTable();renderRBCharts();
     renderCombinedLog();
     renderSensorTable();
     updateReportCounts();updateEntryStats();
@@ -2524,73 +2650,119 @@ function applyDataSnapshot(snap, opts){
   }
 }
 
-// One-time initial load. Tries Firebase first (so the team's shared data wins);
-// falls back to whatever is in localStorage if Firebase is unreachable/not configured.
+// One-time initial load. Tries localStorage first (instant), then Firebase (latest shared data).
+// PRIORITY: Firebase > localStorage > PRELOADED sample data
 async function loadFromStorage(){
-  // Always read local copy first, so the app has *something* immediately even before Firebase responds
+  const hasUserData = !!localStorage.getItem('aageo_hasUserData');
+
+  // ── Step 1: Load from localStorage immediately (so UI isn't blank) ──
   try {
-    const lc=localStorage.getItem(LS_KEYS.lcData), sg=localStorage.getItem(LS_KEYS.sgData),
-          inc=localStorage.getItem(LS_KEYS.incData), cvt=localStorage.getItem(LS_KEYS.cvtData),
-          sen=localStorage.getItem(LS_KEYS.sensorData), kimi=localStorage.getItem(LS_KEYS.kimiBoreholes),
-          mat=localStorage.getItem(LS_KEYS.matData), trt=localStorage.getItem(LS_KEYS.trtData),
-          months=localStorage.getItem(LS_KEYS.customMonths),
-          kimiSess=localStorage.getItem('gims_kimiSessions');
-    // Restore Kimi sessions if saved
+    const lc    = localStorage.getItem(LS_KEYS.lcData);
+    const sg    = localStorage.getItem(LS_KEYS.sgData);
+    const inc   = localStorage.getItem(LS_KEYS.incData);
+    const cvt   = localStorage.getItem(LS_KEYS.cvtData);
+    const sen   = localStorage.getItem(LS_KEYS.sensorData);
+    const kimi  = localStorage.getItem(LS_KEYS.kimiBoreholes);
+    const mat   = localStorage.getItem(LS_KEYS.matData);
+    const trt   = localStorage.getItem(LS_KEYS.trtData);
+    const months= localStorage.getItem(LS_KEYS.customMonths);
+    const rb    = localStorage.getItem(LS_KEYS.rbData);
+    const kimiSess = localStorage.getItem('gims_kimiSessions');
+
     if(kimiSess){
       try{
-        const parsedSess=JSON.parse(kimiSess);
-        if(Array.isArray(parsedSess)&&parsedSess.length>0){
-          KIMI_REAL_DATA.sessions=parsedSess;
-        }
+        const p=JSON.parse(kimiSess);
+        if(Array.isArray(p)&&p.length>0) KIMI_REAL_DATA.sessions=p;
       }catch(e2){console.warn('Kimi sessions load failed',e2);}
     }
-    applyDataSnapshot({
-      lcData: lc?JSON.parse(lc):undefined, sgData: sg?JSON.parse(sg):undefined,
-      incData: inc?JSON.parse(inc):undefined, cvtData: cvt?JSON.parse(cvt):undefined,
-      sensorData: sen?JSON.parse(sen):undefined, kimiBoreholes: kimi?JSON.parse(kimi):undefined,
-      matData: mat?JSON.parse(mat):undefined, trtData: trt?JSON.parse(trt):undefined,
-      customMonths: months?JSON.parse(months):undefined,
-    }, {rerender:false});
-  } catch(e){ console.warn('Local storage load failed:', e); }
 
-  if(!fbReady || !fbDB) return; // offline/local-only mode
+    applyDataSnapshot({
+      lcData:        lc     ? JSON.parse(lc)     : undefined,
+      sgData:        sg     ? JSON.parse(sg)     : undefined,
+      incData:       inc    ? JSON.parse(inc)    : undefined,
+      cvtData:       cvt    ? JSON.parse(cvt)    : undefined,
+      sensorData:    sen    ? JSON.parse(sen)    : undefined,
+      kimiBoreholes: kimi   ? JSON.parse(kimi)   : undefined,
+      matData:       mat    ? JSON.parse(mat)    : undefined,
+      trtData:       trt    ? JSON.parse(trt)    : undefined,
+      customMonths:  months ? JSON.parse(months) : undefined,
+      rbData:        rb     ? JSON.parse(rb)     : undefined,
+    }, {rerender: false, skipFallbackDefaults: hasUserData});
+
+  } catch(e){ console.warn('localStorage load failed:', e); }
+
+  // ── Step 2: Try Firebase for latest shared data ──
+  if(!fbReady || !fbDB) return;
 
   const authOK = await fbAuthenticate();
-  if(!authOK) return; // not authenticated — stay on local data only
+  if(!authOK) return;
 
   try {
     const snapshot = await fbDB.ref('gimsData').get();
     if(snapshot.exists()){
-      const fbVal=snapshot.val();
-      // Restore Kimi sessions from Firebase if available
+      const fbVal = snapshot.val();
       if(fbVal.kimiSessions && Array.isArray(fbVal.kimiSessions) && fbVal.kimiSessions.length>0){
-        KIMI_REAL_DATA.sessions=fbVal.kimiSessions;
+        KIMI_REAL_DATA.sessions = fbVal.kimiSessions;
       }
-      applyDataSnapshot(fbVal, {rerender:false, skipFallbackDefaults:true});
+      // Firebase data always wins over localStorage (it's the shared source of truth)
+      // skipFallbackDefaults:true — never overwrite Firebase data with PRELOADED sample data
+      applyDataSnapshot(fbVal, {rerender: false, skipFallbackDefaults: true});
+      // Mirror Firebase data back to localStorage so offline mode has the latest copy
+      try {
+        localStorage.setItem(LS_KEYS.lcData,        JSON.stringify(lcData));
+        localStorage.setItem(LS_KEYS.sgData,        JSON.stringify(sgData));
+        localStorage.setItem(LS_KEYS.incData,       JSON.stringify(incData));
+        localStorage.setItem(LS_KEYS.cvtData,       JSON.stringify(cvtData));
+        localStorage.setItem(LS_KEYS.sensorData,    JSON.stringify(sensorData));
+        localStorage.setItem(LS_KEYS.kimiBoreholes, JSON.stringify(KIMI_BOREHOLES));
+        localStorage.setItem(LS_KEYS.matData,       JSON.stringify(matData));
+        localStorage.setItem(LS_KEYS.trtData,       JSON.stringify(trtData));
+        localStorage.setItem(LS_KEYS.customMonths,  JSON.stringify(customMonths));
+        localStorage.setItem(LS_KEYS.rbData,        JSON.stringify(rbData));
+        localStorage.setItem('gims_kimiSessions',   JSON.stringify(KIMI_REAL_DATA.sessions));
+        localStorage.setItem('aageo_hasUserData', '1');
+      } catch(e2){ console.warn('localStorage mirror failed:', e2); }
     } else {
-      // Nothing in the cloud yet (first-ever run) — push whatever we have (local/sample data) so the team has a starting point
+      // Firebase is empty (first-ever run) — push our local/preloaded data up
       saveToStorage();
     }
   } catch(e){
-    console.warn('Firebase initial load failed — using local data instead.', e);
+    console.warn('Firebase initial load failed — using localStorage data.', e);
   }
 }
 
 // Keeps every connected team member's screen in sync automatically.
 // Call once, after the first successful load.
+let _syncInitialized = false;
 function startRealtimeSync(){
   if(!fbReady || !fbDB || !fbAuthed) return;
+  if(_syncInitialized) return; // prevent duplicate listeners
+  _syncInitialized = true;
+  // Ignore the first fire (which is just the current value echo on subscribe)
+  let _firstFire = true;
   fbDB.ref('gimsData').on('value', (snapshot)=>{
-    if(fbWriting) return; // ignore the echo of our own just-completed write
+    if(fbWriting) return;
     if(!snapshot.exists()) return;
-    const fbVal=snapshot.val();
+    if(_firstFire){ _firstFire = false; return; } // skip echo of our own initial load
+    const fbVal = snapshot.val();
     if(fbVal.kimiSessions && Array.isArray(fbVal.kimiSessions) && fbVal.kimiSessions.length>0){
-      KIMI_REAL_DATA.sessions=fbVal.kimiSessions;
-      // Re-render kimi if currently visible
+      KIMI_REAL_DATA.sessions = fbVal.kimiSessions;
       if(document.getElementById('view-kimi-inc')?.classList.contains('active')) kimiInit();
     }
-    applyDataSnapshot(fbVal, {rerender:true, skipFallbackDefaults:true});
-    showToast('Data updated by a team member');
+    applyDataSnapshot(fbVal, {rerender: true, skipFallbackDefaults: true});
+    // Mirror to localStorage so offline mode always has latest
+    try {
+      localStorage.setItem(LS_KEYS.lcData,        JSON.stringify(lcData));
+      localStorage.setItem(LS_KEYS.sgData,        JSON.stringify(sgData));
+      localStorage.setItem(LS_KEYS.incData,       JSON.stringify(incData));
+      localStorage.setItem(LS_KEYS.cvtData,       JSON.stringify(cvtData));
+      localStorage.setItem(LS_KEYS.sensorData,    JSON.stringify(sensorData));
+      localStorage.setItem(LS_KEYS.matData,       JSON.stringify(matData));
+      localStorage.setItem(LS_KEYS.trtData,       JSON.stringify(trtData));
+      localStorage.setItem(LS_KEYS.rbData,        JSON.stringify(rbData));
+      localStorage.setItem('aageo_hasUserData', '1');
+    } catch(e){ /* silent */ }
+    showToast('🔄 Data synced from team member');
   });
 }
 
@@ -2650,13 +2822,16 @@ const _sampleTRT = [
   {id:204,date:'2026-03-24',instId:'TRT-02',position:'TRT RHS',rdm:10.000,ch1:0.18,ch2:0.20,ch3:0.19,avg:0.190,notes:''},
   {id:205,date:'2026-04-07',instId:'TRT-01',position:'TRT CROWN',rdm:8.500,ch1:0.72,ch2:0.78,ch3:0.74,avg:0.747,notes:'Normal trend'},
 ];
-// Apply sample data ONLY if localStorage has no saved data for each key
-if(!localStorage.getItem(LS_KEYS.lcData))  lcData  = _sampleLC;
-if(!localStorage.getItem(LS_KEYS.sgData))  sgData  = _sampleSG;
-if(!localStorage.getItem(LS_KEYS.incData)) incData = _sampleInc;
-if(!localStorage.getItem(LS_KEYS.cvtData)) cvtData = _sampleCVT;
-if(!localStorage.getItem(LS_KEYS.matData)) matData = _sampleMAT;
-if(!localStorage.getItem(LS_KEYS.trtData)) trtData = _sampleTRT;
+// Apply sample data ONLY on very first run (no localStorage data ever saved by a user)
+// Once 'aageo_hasUserData' is set, sample data is NEVER loaded again — user data takes priority.
+if(!localStorage.getItem('aageo_hasUserData')){
+  if(!localStorage.getItem(LS_KEYS.lcData))  lcData  = _sampleLC;
+  if(!localStorage.getItem(LS_KEYS.sgData))  sgData  = _sampleSG;
+  if(!localStorage.getItem(LS_KEYS.incData)) incData = _sampleInc;
+  if(!localStorage.getItem(LS_KEYS.cvtData)) cvtData = _sampleCVT;
+  if(!localStorage.getItem(LS_KEYS.matData)) matData = _sampleMAT;
+  if(!localStorage.getItem(LS_KEYS.trtData)) trtData = _sampleTRT;
+}
 
 // ================================================================
 // LOGIN — STEP 1 (Credentials)
@@ -2790,16 +2965,16 @@ async function initApp(){
   renderIncBoreholes();renderIncTable();
   renderCVTTable();renderCVTPositionCards();
   renderMATTable();renderTRTTable();
-  updateMATMonthFilter();updateTRTMonthFilter();updateCVTMonthFilter();
+  updateMATMonthFilter();updateTRTMonthFilter();updateCVTMonthFilter();updateRBMonthFilter();
   renderCombinedLog();
   updateReportCounts();updateEntryStats();
   kimiInit();
   renderSensorTable();
   setTimeout(()=>{
-    initOverviewCharts();renderLCCharts();renderSGCharts();renderIncCharts();renderCVTCharts();renderMATCharts();renderTRTCharts();
+    initOverviewCharts();renderLCCharts();renderSGCharts();renderIncCharts();renderCVTCharts();renderMATCharts();renderTRTCharts();renderRBCharts();
   },100);
   const today=new Date().toISOString().split('T')[0];
-  ['lcDate','sgDate','incDate','cvtDate','qeLCDate','qeSGDate','qeIncDate','qeCVTDate','matDate','trtDate'].forEach(id=>{
+  ['lcDate','sgDate','incDate','cvtDate','qeLCDate','qeSGDate','qeIncDate','qeCVTDate','matDate','trtDate','rbDate'].forEach(id=>{
     const el=document.getElementById(id);if(el)el.value=today;
   });
   ['qeLC1','qeLC2','qeLC3'].forEach(id=>document.getElementById(id).addEventListener('input',calcQEAvg));
@@ -2823,7 +2998,7 @@ function startClock(){
 // ================================================================
 // NAVIGATION
 // ================================================================
-const viewMeta={overview:'Dashboard Overview',loadcell:'Load Cell Monitoring',strain:'Strain Gauge Monitoring',inclinometer:'Inclinometer Monitoring','kimi-inc':'Kimi Inclinometer System',cvt:'Convergence (CVT) Monitoring',mat:'MAT Monitoring',trt:'TRT Monitoring',combinedlog:'Combined Reading Log',dataentry:'Manual Data Entry',reports:'Reports & Export'};
+const viewMeta={overview:'Dashboard Overview',loadcell:'Load Cell Monitoring',strain:'Strain Gauge Monitoring',inclinometer:'Inclinometer Monitoring','kimi-inc':'Kimi Inclinometer System',cvt:'Convergence (CVT) Monitoring',mat:'MAT Monitoring',trt:'TRT Monitoring',rockbolt:'Rock Bolt Load Cell',combinedlog:'Combined Reading Log',dataentry:'Manual Data Entry',reports:'Reports & Export'};
 function switchView(id,el){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
@@ -2839,6 +3014,7 @@ function switchView(id,el){
     if(id==='cvt'){renderCVTTable();renderCVTCharts();renderCVTPositionCards();}
     if(id==='mat'){renderMATTable();renderMATCharts();updateMATMonthFilter();}
     if(id==='trt'){renderTRTTable();renderTRTCharts();updateTRTMonthFilter();}
+    if(id==='rockbolt'){renderRBTable();renderRBCharts();updateRBMonthFilter();}
     if(id==='combinedlog'){renderCombinedLog();}
     if(id==='reports')updateReportCounts();
   },50);
@@ -2856,6 +3032,7 @@ function closeModal(id){
   else if(id==='cvtDataModal') editingCVT=null;
   else if(id==='matDataModal') editingMAT=null;
   else if(id==='trtDataModal') editingTRT=null;
+  else if(id==='rbDataModal') editingRB=null;
   else if(id==='sensorModal') editingSensor=null;
 }
 document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open')}));
@@ -3230,14 +3407,15 @@ function renderCVTTable(){
   if(monthFilter!=='all')rows=rows.filter(r=>getMonthKey(r.date)===monthFilter);
   if(filterPos!=='all')rows=rows.filter(r=>r.position===filterPos);
   if(filterId!=='all')rows=rows.filter(r=>r.cvtId===filterId);
-  rows.sort((a,b)=>b.date.localeCompare(a.date)||a.position.localeCompare(b.position));
+  // Sort date-wise ASCENDING (oldest first) then by position
+  rows.sort((a,b)=>a.date.localeCompare(b.date)||a.position.localeCompare(b.position));
   if(!rows.length){
-    tbody.innerHTML='<tr><td colspan="10" style="text-align:center;color:var(--txt3);font-family:var(--mono);font-size:10px;padding:20px">No CVT readings. Click "+ Add Reading" to add.</td></tr>';
+    tbody.innerHTML='<tr><td colspan="12" style="text-align:center;color:var(--txt3);font-family:var(--mono);font-size:10px;padding:20px">No CVT readings. Click "+ Add Reading" to add.</td></tr>';
     document.getElementById('cvtRowCount').textContent='0 Entries';
     renderCVTMonthCards();
     return;
   }
-  tbody.innerHTML=rows.map(r=>{
+  tbody.innerHTML=rows.map((r,idx)=>{
     const s=cvtStatus(r.convergence);
     const col=CVT_COLORS[r.position]||'var(--accent)';
     const ch1=r.ch1!=null?r.ch1.toFixed(2):(r.initial||0).toFixed(2);
@@ -3245,6 +3423,7 @@ function renderCVTTable(){
     const ch3=r.ch3!=null?r.ch3.toFixed(2):'—';
     const avg=r.avg!=null?r.avg.toFixed(3):(r.current||0).toFixed(3);
     return `<tr>
+      <td style="font-family:var(--mono);font-size:10px;color:var(--txt3);text-align:center">${idx+1}</td>
       <td>${r.date}</td>
       <td style="font-family:var(--mono);font-size:9px;color:var(--txt3)">${getMonthLabel(r.date)}</td>
       <td class="iid">${r.cvtId}</td>
@@ -3396,11 +3575,19 @@ function quickEntryInc(){
   showToast('Inclinometer reading saved!');
 }
 
-function showToast(msg){
-  const t=document.createElement('div');
-  t.style.cssText='position:fixed;bottom:20px;right:20px;background:var(--accent);color:#0a0c10;font-family:var(--mono);font-size:11px;padding:10px 18px;border-radius:6px;z-index:9999;animation:fi .3s ease;box-shadow:0 4px 20px rgba(0,212,170,.4)';
-  t.textContent='✓ '+msg;document.body.appendChild(t);
-  setTimeout(()=>t.remove(),3000);
+function showToast(msg, duration, type){
+  // type: 'ok' (green, default) | 'warn' (orange) | 'err' (red)
+  const colors = {
+    ok:   {bg:'var(--accent)',   color:'#0a0c10', shadow:'rgba(0,212,170,.4)'},
+    warn: {bg:'var(--warn)',     color:'#0a0c10', shadow:'rgba(245,166,35,.4)'},
+    err:  {bg:'var(--danger)',   color:'#fff',    shadow:'rgba(239,68,68,.4)'},
+  };
+  const c = colors[type] || colors.ok;
+  const t = document.createElement('div');
+  t.style.cssText = `position:fixed;bottom:20px;right:20px;background:${c.bg};color:${c.color};font-family:var(--mono);font-size:11px;padding:10px 18px;border-radius:6px;z-index:9999;animation:fi .3s ease;box-shadow:0 4px 20px ${c.shadow};max-width:340px`;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(), duration||3000);
 }
 
 // ================================================================
@@ -4676,12 +4863,193 @@ function renderTRTTable(){
 }
 
 // ================================================================
+// ROCK BOLT LOAD CELL
+// ================================================================
+let rbData = [];
+let editingRB = null;
+const RB_ALERT = 7.5, RB_ALARM = 12;
+
+function rbStatus(avg){
+  if(avg>=RB_ALARM) return {cls:'chip-d',txt:'ALARM'};
+  if(avg>=RB_ALERT) return {cls:'chip-w',txt:'ALERT'};
+  return {cls:'chip-ok',txt:'NORMAL'};
+}
+
+function calcRBAvg(){
+  const v=[parseFloat(document.getElementById('rbCh1').value)||0,
+           parseFloat(document.getElementById('rbCh2').value)||0,
+           parseFloat(document.getElementById('rbCh3').value)||0];
+  document.getElementById('rbAvg').value=((v[0]+v[1]+v[2])/3).toFixed(3);
+}
+
+function openRBModal(id=null){
+  editingRB=id;
+  document.getElementById('rbModalTitle').textContent=id?'Edit Rock Bolt Reading':'Add Rock Bolt Reading';
+  if(!id){
+    ['rbCh1','rbCh2','rbCh3','rbAvg','rbNotes','rbRDM'].forEach(x=>document.getElementById(x).value='');
+    document.getElementById('rbInstSelect').selectedIndex=0;
+    document.getElementById('rbDate').value=new Date().toISOString().split('T')[0];
+  } else {
+    const r=rbData.find(x=>x.id===id);
+    if(r){
+      document.getElementById('rbInstSelect').value=r.instId;
+      document.getElementById('rbDate').value=r.date;
+      document.getElementById('rbRDM').value=r.rdm||'';
+      document.getElementById('rbCh1').value=r.ch1;
+      document.getElementById('rbCh2').value=r.ch2;
+      document.getElementById('rbCh3').value=r.ch3;
+      document.getElementById('rbAvg').value=r.avg;
+      document.getElementById('rbNotes').value=r.notes||'';
+    }
+  }
+  openModal('rbDataModal');
+}
+
+function saveRBData(){
+  const instId=document.getElementById('rbInstSelect').value;
+  const date=document.getElementById('rbDate').value;
+  const rdm=parseFloat(document.getElementById('rbRDM').value)||0;
+  const ch1=parseFloat(document.getElementById('rbCh1').value)||0;
+  const ch2=parseFloat(document.getElementById('rbCh2').value)||0;
+  const ch3=parseFloat(document.getElementById('rbCh3').value)||0;
+  const avg=(ch1+ch2+ch3)/3;
+  const notes=document.getElementById('rbNotes').value.trim();
+  if(!date) return alert('Please enter a date');
+  if(editingRB){
+    const r=rbData.find(x=>x.id===editingRB);
+    if(r){ Object.assign(r,{instId,date,rdm,ch1,ch2,ch3,avg,notes}); }
+    else { rbData.push({id:Date.now(),instId,date,rdm,ch1,ch2,ch3,avg,notes}); }
+    editingRB=null;
+  } else {
+    rbData.push({id:Date.now(),instId,date,rdm,ch1,ch2,ch3,avg,notes});
+  }
+  renderRBTable(); renderRBCharts(); updateRBMonthFilter();
+  closeModal('rbDataModal'); saveToStorage();
+  showToast('Rock Bolt reading saved!');
+  if(avg>=RB_ALERT) notifyAdmin('Alert: '+instId+' Rock Bolt avg '+avg.toFixed(3)+'T exceeds threshold.');
+}
+
+function deleteRB(id){
+  if(!confirm('Delete this Rock Bolt reading?'))return;
+  rbData=rbData.filter(x=>x.id!==id);
+  renderRBTable(); renderRBCharts(); updateRBMonthFilter(); saveToStorage();
+}
+
+function updateRBMonthFilter(){
+  const sel=document.getElementById('rbMonthFilter');
+  if(!sel)return;
+  const months=[...new Set(rbData.map(r=>getMonthKey(r.date)))].sort().reverse();
+  const cur=sel.value;
+  sel.innerHTML='<option value="all">All Months</option>'+months.map(m=>`<option value="${m}"${m===cur?' selected':''}>${getMonthLabel(m+'-01')}</option>`).join('');
+}
+
+function renderRBMonthCards(){
+  const container=document.getElementById('rbMonthCards');
+  if(!container)return;
+  const selFilter=document.getElementById('rbMonthFilter')?.value||'all';
+  const months=[...new Set(rbData.map(r=>getMonthKey(r.date)))].sort().reverse();
+  if(!months.length){ container.innerHTML=''; return; }
+  container.innerHTML=months.map(m=>{
+    const rows=rbData.filter(r=>getMonthKey(r.date)===m);
+    const isActive=selFilter===m;
+    return `<div onclick="const s=document.getElementById('rbMonthFilter');if(s){s.value='${m}';}renderRBTable();" style="cursor:pointer;background:${isActive?'rgba(251,191,36,.12)':'var(--card)'};border:1px solid ${isActive?'#fbbf24':'var(--border)'};border-radius:8px;padding:10px 14px;min-width:160px;transition:all .15s">
+      <div style="display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:9px;color:${isActive?'#fbbf24':'var(--txt3)'};text-transform:uppercase;margin-bottom:6px"><span style="color:#fbbf24">■</span> Month</div>
+      <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:${isActive?'#fbbf24':'var(--txt)'}">${getMonthLabel(m+'-01')}</div>
+      <div style="font-size:11px;color:var(--txt2);margin-top:4px">${rows.length} reading${rows.length!==1?'s':''}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderRBTable(){
+  const tbody=document.getElementById('rbTbody');
+  if(!tbody)return;
+  const monthFilter=document.getElementById('rbMonthFilter')?.value||'all';
+  const instFilter=document.getElementById('rbInstFilter')?.value||'all';
+  let rows=monthFilter==='all'?[...rbData]:rbData.filter(r=>getMonthKey(r.date)===monthFilter);
+  if(instFilter!=='all')rows=rows.filter(r=>r.instId===instFilter);
+  // Ascending date + serial
+  rows.sort((a,b)=>a.date.localeCompare(b.date));
+  renderRBMonthCards();
+  // Update KPIs
+  const totalEl=document.getElementById('rbTotalCount');
+  if(totalEl)totalEl.textContent=rbData.length;
+  const latestEl=document.getElementById('rbLatestAvg');
+  if(latestEl){
+    const latest=[...rbData].sort((a,b)=>b.date.localeCompare(a.date))[0];
+    latestEl.textContent=latest?latest.avg.toFixed(3)+' T':'—';
+  }
+  if(!rows.length){
+    tbody.innerHTML='<tr><td colspan="12" style="text-align:center;color:var(--txt3);font-family:var(--mono);font-size:10px;padding:20px">No Rock Bolt readings. Click "+ Add Reading".</td></tr>';
+    document.getElementById('rbRowCount').textContent='0 Entries';
+    return;
+  }
+  tbody.innerHTML=rows.map((r,idx)=>{
+    const s=rbStatus(r.avg);
+    return `<tr>
+      <td style="font-family:var(--mono);font-size:10px;color:var(--txt3);text-align:center">${idx+1}</td>
+      <td>${r.date}</td>
+      <td style="font-family:var(--mono);font-size:9px;color:#fbbf24">${getMonthLabel(r.date)}</td>
+      <td class="iid" style="color:#fbbf24">${r.instId}</td>
+      <td class="iu">${r.rdm||'--'}</td>
+      <td class="iv">${r.ch1.toFixed(2)}</td>
+      <td class="iv">${r.ch2.toFixed(2)}</td>
+      <td class="iv">${r.ch3.toFixed(2)}</td>
+      <td class="iv" style="color:${r.avg>=RB_ALERT?'var(--warn)':'#fbbf24'}">${r.avg.toFixed(3)}</td>
+      <td><span class="chip ${s.cls}">${s.txt}</span></td>
+      <td style="font-size:11px;color:var(--txt2)">${r.notes||'--'}</td>
+      <td class="no-print"><div class="tbl-actions"><button onclick="openRBModal(${r.id})">Edit</button><button class="del" onclick="deleteRB(${r.id})">Del</button></div></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('rbRowCount').textContent=rows.length+' Entries';
+}
+
+function renderRBCharts(){
+  const allDates=[...new Set(rbData.map(r=>r.date))].sort();
+  const insts=[...new Set(rbData.map(r=>r.instId))];
+  const colors=['#fbbf24','#60a5fa','#00d4aa','#a78bfa'];
+  const datasets=insts.map((inst,i)=>({
+    label:inst,
+    data:allDates.map(d=>{const r=rbData.find(x=>x.instId===inst&&x.date===d);return r?+r.avg.toFixed(3):null;}),
+    borderColor:colors[i%colors.length],backgroundColor:'transparent',tension:0.3,pointRadius:4,spanGaps:true
+  }));
+  // Alert line
+  if(allDates.length) datasets.push({label:'Alert (7.5T)',data:allDates.map(()=>RB_ALERT),borderColor:'rgba(239,68,68,0.5)',borderDash:[4,4],pointRadius:0,borderWidth:1,backgroundColor:'transparent'});
+  mkChart('rbTrendChart',{type:'line',data:{labels:allDates,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8892a4',font:{family:'Space Mono',size:9},boxWidth:10}}},scales:{y:{ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'},title:{display:true,text:'Avg Load (Ton)',color:'#4a5568'}},x:{ticks:{color:'#4a5568',font:{family:'Space Mono',size:8},maxRotation:45},grid:{display:false}}}}});
+  // Bar latest per inst
+  const latestVals=insts.map(inst=>{const rows=rbData.filter(r=>r.instId===inst);return rows.length?rows.sort((a,b)=>b.date.localeCompare(a.date))[0].avg:0;});
+  mkChart('rbBarChart',{type:'bar',data:{labels:insts,datasets:[{label:'Latest Avg (Ton)',data:latestVals,backgroundColor:latestVals.map((_,i)=>colors[i%colors.length]+'99'),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'}},x:{ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{display:false}}}}});
+}
+
+function exportRBData(){
+  const csv=['Date,Month,InstID,RD(m),CH1(T),CH2(T),CH3(T),Avg(T),Status,Notes',...rbData.map(r=>`${r.date},"${getMonthLabel(r.date)}","${r.instId}",${r.rdm||'--'},${r.ch1.toFixed(2)},${r.ch2.toFixed(2)},${r.ch3.toFixed(2)},${r.avg.toFixed(3)},${rbStatus(r.avg).txt},"${(r.notes||'').replace(/"/g,'\'')}"`)].join('\n');
+  downloadCSV(csv,'RockBolt_LC_Data.csv');
+}
+
+// ================================================================
 // APP BOOT
 // ================================================================
 window.addEventListener('load',()=>{
   document.getElementById('loginPage').style.display='flex';
 });
 </script>
+
+<!-- ========== ROCK BOLT DATA MODAL ========== -->
+<div class="modal-bg" id="rbDataModal">
+  <div class="modal">
+    <div class="modal-title"><span id="rbModalTitle">Add Rock Bolt Reading</span><button class="modal-close" onclick="closeModal('rbDataModal')">×</button></div>
+    <div class="form-grid">
+      <div class="fg"><label class="fl">Instrument ID</label><select class="fs" id="rbInstSelect"><option>RB-01</option><option>RB-02</option><option>RB-03</option></select></div>
+      <div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="rbDate"/></div>
+      <div class="fg"><label class="fl">RD (m)</label><input class="fi" type="number" step="0.001" id="rbRDM" placeholder="0.000"/></div>
+      <div class="fg"><label class="fl">Notes</label><input class="fi" id="rbNotes" placeholder="Optional"/></div>
+      <div class="fg"><label class="fl">CH-1 (Ton)</label><input class="fi" type="number" step="0.01" id="rbCh1" placeholder="0.00" oninput="calcRBAvg()"/></div>
+      <div class="fg"><label class="fl">CH-2 (Ton)</label><input class="fi" type="number" step="0.01" id="rbCh2" placeholder="0.00" oninput="calcRBAvg()"/></div>
+      <div class="fg"><label class="fl">CH-3 (Ton)</label><input class="fi" type="number" step="0.01" id="rbCh3" placeholder="0.00" oninput="calcRBAvg()"/></div>
+      <div class="fg"><label class="fl">Avg (auto)</label><input class="fi" id="rbAvg" readonly style="opacity:.7"/></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('rbDataModal')">Cancel</button><button class="btn btn-p" onclick="saveRBData()">Save Reading</button></div>
+  </div>
+</div>
 
 <!-- ========== MAT DATA MODAL ========== -->
 <div class="modal-bg" id="matDataModal">
