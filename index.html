@@ -2626,13 +2626,8 @@ function applyDataSnapshot(snap, opts){
   if(snap.kimiSessions && Array.isArray(snap.kimiSessions) && snap.kimiSessions.length>0){
     KIMI_REAL_DATA.sessions = snap.kimiSessions;
   }
-
-  if(!opts.skipFallbackDefaults){
-    if(!lcData.length && typeof PRELOADED_LC_DATA !== 'undefined') lcData = [...PRELOADED_LC_DATA];
-    if(!sgData.length && typeof PRELOADED_SG_DATA !== 'undefined') sgData = [...PRELOADED_SG_DATA];
-    if(!matData.length && typeof PRELOADED_MAT_DATA !== 'undefined') matData = [...PRELOADED_MAT_DATA];
-    if(!trtData.length && typeof PRELOADED_TRT_DATA !== 'undefined') trtData = [...PRELOADED_TRT_DATA];
-  }
+  // NOTE: No sample/preloaded fallback here.
+  // Sample data is only ever loaded inside loadFromStorage() on absolute first run.
 
   if(opts.rerender){
     renderLCTable();renderLCCharts();
@@ -2691,11 +2686,34 @@ async function loadFromStorage(){
 
   } catch(e){ console.warn('localStorage load failed:', e); }
 
-  // ── Step 2: Try Firebase for latest shared data ──
-  if(!fbReady || !fbDB) return;
+  // ── Step 2: Try Firebase — wait for it fully before returning ──
+  if(!fbReady || !fbDB){
+    console.log('Firebase not ready — using localStorage only');
+    // If no localStorage data either, load sample data for demo
+    if(!localStorage.getItem('aageo_hasUserData')){
+      if(!lcData.length)  lcData  = _sampleLC;
+      if(!sgData.length)  sgData  = _sampleSG;
+      if(!incData.length) incData = _sampleInc;
+      if(!cvtData.length) cvtData = _sampleCVT;
+      if(!matData.length) matData = _sampleMAT;
+      if(!trtData.length) trtData = _sampleTRT;
+    }
+    return;
+  }
 
   const authOK = await fbAuthenticate();
-  if(!authOK) return;
+  if(!authOK){
+    console.log('Firebase auth failed — using localStorage only');
+    if(!localStorage.getItem('aageo_hasUserData')){
+      if(!lcData.length)  lcData  = _sampleLC;
+      if(!sgData.length)  sgData  = _sampleSG;
+      if(!incData.length) incData = _sampleInc;
+      if(!cvtData.length) cvtData = _sampleCVT;
+      if(!matData.length) matData = _sampleMAT;
+      if(!trtData.length) trtData = _sampleTRT;
+    }
+    return;
+  }
 
   try {
     const snapshot = await fbDB.ref('gimsData').get();
@@ -2704,10 +2722,11 @@ async function loadFromStorage(){
       if(fbVal.kimiSessions && Array.isArray(fbVal.kimiSessions) && fbVal.kimiSessions.length>0){
         KIMI_REAL_DATA.sessions = fbVal.kimiSessions;
       }
-      // Firebase data always wins over localStorage (it's the shared source of truth)
-      // skipFallbackDefaults:true — never overwrite Firebase data with PRELOADED sample data
+      // Firebase ALWAYS wins — it is the single source of truth
+      // skipFallbackDefaults:true — never let sample data overwrite Firebase data
       applyDataSnapshot(fbVal, {rerender: false, skipFallbackDefaults: true});
-      // Mirror Firebase data back to localStorage so offline mode has the latest copy
+
+      // Mirror Firebase data to localStorage (offline backup)
       try {
         localStorage.setItem(LS_KEYS.lcData,        JSON.stringify(lcData));
         localStorage.setItem(LS_KEYS.sgData,        JSON.stringify(sgData));
@@ -2720,15 +2739,25 @@ async function loadFromStorage(){
         localStorage.setItem(LS_KEYS.customMonths,  JSON.stringify(customMonths));
         localStorage.setItem(LS_KEYS.rbData,        JSON.stringify(rbData));
         localStorage.setItem('gims_kimiSessions',   JSON.stringify(KIMI_REAL_DATA.sessions));
-        localStorage.setItem('aageo_hasUserData', '1');
+        localStorage.setItem('aageo_hasUserData',   '1');
       } catch(e2){ console.warn('localStorage mirror failed:', e2); }
+
     } else {
-      // Firebase is empty (first-ever run) — push our local/preloaded data up
-      saveToStorage();
+      // Firebase is empty (very first ever run) AND no local data exists
+      // Only now is it safe to load sample/preloaded data for demo purposes
+      if(!localStorage.getItem('aageo_hasUserData')){
+        if(!lcData.length)  lcData  = _sampleLC;
+        if(!sgData.length)  sgData  = _sampleSG;
+        if(!incData.length) incData = _sampleInc;
+        if(!cvtData.length) cvtData = _sampleCVT;
+        if(!matData.length) matData = _sampleMAT;
+        if(!trtData.length) trtData = _sampleTRT;
+      }
     }
   } catch(e){
-    console.warn('Firebase initial load failed — using localStorage data.', e);
+    console.warn('Firebase load failed — using localStorage data.', e);
   }
+  // loadFromStorage() is done — initApp will now render with correct data
 }
 
 // Keeps every connected team member's screen in sync automatically.
@@ -2774,6 +2803,10 @@ let currentOTP = '';
 let otpTimerInterval = null;
 
 // Sample initial data — ONLY loaded when localStorage has NO saved data
+// ================================================================
+// SAMPLE DATA — Only loaded on very first ever run (empty Firebase + empty localStorage)
+// After first real save, 'aageo_hasUserData' flag permanently prevents these from loading.
+// ================================================================
 const _sampleLC = [
   {id:1,date:'2026-02-10',lc:'LC MAT-LHS (4421)',ch1:0.8,ch2:0.5,ch3:0.3,avg:0.533,type:'rib'},
   {id:2,date:'2026-02-16',lc:'LC MAT-LHS (4421)',ch1:0.8,ch2:0.5,ch3:0.3,avg:0.533,type:'rib'},
@@ -2822,16 +2855,10 @@ const _sampleTRT = [
   {id:204,date:'2026-03-24',instId:'TRT-02',position:'TRT RHS',rdm:10.000,ch1:0.18,ch2:0.20,ch3:0.19,avg:0.190,notes:''},
   {id:205,date:'2026-04-07',instId:'TRT-01',position:'TRT CROWN',rdm:8.500,ch1:0.72,ch2:0.78,ch3:0.74,avg:0.747,notes:'Normal trend'},
 ];
-// Apply sample data ONLY on very first run (no localStorage data ever saved by a user)
-// Once 'aageo_hasUserData' is set, sample data is NEVER loaded again — user data takes priority.
-if(!localStorage.getItem('aageo_hasUserData')){
-  if(!localStorage.getItem(LS_KEYS.lcData))  lcData  = _sampleLC;
-  if(!localStorage.getItem(LS_KEYS.sgData))  sgData  = _sampleSG;
-  if(!localStorage.getItem(LS_KEYS.incData)) incData = _sampleInc;
-  if(!localStorage.getItem(LS_KEYS.cvtData)) cvtData = _sampleCVT;
-  if(!localStorage.getItem(LS_KEYS.matData)) matData = _sampleMAT;
-  if(!localStorage.getItem(LS_KEYS.trtData)) trtData = _sampleTRT;
-}
+// DO NOT auto-load sample data here at script start.
+// Sample data is only injected inside loadFromStorage() when BOTH
+// localStorage AND Firebase are confirmed empty (absolute first run).
+// This prevents sample data from ever racing against / overwriting real user data.
 
 // ================================================================
 // LOGIN — STEP 1 (Credentials)
