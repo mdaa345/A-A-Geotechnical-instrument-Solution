@@ -1203,6 +1203,10 @@ canvas{display:block}
             <option value="RB-01">RB-01</option>
             <option value="RB-02">RB-02</option>
             <option value="RB-03">RB-03</option>
+            <option value="RB-04">RB-04</option>
+            <option value="RB-05">RB-05</option>
+            <option value="RB-06">RB-06</option>
+            <option value="RB-07">RB-07</option>
           </select>
           <button class="btn btn-ghost no-print" onclick="openRBModal()">+ Add Reading</button>
           <button class="btn btn-ghost no-print" onclick="exportRBData()">Export CSV</button>
@@ -1558,9 +1562,9 @@ const USERS = [
   {id:3,name:'operator2',pass:'op456',role:'user',status:'pending',displayName:'Operator 2',email:'op2@aa-geo.com'},
 ];
 let currentUser = null;
-let lcData = [], sgData = [], incData = [], cvtData = [], matData = [], trtData = [];
+let lcData = [], sgData = [], incData = [], cvtData = [], matData = [], trtData = [], rbData = [];
 let customMonths = {cvt:[], mat:[], trt:[], comb:[]};
-let editingLC = null, editingSG = null, editingInc = null, editingCVT = null, editingMAT = null, editingTRT = null;
+let editingLC = null, editingSG = null, editingInc = null, editingCVT = null, editingMAT = null, editingTRT = null, editingRB = null;
 let sensorData = [];
 let editingSensor = null;
 let sgCurrentProject = 'all';
@@ -4438,10 +4442,12 @@ function renderMATCharts(){
     data:allDates.map(d=>{const r=matData.find(x=>x.instId===inst&&x.date===d);return r?+r.avg.toFixed(3):null;}),
     borderColor:colors[i%colors.length],backgroundColor:'transparent',tension:0.3,pointRadius:4,spanGaps:true
   }));
-  mkChart('matTrendChart',{type:'line',data:{labels:allDates,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8892a4',font:{family:'Space Mono',size:9},boxWidth:10}}},scales:{y:{ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'},title:{display:true,text:'Avg Load (Ton)',color:'#4a5568'}},x:{ticks:{color:'#4a5568',font:{family:'Space Mono',size:8},maxRotation:45},grid:{display:false}}}}});
-  // Bar chart latest per instrument
+  if(allDates.length){
+    datasets.push({label:'Alert (7.5T)',data:allDates.map(()=>MAT_ALERT),borderColor:'rgba(239,68,68,0.5)',borderDash:[4,4],pointRadius:0,borderWidth:1.5,backgroundColor:'transparent'});
+  }
+  mkChart('matTrendChart',{type:'line',data:{labels:allDates,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8892a4',font:{family:'Space Mono',size:9},boxWidth:10}}},scales:{y:{min:0,max:10,ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'},title:{display:true,text:'Avg Load (Ton)',color:'#4a5568'}},x:{ticks:{color:'#4a5568',font:{family:'Space Mono',size:8},maxRotation:45},grid:{display:false}}}}});
   const latestVals=insts.map(inst=>{const rows=matData.filter(r=>r.instId===inst);return rows.length?rows.sort((a,b)=>b.date.localeCompare(a.date))[0].avg:0;});
-  mkChart('matBarChart',{type:'bar',data:{labels:insts,datasets:[{label:'Latest Avg (Ton)',data:latestVals,backgroundColor:latestVals.map((v,i)=>colors[i%colors.length]+'99'),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'}},x:{ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{display:false}}}}});
+  mkChart('matBarChart',{type:'bar',data:{labels:insts,datasets:[{label:'Latest Avg (Ton)',data:latestVals,backgroundColor:latestVals.map((v,i)=>colors[i%colors.length]+'99'),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:10,ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'}},x:{ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{display:false}}}}});
 }
 
 // ================================================================
@@ -4541,9 +4547,12 @@ function renderTRTCharts(){
     data:allDates.map(d=>{const r=trtData.find(x=>x.instId===inst&&x.date===d);return r?+r.avg.toFixed(3):null;}),
     borderColor:colors[i%colors.length],backgroundColor:'transparent',tension:0.3,pointRadius:4,spanGaps:true
   }));
-  mkChart('trtTrendChart',{type:'line',data:{labels:allDates,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8892a4',font:{family:'Space Mono',size:9},boxWidth:10}}},scales:{y:{ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'},title:{display:true,text:'Avg Load (Ton)',color:'#4a5568'}},x:{ticks:{color:'#4a5568',font:{family:'Space Mono',size:8},maxRotation:45},grid:{display:false}}}}});
+  if(allDates.length){
+    datasets.push({label:'Alert (7.5T)',data:allDates.map(()=>TRT_ALERT),borderColor:'rgba(239,68,68,0.5)',borderDash:[4,4],pointRadius:0,borderWidth:1.5,backgroundColor:'transparent'});
+  }
+  mkChart('trtTrendChart',{type:'line',data:{labels:allDates,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8892a4',font:{family:'Space Mono',size:9},boxWidth:10}}},scales:{y:{min:0,max:10,ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'},title:{display:true,text:'Avg Load (Ton)',color:'#4a5568'}},x:{ticks:{color:'#4a5568',font:{family:'Space Mono',size:8},maxRotation:45},grid:{display:false}}}}});
   const latestVals=insts.map(inst=>{const rows=trtData.filter(r=>r.instId===inst);return rows.length?rows.sort((a,b)=>b.date.localeCompare(a.date))[0].avg:0;});
-  mkChart('trtBarChart',{type:'bar',data:{labels:insts,datasets:[{label:'Latest Avg (Ton)',data:latestVals,backgroundColor:latestVals.map((v,i)=>colors[i%colors.length]+'99'),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'}},x:{ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{display:false}}}}});
+  mkChart('trtBarChart',{type:'bar',data:{labels:insts,datasets:[{label:'Latest Avg (Ton)',data:latestVals,backgroundColor:latestVals.map((v,i)=>colors[i%colors.length]+'99'),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:10,ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'}},x:{ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{display:false}}}}});
 }
 
 // ================================================================
@@ -4892,8 +4901,6 @@ function renderTRTTable(){
 // ================================================================
 // ROCK BOLT LOAD CELL
 // ================================================================
-let rbData = [];
-let editingRB = null;
 const RB_ALERT = 7.5, RB_ALARM = 12;
 
 function rbStatus(avg){
@@ -5065,7 +5072,10 @@ window.addEventListener('load',()=>{
   <div class="modal">
     <div class="modal-title"><span id="rbModalTitle">Add Rock Bolt Reading</span><button class="modal-close" onclick="closeModal('rbDataModal')">×</button></div>
     <div class="form-grid">
-      <div class="fg"><label class="fl">Instrument ID</label><select class="fs" id="rbInstSelect"><option>RB-01</option><option>RB-02</option><option>RB-03</option></select></div>
+      <div class="fg"><label class="fl">Instrument ID</label><select class="fs" id="rbInstSelect">
+        <option>RB-01</option><option>RB-02</option><option>RB-03</option>
+        <option>RB-04</option><option>RB-05</option><option>RB-06</option><option>RB-07</option>
+      </select></div>
       <div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="rbDate"/></div>
       <div class="fg"><label class="fl">RD (m)</label><input class="fi" type="number" step="0.001" id="rbRDM" placeholder="0.000"/></div>
       <div class="fg"><label class="fl">Notes</label><input class="fi" id="rbNotes" placeholder="Optional"/></div>
