@@ -742,6 +742,11 @@ canvas{display:block}
     </div>
   </div>
   <div class="sb-status"><div class="sdot"></div><span class="stxt">LIVE MONITORING</span></div>
+  <div id="cloudSaveStatus" style="padding:6px 16px;background:rgba(239,68,68,0.08);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:7px">
+    <span style="width:7px;height:7px;border-radius:50%;background:#ef4444;flex-shrink:0;display:inline-block" id="cloudDot"></span>
+    <span style="font-family:var(--mono);font-size:9px;color:#ef4444;line-height:1.3;flex:1" id="cloudSaveTxt">⏳ Connecting to cloud…</span>
+    <button onclick="testFirebaseConnection()" title="Test Firebase connection" style="background:none;border:1px solid currentColor;color:var(--txt3);font-family:var(--mono);font-size:8px;padding:2px 5px;border-radius:3px;cursor:pointer;white-space:nowrap">TEST</button>
+  </div>
   <div class="sb-nav">
     <div class="nav-sec">MONITORING</div>
     <div class="ni active" onclick="switchView('overview',this)">
@@ -1577,6 +1582,17 @@ let charts = {};
 // ================================================================
 // FIREBASE — shared cloud database (replaces localStorage as source of truth)
 // ================================================================
+// IMPORTANT — Firebase Realtime Database Rules must be set to:
+// {
+//   "rules": {
+//     ".read": "auth != null",
+//     ".write": "auth != null"
+//   }
+// }
+// AND "Anonymous" sign-in must be ENABLED in Firebase Console →
+// Authentication → Sign-in method → Anonymous → Enable
+// Without these two settings, cloud save will silently fail.
+// ================================================================
 const firebaseConfig = {
   apiKey: "AIzaSyAWFFcFTkj-qWSRC-5Hbm-3JtDeflTHGlw",
   authDomain: "aa-gims-dashboard.firebaseapp.com",
@@ -1593,35 +1609,67 @@ let fbApp=null, fbDB=null, fbAuth=null, fbReady=false, fbAuthed=false;
 // of giving up immediately on "firebase is not defined", retry briefly.
 function fbTryInit(){
   if(typeof firebase === 'undefined') return false;
+  // Check all three SDK modules are loaded (database and auth compat bundles)
+  if(typeof firebase.database !== 'function') return false;
+  if(typeof firebase.auth !== 'function') return false;
   try{
-    fbApp = firebase.initializeApp(firebaseConfig);
-    fbDB = firebase.database();
-    fbAuth = firebase.auth();
+    // Prevent duplicate app initialization
+    if(firebase.apps && firebase.apps.length > 0){
+      fbApp = firebase.apps[0];
+    } else {
+      fbApp = firebase.initializeApp(firebaseConfig);
+    }
+    fbDB   = firebase.database(fbApp);
+    fbAuth = firebase.auth(fbApp);
     fbReady = true;
-    console.log('Firebase initialized successfully.');
+    console.log('Firebase initialized successfully ✓');
     return true;
   }catch(e){
-    console.warn('Firebase init failed:', e);
+    console.warn('Firebase init failed:', e.message);
     fbReady = false;
     return false;
   }
 }
 function fbSetStatusBadge(text, color){
+  // Login page badge
   const el = document.getElementById('fbStatusBadge');
   if(el){ el.textContent = text; if(color) el.style.color = color; }
+  // Sidebar cloud save status (always visible after login)
+  const dot  = document.getElementById('cloudDot');
+  const txt  = document.getElementById('cloudSaveTxt');
+  const bar  = document.getElementById('cloudSaveStatus');
+  if(!dot || !txt || !bar) return;
+  if(color === '#2dd4bf' || color === '#00d4aa'){
+    // Green — cloud active
+    dot.style.background  = '#2dd4bf';
+    txt.style.color       = '#2dd4bf';
+    bar.style.background  = 'rgba(0,212,170,0.08)';
+    txt.textContent       = text;
+  } else if(color === '#ef4444'){
+    // Red — blocked / error
+    dot.style.background  = '#ef4444';
+    txt.style.color       = '#ef4444';
+    bar.style.background  = 'rgba(239,68,68,0.08)';
+    txt.textContent       = text;
+  } else {
+    // Orange — warning / local only
+    dot.style.background  = '#f5a623';
+    txt.style.color       = '#f5a623';
+    bar.style.background  = 'rgba(245,166,35,0.08)';
+    txt.textContent       = text;
+  }
 }
 if(!fbTryInit()){
   let fbInitAttempts=0;
   const fbInitRetry = setInterval(()=>{
     fbInitAttempts++;
-    if(fbTryInit() || fbInitAttempts>=20){ // retry for up to ~10s (20 x 500ms)
+    if(fbTryInit()){
       clearInterval(fbInitRetry);
-      if(fbReady){
-        fbSetStatusBadge('✓ Connected to shared database', '#2dd4bf');
-      } else {
-        console.warn('Firebase SDK did not load after waiting — running in localStorage-only mode. Check your internet connection / firewall access to gstatic.com.');
-        fbSetStatusBadge('⚠ Offline mode — changes save to this device only', '#f5a623');
-      }
+      fbSetStatusBadge('✓ Connected to shared database', '#2dd4bf');
+    } else if(fbInitAttempts >= 40){ // retry for up to ~20s (40 x 500ms)
+      clearInterval(fbInitRetry);
+      console.warn('Firebase SDK did not load after waiting — running in localStorage-only mode.');
+      fbSetStatusBadge('⚠ Offline mode — changes save to this device only', '#f5a623');
     }
   }, 500);
 } else {
@@ -1636,24 +1684,99 @@ let fbWriting = false;
 // Itself retries briefly in case Firebase was still mid-initialization when login happened.
 async function fbAuthenticate(){
   if(!fbReady){
-    // Give the retry loop above a final chance to finish (covers the case where
-    // someone logs in within the first couple seconds of the page opening).
     for(let i=0;i<10 && !fbReady;i++){
       await new Promise(r=>setTimeout(r,300));
     }
   }
-  if(!fbReady || !fbAuth) return false;
+  if(!fbReady || !fbAuth){
+    fbSetStatusBadge('⚠ Firebase SDK not loaded', '#ef4444');
+    return false;
+  }
   try{
+    fbSetStatusBadge('⏳ Signing in anonymously…', '#f5a623');
     if(!fbAuth.currentUser){
       await fbAuth.signInAnonymously();
     }
     fbAuthed = true;
+    const uid = fbAuth.currentUser ? fbAuth.currentUser.uid : 'unknown';
+    console.log('Firebase anonymous auth OK — UID:', uid);
+    fbSetStatusBadge('⏳ Testing cloud write…', '#f5a623');
+
+    // ── Write test ──
+    try {
+      await fbDB.ref('gimsData/_ping').set({t: Date.now(), uid});
+      console.log('Firebase WRITE test ✓ — cloud save is working');
+      fbSetStatusBadge('☁ Cloud save active — data permanent', '#2dd4bf');
+      showToast('☁ Firebase connected — data will be saved permanently', 4000);
+    } catch(writeErr){
+      console.error('Firebase WRITE test FAILED:', writeErr.code, writeErr.message);
+      fbSetStatusBadge('⚠ Write failed: ' + writeErr.code, '#ef4444');
+      showToast('⚠ Firebase write failed: ' + writeErr.message, 6000, 'warn');
+    }
     return true;
-  }catch(e){
-    console.warn('Firebase auth failed — falling back to localStorage only.', e);
+  } catch(e){
+    console.error('Firebase signInAnonymously FAILED:', e.code, e.message);
+    // Give specific guidance based on error code
+    let hint = '';
+    if(e.code === 'auth/operation-not-allowed'){
+      hint = '⚠ Anonymous Auth disabled — enable in Firebase Console → Authentication → Sign-in method';
+    } else if(e.code === 'auth/network-request-failed'){
+      hint = '⚠ No internet — saving locally only';
+    } else {
+      hint = '⚠ Auth error: ' + e.code;
+    }
     fbAuthed = false;
+    fbSetStatusBadge(hint, '#ef4444');
+    showToast(hint, 7000, 'warn');
     return false;
   }
+}
+
+// Manual Firebase connection test — callable from the UI
+async function testFirebaseConnection(){
+  const results = [];
+  results.push('=== Firebase Diagnostic ===');
+  results.push('fbReady: ' + fbReady);
+  results.push('fbAuthed: ' + fbAuthed);
+  results.push('fbDB: ' + (fbDB ? 'OK' : 'NULL'));
+  results.push('fbAuth: ' + (fbAuth ? 'OK' : 'NULL'));
+  results.push('currentUser: ' + (fbAuth && fbAuth.currentUser ? fbAuth.currentUser.uid : 'none'));
+
+  if(!fbReady || !fbDB){
+    results.push('RESULT: Firebase SDK not loaded');
+    alert(results.join('\n'));
+    return;
+  }
+  // Try auth
+  try {
+    if(!fbAuth.currentUser) await fbAuth.signInAnonymously();
+    results.push('Auth: ✓ signInAnonymously OK — UID: ' + fbAuth.currentUser.uid);
+  } catch(e){
+    results.push('Auth: ✗ FAILED — ' + e.code + ': ' + e.message);
+    alert(results.join('\n'));
+    return;
+  }
+  // Try write
+  try {
+    await fbDB.ref('gimsData/_diagTest').set({t: Date.now(), test: true});
+    results.push('Write: ✓ SUCCESS — data saved to Firebase');
+    fbAuthed = true;
+    fbSetStatusBadge('☁ Cloud save active — data permanent', '#2dd4bf');
+    showToast('☁ Firebase working! All data will be saved permanently.', 4000);
+  } catch(e){
+    results.push('Write: ✗ FAILED — ' + e.code + ': ' + e.message);
+    fbSetStatusBadge('⚠ Write blocked: ' + e.code, '#ef4444');
+  }
+  // Try read
+  try {
+    const snap = await fbDB.ref('gimsData/_diagTest').get();
+    results.push('Read: ✓ SUCCESS — value: ' + JSON.stringify(snap.val()));
+  } catch(e){
+    results.push('Read: ✗ FAILED — ' + e.code + ': ' + e.message);
+  }
+  results.push('=== End ===');
+  console.log(results.join('\n'));
+  alert(results.join('\n'));
 }
 
 const LS_KEYS = {
@@ -1687,14 +1810,15 @@ function saveToStorage(){
     localStorage.setItem('aageo_hasUserData', '1');
   } catch(e){ console.warn('localStorage save failed:', e); }
 
-  // ── Show "Saved" badge in topbar ──
+  // ── Show save status badge in topbar ──
   const badge = document.getElementById('saveStatusBadge');
   if(badge){
-    badge.style.display='block';
-    badge.style.background='var(--acc-dim)';
-    badge.style.color='var(--accent)';
-    badge.style.borderColor='rgba(0,212,170,.2)';
-    badge.textContent='✓ Saved locally';
+    const cloudOK = fbReady && fbDB && fbAuthed;
+    badge.style.display      = 'block';
+    badge.style.background   = 'var(--acc-dim)';
+    badge.style.color        = 'var(--accent)';
+    badge.style.borderColor  = 'rgba(0,212,170,.2)';
+    badge.textContent        = cloudOK ? '✓ Saving to Firebase cloud…' : '✓ Saved to browser (no cloud)';
     clearTimeout(badge._timer);
     badge._timer = setTimeout(()=>{ badge.style.display='none'; }, 3000);
   }
@@ -2614,24 +2738,26 @@ const PRELOADED_SG_DATA = [
 // then re-renders every view so all team members see the same thing.
 function applyDataSnapshot(snap, opts){
   opts = opts || {};
-  // CRITICAL: use Array.isArray check — NOT just `if(snap.x)` — because an empty array [] is falsy
-  // and would cause saved data (even empty after deletes) to be ignored, loading stale sample data instead.
-  if(Array.isArray(snap.lcData)) lcData = snap.lcData;
-  if(Array.isArray(snap.sgData)) sgData = snap.sgData;
-  if(Array.isArray(snap.incData)) incData = snap.incData;
-  if(Array.isArray(snap.cvtData)) cvtData = snap.cvtData;
-  if(Array.isArray(snap.sensorData)) sensorData = snap.sensorData;
-  if(Array.isArray(snap.kimiBoreholes)){ KIMI_BOREHOLES.length=0; snap.kimiBoreholes.forEach(b=>KIMI_BOREHOLES.push(b)); }
-  if(Array.isArray(snap.matData)) matData = snap.matData;
-  if(Array.isArray(snap.trtData)) trtData = snap.trtData;
-  if(Array.isArray(snap.rbData)) rbData = snap.rbData;
-  if(snap.customMonths && typeof snap.customMonths === 'object') customMonths = {...customMonths, ...snap.customMonths};
-  // Restore Kimi sessions from Firebase/snapshot
+  // CRITICAL: use Array.isArray — NOT `if(snap.x)` — because empty array [] is falsy
+  // and would cause saved data to be ignored, loading stale data instead.
+  if(Array.isArray(snap.lcData))       lcData       = snap.lcData;
+  if(Array.isArray(snap.sgData))       sgData       = snap.sgData;
+  if(Array.isArray(snap.incData))      incData      = snap.incData;
+  if(Array.isArray(snap.cvtData))      cvtData      = snap.cvtData;
+  if(Array.isArray(snap.sensorData))   sensorData   = snap.sensorData;
+  if(Array.isArray(snap.matData))      matData      = snap.matData;
+  if(Array.isArray(snap.trtData))      trtData      = snap.trtData;
+  if(Array.isArray(snap.rbData))       rbData       = snap.rbData;
+  if(Array.isArray(snap.kimiBoreholes)){
+    KIMI_BOREHOLES.length=0;
+    snap.kimiBoreholes.forEach(b=>KIMI_BOREHOLES.push(b));
+  }
+  if(snap.customMonths && typeof snap.customMonths === 'object'){
+    customMonths = {...customMonths, ...snap.customMonths};
+  }
   if(snap.kimiSessions && Array.isArray(snap.kimiSessions) && snap.kimiSessions.length>0){
     KIMI_REAL_DATA.sessions = snap.kimiSessions;
   }
-  // NOTE: No sample/preloaded fallback here.
-  // Sample data is only ever loaded inside loadFromStorage() on absolute first run.
 
   if(opts.rerender){
     renderLCTable();renderLCCharts();
@@ -2650,7 +2776,7 @@ function applyDataSnapshot(snap, opts){
 }
 
 // One-time initial load. Tries localStorage first (instant), then Firebase (latest shared data).
-// PRIORITY: Firebase > localStorage > PRELOADED sample data
+// PRIORITY: Firebase > localStorage > PRELOADED/sample data (first run only)
 async function loadFromStorage(){
   const hasUserData = !!localStorage.getItem('aageo_hasUserData');
 
@@ -2686,36 +2812,33 @@ async function loadFromStorage(){
       trtData:       trt    ? JSON.parse(trt)    : undefined,
       customMonths:  months ? JSON.parse(months) : undefined,
       rbData:        rb     ? JSON.parse(rb)     : undefined,
-    }, {rerender: false, skipFallbackDefaults: hasUserData});
+    }, {rerender: false});
 
   } catch(e){ console.warn('localStorage load failed:', e); }
 
-  // ── Step 2: Try Firebase — wait for it fully before returning ──
+  // ── Helper: inject preloaded/sample data for any array still empty ──
+  // Only runs when the user has never saved data (aageo_hasUserData not set)
+  function _injectSampleIfEmpty(){
+    if(localStorage.getItem('aageo_hasUserData')) return; // user has real data — never touch it
+    if(!lcData.length  && typeof PRELOADED_LC_DATA !== 'undefined')  lcData  = [...PRELOADED_LC_DATA];
+    if(!sgData.length  && typeof PRELOADED_SG_DATA !== 'undefined')  sgData  = [...PRELOADED_SG_DATA];
+    if(!incData.length)  incData  = [..._sampleInc];
+    if(!cvtData.length)  cvtData  = [..._sampleCVT];
+    if(!matData.length)  matData  = [..._sampleMAT];
+    if(!trtData.length)  trtData  = [..._sampleTRT];
+  }
+
+  // ── Step 2: Try Firebase — fully await before returning ──
   if(!fbReady || !fbDB){
     console.log('Firebase not ready — using localStorage only');
-    // If no localStorage data either, load sample data for demo
-    if(!localStorage.getItem('aageo_hasUserData')){
-      if(!lcData.length)  lcData  = _sampleLC;
-      if(!sgData.length)  sgData  = _sampleSG;
-      if(!incData.length) incData = _sampleInc;
-      if(!cvtData.length) cvtData = _sampleCVT;
-      if(!matData.length) matData = _sampleMAT;
-      if(!trtData.length) trtData = _sampleTRT;
-    }
+    _injectSampleIfEmpty();
     return;
   }
 
   const authOK = await fbAuthenticate();
   if(!authOK){
     console.log('Firebase auth failed — using localStorage only');
-    if(!localStorage.getItem('aageo_hasUserData')){
-      if(!lcData.length)  lcData  = _sampleLC;
-      if(!sgData.length)  sgData  = _sampleSG;
-      if(!incData.length) incData = _sampleInc;
-      if(!cvtData.length) cvtData = _sampleCVT;
-      if(!matData.length) matData = _sampleMAT;
-      if(!trtData.length) trtData = _sampleTRT;
-    }
+    _injectSampleIfEmpty();
     return;
   }
 
@@ -2726,42 +2849,52 @@ async function loadFromStorage(){
       if(fbVal.kimiSessions && Array.isArray(fbVal.kimiSessions) && fbVal.kimiSessions.length>0){
         KIMI_REAL_DATA.sessions = fbVal.kimiSessions;
       }
-      // Firebase ALWAYS wins — it is the single source of truth
-      // skipFallbackDefaults:true — never let sample data overwrite Firebase data
-      applyDataSnapshot(fbVal, {rerender: false, skipFallbackDefaults: true});
+      // Firebase is the single source of truth — always wins over localStorage
+      applyDataSnapshot(fbVal, {rerender: false});
 
-      // Mirror Firebase data to localStorage (offline backup)
+      // If Firebase had no data for a key (undefined/null), fall back to localStorage value
+      // This handles partial saves where Firebase is missing some keys
       try {
-        localStorage.setItem(LS_KEYS.lcData,        JSON.stringify(lcData));
-        localStorage.setItem(LS_KEYS.sgData,        JSON.stringify(sgData));
-        localStorage.setItem(LS_KEYS.incData,       JSON.stringify(incData));
-        localStorage.setItem(LS_KEYS.cvtData,       JSON.stringify(cvtData));
-        localStorage.setItem(LS_KEYS.sensorData,    JSON.stringify(sensorData));
-        localStorage.setItem(LS_KEYS.kimiBoreholes, JSON.stringify(KIMI_BOREHOLES));
-        localStorage.setItem(LS_KEYS.matData,       JSON.stringify(matData));
-        localStorage.setItem(LS_KEYS.trtData,       JSON.stringify(trtData));
-        localStorage.setItem(LS_KEYS.customMonths,  JSON.stringify(customMonths));
-        localStorage.setItem(LS_KEYS.rbData,        JSON.stringify(rbData));
-        localStorage.setItem('gims_kimiSessions',   JSON.stringify(KIMI_REAL_DATA.sessions));
-        localStorage.setItem('aageo_hasUserData',   '1');
-      } catch(e2){ console.warn('localStorage mirror failed:', e2); }
+        if(!lcData.length){  const v=localStorage.getItem(LS_KEYS.lcData);  if(v) lcData  = JSON.parse(v); }
+        if(!sgData.length){  const v=localStorage.getItem(LS_KEYS.sgData);  if(v) sgData  = JSON.parse(v); }
+        if(!incData.length){ const v=localStorage.getItem(LS_KEYS.incData); if(v) incData = JSON.parse(v); }
+        if(!cvtData.length){ const v=localStorage.getItem(LS_KEYS.cvtData); if(v) cvtData = JSON.parse(v); }
+        if(!matData.length){ const v=localStorage.getItem(LS_KEYS.matData); if(v) matData = JSON.parse(v); }
+        if(!trtData.length){ const v=localStorage.getItem(LS_KEYS.trtData); if(v) trtData = JSON.parse(v); }
+        if(!rbData.length){  const v=localStorage.getItem(LS_KEYS.rbData);  if(v) rbData  = JSON.parse(v); }
+      } catch(e2){ console.warn('LS fallback read failed:', e2); }
+
+      // Mirror final in-memory state to localStorage (offline backup)
+      _mirrorToLocalStorage();
 
     } else {
-      // Firebase is empty (very first ever run) AND no local data exists
-      // Only now is it safe to load sample/preloaded data for demo purposes
-      if(!localStorage.getItem('aageo_hasUserData')){
-        if(!lcData.length)  lcData  = _sampleLC;
-        if(!sgData.length)  sgData  = _sampleSG;
-        if(!incData.length) incData = _sampleInc;
-        if(!cvtData.length) cvtData = _sampleCVT;
-        if(!matData.length) matData = _sampleMAT;
-        if(!trtData.length) trtData = _sampleTRT;
-      }
+      // Firebase node is completely empty — first ever run
+      _injectSampleIfEmpty();
+      // If we injected sample data, save it to Firebase so next session loads it
+      if(!localStorage.getItem('aageo_hasUserData')) saveToStorage();
     }
   } catch(e){
     console.warn('Firebase load failed — using localStorage data.', e);
+    _injectSampleIfEmpty();
   }
-  // loadFromStorage() is done — initApp will now render with correct data
+}
+
+// Mirror current in-memory state to localStorage (called after Firebase load)
+function _mirrorToLocalStorage(){
+  try {
+    localStorage.setItem(LS_KEYS.lcData,        JSON.stringify(lcData));
+    localStorage.setItem(LS_KEYS.sgData,        JSON.stringify(sgData));
+    localStorage.setItem(LS_KEYS.incData,       JSON.stringify(incData));
+    localStorage.setItem(LS_KEYS.cvtData,       JSON.stringify(cvtData));
+    localStorage.setItem(LS_KEYS.sensorData,    JSON.stringify(sensorData));
+    localStorage.setItem(LS_KEYS.kimiBoreholes, JSON.stringify(KIMI_BOREHOLES));
+    localStorage.setItem(LS_KEYS.matData,       JSON.stringify(matData));
+    localStorage.setItem(LS_KEYS.trtData,       JSON.stringify(trtData));
+    localStorage.setItem(LS_KEYS.customMonths,  JSON.stringify(customMonths));
+    localStorage.setItem(LS_KEYS.rbData,        JSON.stringify(rbData));
+    localStorage.setItem('gims_kimiSessions',   JSON.stringify(KIMI_REAL_DATA.sessions));
+    localStorage.setItem('aageo_hasUserData',   '1');
+  } catch(e){ console.warn('localStorage mirror failed:', e); }
 }
 
 // Keeps every connected team member's screen in sync automatically.
@@ -2782,19 +2915,8 @@ function startRealtimeSync(){
       KIMI_REAL_DATA.sessions = fbVal.kimiSessions;
       if(document.getElementById('view-kimi-inc')?.classList.contains('active')) kimiInit();
     }
-    applyDataSnapshot(fbVal, {rerender: true, skipFallbackDefaults: true});
-    // Mirror to localStorage so offline mode always has latest
-    try {
-      localStorage.setItem(LS_KEYS.lcData,        JSON.stringify(lcData));
-      localStorage.setItem(LS_KEYS.sgData,        JSON.stringify(sgData));
-      localStorage.setItem(LS_KEYS.incData,       JSON.stringify(incData));
-      localStorage.setItem(LS_KEYS.cvtData,       JSON.stringify(cvtData));
-      localStorage.setItem(LS_KEYS.sensorData,    JSON.stringify(sensorData));
-      localStorage.setItem(LS_KEYS.matData,       JSON.stringify(matData));
-      localStorage.setItem(LS_KEYS.trtData,       JSON.stringify(trtData));
-      localStorage.setItem(LS_KEYS.rbData,        JSON.stringify(rbData));
-      localStorage.setItem('aageo_hasUserData', '1');
-    } catch(e){ /* silent */ }
+    applyDataSnapshot(fbVal, {rerender: true});
+    _mirrorToLocalStorage();
     showToast('🔄 Data synced from team member');
   });
 }
