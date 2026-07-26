@@ -16,13 +16,13 @@
 ================================================================ */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0a0c10;--surface:#111318;--panel:#181c24;--card:#1e2330;
-  --border:#2a2f3d;--border-hi:#3a4460;
-  --accent:#00d4aa;--acc-dim:rgba(0,212,170,0.12);--acc-glow:rgba(0,212,170,0.3);
-  --warn:#f5a623;--warn-dim:rgba(245,166,35,0.12);
-  --danger:#ef4444;--danger-dim:rgba(239,68,68,0.12);
-  --info:#60a5fa;--info-dim:rgba(96,165,250,0.12);
-  --txt:#e8eaf0;--txt2:#8892a4;--txt3:#4a5568;
+  --bg:#eef1f6;--surface:#ffffff;--panel:#ffffff;--card:#f7f9fb;
+  --border:#dde3ea;--border-hi:#c3ccd6;
+  --accent:#0f766e;--accent-solid:#00b894;--acc-dim:rgba(15,118,110,0.1);--acc-glow:rgba(15,118,110,0.25);
+  --warn:#b45309;--warn-dim:rgba(180,83,9,0.1);
+  --danger:#dc2626;--danger-dim:rgba(220,38,38,0.09);
+  --info:#0a6ed1;--info-dim:rgba(10,110,209,0.1);
+  --txt:#1c2733;--txt2:#5b6b79;--txt3:#8794a1;
   --mono:'Space Mono',monospace;--sans:'DM Sans',sans-serif;
   --sw:240px;--hh:56px;--r:8px;--rl:12px;
 }
@@ -51,7 +51,7 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:14p
 .ni.active svg{opacity:1}
 .ni-badge{margin-left:auto;background:var(--danger);color:#fff;font-size:9px;font-family:var(--mono);padding:1px 5px;border-radius:10px;font-weight:700}
 .ni-badge.w{background:var(--warn)}
-.ni-badge.a{background:var(--accent);color:#0a0c10}
+.ni-badge.a{background:var(--accent-solid);color:#0a0c10}
 .ni-badge.b{background:#a78bfa;color:#0a0c10}
 .sb-foot{padding:10px 14px;border-top:1px solid var(--border);display:flex;align-items:center;gap:9px}
 .ua{width:30px;height:30px;border-radius:50%;background:var(--card);border:1px solid var(--border-hi);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;color:var(--accent)}
@@ -71,7 +71,7 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:14p
 .btn{display:inline-flex;align-items:center;gap:6px;padding:6px 13px;border-radius:var(--r);font-family:var(--mono);font-size:10px;font-weight:700;cursor:pointer;border:none;transition:all .15s;white-space:nowrap}
 .btn-ghost{background:transparent;color:var(--txt2);border:1px solid var(--border)}
 .btn-ghost:hover{border-color:var(--border-hi);color:var(--txt);background:var(--panel)}
-.btn-p{background:var(--accent);color:#0a0c10}
+.btn-p{background:var(--accent-solid);color:#0a0c10}
 .btn-p:hover{filter:brightness(1.1)}
 .btn-warn{background:var(--warn-dim);color:var(--warn);border:1px solid rgba(245,166,35,.3)}
 .btn-d{background:var(--danger-dim);color:var(--danger);border:1px solid rgba(239,68,68,.3)}
@@ -204,14 +204,14 @@ canvas{display:block}
 .login-err{background:var(--danger-dim);border:1px solid rgba(239,68,68,.3);color:var(--danger);font-family:var(--mono);font-size:11px;padding:8px 12px;border-radius:var(--r);margin-bottom:14px;display:none}
 .login-form .fg{margin-bottom:13px}
 .login-admin-info{background:var(--acc-dim);border:1px solid rgba(0,212,170,.2);border-radius:var(--r);padding:10px 12px;margin-bottom:14px;font-family:var(--mono);font-size:10px;color:var(--accent)}
-.login-btn{width:100%;padding:11px;border-radius:var(--r);background:var(--accent);color:#0a0c10;font-family:var(--mono);font-size:12px;font-weight:700;border:none;cursor:pointer;transition:filter .15s;letter-spacing:.05em}
+.login-btn{width:100%;padding:11px;border-radius:var(--r);background:var(--accent-solid);color:#0a0c10;font-family:var(--mono);font-size:12px;font-weight:700;border:none;cursor:pointer;transition:filter .15s;letter-spacing:.05em}
 .login-btn:hover{filter:brightness(1.1)}
 .login-footer{margin-top:18px;font-family:var(--mono);font-size:9px;color:var(--txt3);text-align:center}
 .perm-req{background:var(--warn-dim);border:1px solid rgba(245,166,35,.3);border-radius:var(--r);padding:12px;font-family:var(--mono);font-size:10px;color:var(--warn);display:none;margin-top:10px}
 /* OTP step */
 .otp-step{display:none}
 .otp-msg{background:var(--info-dim);border:1px solid rgba(96,165,250,.3);border-radius:var(--r);padding:10px 12px;margin-bottom:14px;font-family:var(--mono);font-size:10px;color:var(--info)}
-.otp-demo{background:rgba(0,0,0,.3);border:1px dashed var(--border-hi);border-radius:var(--r);padding:8px 12px;margin-bottom:14px;font-family:var(--mono);font-size:11px;text-align:center}
+.otp-demo{background:var(--card);border:1px dashed var(--border-hi);border-radius:var(--r);padding:8px 12px;margin-bottom:14px;font-family:var(--mono);font-size:11px;text-align:center}
 .otp-demo span{color:var(--warn);font-size:18px;letter-spacing:6px;font-weight:700}
 .otp-inputs{display:flex;gap:8px;justify-content:center;margin-bottom:14px}
 .otp-inputs input{width:46px;height:52px;text-align:center;font-family:var(--mono);font-size:20px;font-weight:700;background:var(--card);border:1px solid var(--border);border-radius:var(--r);color:var(--accent);outline:none;transition:border-color .15s}
@@ -250,7 +250,7 @@ canvas{display:block}
 .lc-limit-badge{padding:5px 12px;border-radius:var(--r);font-family:var(--mono);font-size:10px;font-weight:700}
 .limit-alert{background:rgba(245,166,35,.15);color:var(--warn);border:1px solid rgba(245,166,35,.3)}
 .limit-alarm{background:rgba(239,68,68,.15);color:var(--danger);border:1px solid rgba(239,68,68,.3)}
-.limit-action{background:rgba(239,68,68,.25);color:#ff8080;border:1px solid rgba(239,68,68,.5)}
+.limit-action{background:rgba(220,38,38,.16);color:#a91b1b;border:1px solid rgba(220,38,38,.4)}
 
 /* ── STRAIN GAUGE VIEW ── */
 .sg-project-bar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
@@ -439,6 +439,127 @@ canvas{display:block}
   .panel,.kpi-card,.lc-meta-card{border:1px solid #ccc!important;background:#f9f9f9!important;break-inside:avoid}
   .kpi-val,.iv,.iid{color:#000!important}
 }
+
+/* ================================================================
+   SAP-STYLE LIGHT MODULE — Instrument Drawings + Inventory/Indent
+   Scoped under .sap-shell so the rest of the (dark) dashboard is
+   completely untouched. Palette intentionally mimics SAP Fiori.
+================================================================ */
+.sap-shell{
+  --sap-bg:#eef1f6;--sap-panel:#ffffff;--sap-border:#d7dde5;--sap-border2:#e8ecf1;
+  --sap-txt:#1c2733;--sap-txt2:#5b6b79;--sap-txt3:#8794a1;
+  --sap-blue:#0a6ed1;--sap-blue-dim:#e8f1fc;--sap-navy:#354a5f;
+  --sap-green:#107e3e;--sap-green-dim:#e6f4ea;
+  --sap-orange:#e9730c;--sap-orange-dim:#fdf1e4;
+  --sap-red:#bb0000;--sap-red-dim:#fbe9e9;
+  background:var(--sap-bg);color:var(--sap-txt);font-family:var(--sans);
+  margin:-18px -20px;padding:20px;min-height:calc(100vh - 74px);
+}
+.sap-shell *{box-sizing:border-box}
+.sap-appbar{background:linear-gradient(135deg,var(--sap-navy),#243343);border-radius:10px;padding:14px 18px;display:flex;align-items:center;gap:12px;margin-bottom:16px;box-shadow:0 2px 6px rgba(30,45,65,.15)}
+.sap-appbar-icon{width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sap-appbar-icon svg{width:20px;height:20px;stroke:#fff;fill:none}
+.sap-appbar-title{font-size:15px;font-weight:700;color:#fff;line-height:1.2}
+.sap-appbar-sub{font-size:11px;color:rgba(255,255,255,.65);font-family:var(--mono);margin-top:2px}
+.sap-appbar-right{margin-left:auto;display:flex;gap:8px}
+
+.sap-tabs{display:flex;gap:2px;background:var(--sap-panel);border:1px solid var(--sap-border);border-radius:10px 10px 0 0;padding:4px;margin-bottom:0;overflow-x:auto}
+.sap-tab{padding:9px 16px;border-radius:7px;font-size:12px;font-weight:600;color:var(--sap-txt2);cursor:pointer;white-space:nowrap;border:1px solid transparent;transition:all .15s;user-select:none}
+.sap-tab:hover{background:var(--sap-bg);color:var(--sap-txt)}
+.sap-tab.active{background:var(--sap-blue);color:#fff}
+.sap-tabpanel{display:none;background:var(--sap-panel);border:1px solid var(--sap-border);border-top:none;border-radius:0 0 10px 10px;padding:18px;margin-bottom:18px}
+.sap-tabpanel.active{display:block;animation:fi .18s ease}
+
+.sap-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.sap-kpi{background:var(--sap-panel);border:1px solid var(--sap-border);border-left:4px solid var(--sap-blue);border-radius:8px;padding:12px 14px;box-shadow:0 1px 2px rgba(30,45,65,.04)}
+.sap-kpi.g{border-left-color:var(--sap-green)}
+.sap-kpi.o{border-left-color:var(--sap-orange)}
+.sap-kpi.r{border-left-color:var(--sap-red)}
+.sap-kpi-label{font-size:10px;color:var(--sap-txt3);text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-bottom:4px}
+.sap-kpi-val{font-size:22px;font-weight:700;color:var(--sap-txt);line-height:1}
+.sap-kpi-val.g{color:var(--sap-green)}
+.sap-kpi-val.o{color:var(--sap-orange)}
+.sap-kpi-val.r{color:var(--sap-red)}
+
+.sap-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.sap-toolbar .sap-fs{max-width:200px}
+.sap-search{flex:1;min-width:160px;max-width:260px}
+
+.sap-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--sap-border);background:var(--sap-panel);color:var(--sap-txt);transition:all .15s;white-space:nowrap}
+.sap-btn:hover{background:var(--sap-bg)}
+.sap-btn svg{width:13px;height:13px}
+.sap-btn-primary{background:var(--sap-blue);border-color:var(--sap-blue);color:#fff}
+.sap-btn-primary:hover{background:#0857a8}
+.sap-btn-success{background:var(--sap-green);border-color:var(--sap-green);color:#fff}
+.sap-btn-success:hover{background:#0c6a34}
+.sap-btn-danger-o{background:var(--sap-red-dim);border-color:rgba(187,0,0,.25);color:var(--sap-red)}
+.sap-btn-sm{padding:4px 9px;font-size:10.5px;border-radius:5px}
+
+.sap-card{background:var(--sap-panel);border:1px solid var(--sap-border);border-radius:10px;padding:16px;margin-bottom:14px;box-shadow:0 1px 2px rgba(30,45,65,.04)}
+.sap-card-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--sap-border2)}
+.sap-card-title{font-size:13px;font-weight:700;color:var(--sap-txt)}
+.sap-card-head .sap-btn{margin-left:auto}
+
+.sap-table-wrap{overflow-x:auto;border:1px solid var(--sap-border2);border-radius:8px}
+.sap-table{width:100%;border-collapse:collapse;font-size:12px}
+.sap-table thead th{background:#f4f6f9;text-align:left;padding:9px 12px;font-size:10px;font-weight:700;color:var(--sap-txt2);text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--sap-border);white-space:nowrap}
+.sap-table td{padding:9px 12px;border-bottom:1px solid var(--sap-border2);color:var(--sap-txt);vertical-align:middle}
+.sap-table tbody tr:nth-child(even){background:#fafbfc}
+.sap-table tbody tr:hover{background:var(--sap-blue-dim)}
+.sap-table tr:last-child td{border-bottom:none}
+
+.sap-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+.sap-badge.g{background:var(--sap-green-dim);color:var(--sap-green)}
+.sap-badge.o{background:var(--sap-orange-dim);color:var(--sap-orange)}
+.sap-badge.r{background:var(--sap-red-dim);color:var(--sap-red)}
+.sap-badge.b{background:var(--sap-blue-dim);color:var(--sap-blue)}
+
+.sap-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.sap-fg{display:flex;flex-direction:column;gap:5px}
+.sap-fl{font-size:10.5px;font-weight:600;color:var(--sap-txt2);text-transform:uppercase;letter-spacing:.03em}
+.sap-fi,.sap-fs,.sap-ta{background:#fff;border:1px solid var(--sap-border);border-radius:6px;color:var(--sap-txt);font-family:var(--sans);font-size:12.5px;padding:8px 10px;outline:none;transition:border-color .15s;width:100%}
+.sap-fi:focus,.sap-fs:focus,.sap-ta:focus{border-color:var(--sap-blue);box-shadow:0 0 0 3px rgba(10,110,209,.12)}
+.sap-ta{resize:vertical;min-height:60px;font-family:var(--sans)}
+
+.sap-modal-bg{display:none;position:fixed;inset:0;background:rgba(15,22,32,.78);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:999;align-items:center;justify-content:center}
+.sap-modal-bg.open{display:flex}
+.sap-modal{position:relative;z-index:1;isolation:isolate;background:var(--sap-panel);border-radius:12px;padding:22px;width:540px;max-width:92vw;max-height:86vh;overflow-y:auto;box-shadow:0 10px 40px rgba(20,30,45,.25)}
+.sap-modal-title{display:flex;align-items:center;font-size:14px;font-weight:700;color:var(--sap-txt);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--sap-border2)}
+.sap-modal-close{margin-left:auto;background:transparent;border:none;color:var(--sap-txt3);font-size:20px;cursor:pointer;line-height:1;padding:2px 6px;border-radius:5px}
+.sap-modal-close:hover{background:var(--sap-bg);color:var(--sap-txt)}
+.sap-modal-foot{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;padding-top:14px;border-top:1px solid var(--sap-border2)}
+
+.sap-upload{border:2px dashed var(--sap-border);border-radius:8px;padding:20px;text-align:center;cursor:pointer;transition:all .15s;background:#fbfcfd}
+.sap-upload:hover{border-color:var(--sap-blue);background:var(--sap-blue-dim)}
+.sap-upload svg{width:26px;height:26px;stroke:var(--sap-txt3);fill:none;margin-bottom:6px}
+.sap-upload-txt{font-size:12px;color:var(--sap-txt2);font-weight:600}
+.sap-upload-sub{font-size:10.5px;color:var(--sap-txt3);margin-top:3px}
+.sap-file-chip{display:flex;align-items:center;gap:8px;background:var(--sap-blue-dim);border:1px solid rgba(10,110,209,.2);border-radius:7px;padding:8px 10px;font-size:11.5px;color:var(--sap-blue);margin-top:8px}
+.sap-file-chip svg{width:14px;height:14px;flex-shrink:0}
+
+.sap-drawing-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.sap-drawing-card{background:var(--sap-panel);border:1px solid var(--sap-border);border-radius:10px;overflow:hidden;transition:all .15s}
+.sap-drawing-card:hover{border-color:var(--sap-blue);box-shadow:0 3px 10px rgba(10,110,209,.1)}
+.sap-drawing-thumb{height:110px;background:#f4f6f9;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.sap-drawing-thumb img{width:100%;height:100%;object-fit:cover}
+.sap-drawing-thumb svg{width:34px;height:34px;stroke:var(--sap-txt3);fill:none}
+.sap-drawing-body{padding:10px 12px}
+.sap-drawing-name{font-size:12px;font-weight:700;color:var(--sap-txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sap-drawing-meta{font-size:10px;color:var(--sap-txt3);margin-top:3px}
+.sap-drawing-actions{display:flex;gap:6px;padding:0 12px 12px}
+
+.sap-empty{text-align:center;padding:40px 20px;color:var(--sap-txt3)}
+.sap-empty svg{width:40px;height:40px;stroke:var(--sap-border);fill:none;margin-bottom:10px}
+.sap-empty-txt{font-size:12.5px}
+
+.sap-mtype-select{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.sap-mtype-chip{padding:6px 12px;border-radius:20px;border:1px solid var(--sap-border);font-size:11px;font-weight:600;color:var(--sap-txt2);cursor:pointer;background:#fff}
+.sap-mtype-chip.active{background:var(--sap-blue);border-color:var(--sap-blue);color:#fff}
+
+@media(max-width:900px){
+  .sap-kpi-row{grid-template-columns:repeat(2,1fr)}
+  .sap-form-grid{grid-template-columns:1fr}
+}
 </style>
 </head>
 <!-- EmailJS for Gmail OTP -->
@@ -464,10 +585,10 @@ canvas{display:block}
       if (!box) {
         box = document.createElement('div');
         box.id = 'otpFallbackBox';
-        box.style = 'background:rgba(0,0,0,.4);border:1px dashed #3a4460;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-family:Space Mono,monospace;font-size:11px;text-align:center;color:#8892a4';
+        box.style = 'background:var(--card);border:1px dashed var(--border-hi);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-family:Space Mono,monospace;font-size:11px;text-align:center;color:var(--txt2)';
         document.getElementById('loginStep2').insertBefore(box, document.querySelector('.otp-inputs'));
       }
-      box.innerHTML = '⚠ EmailJS not configured — OTP: <span style="color:#f5a623;font-size:18px;letter-spacing:6px;font-weight:700">'+otp+'</span>';
+      box.innerHTML = '⚠ EmailJS not configured — OTP: <span style="color:#b45309;font-size:18px;letter-spacing:6px;font-weight:700">'+otp+'</span>';
       return;
     }
     const params = {
@@ -801,6 +922,17 @@ canvas{display:block}
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M3 1h7l3 3v11H3V1z"/><path d="M8 2v3h3M5 7h6M5 9h6M5 11h4"/></svg>
       Reports &amp; Export
     </div>
+    <div class="nav-sec">INVENTORY</div>
+    <div class="ni" onclick="switchView('drawings',this)">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M3 1h7l3 3v11H3V1z"/><path d="M8 2v3h3M5 8h6M5 10.5h6"/></svg>
+      Instrument Drawings
+      <span class="ni-badge b" id="drawingsNavBadge" style="display:none">0</span>
+    </div>
+    <div class="ni" onclick="switchView('inventory',this)">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M1.5 4.5 8 1l6.5 3.5v7L8 15l-6.5-3.5v-7z"/><path d="M1.5 4.5 8 8l6.5-3.5M8 8v7"/></svg>
+      Inventory &amp; Indent
+      <span class="ni-badge w" id="inventoryNavBadge" style="display:none">0</span>
+    </div>
     <div class="nav-sec" id="adminNavSec" style="display:none">ADMIN</div>
     <div class="ni" id="adminNavBtn" onclick="openModal('adminModal');loadUserTable()" style="display:none">
       <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 8a3 3 0 100-6 3 3 0 000 6zm-5 6a5 5 0 0110 0H3z" opacity=".9"/></svg>
@@ -835,6 +967,9 @@ canvas{display:block}
         <span class="notif-dot" id="notifDot"></span>
       </button>
       <button class="btn btn-ghost" onclick="openAddSensorModal()">+ Add Sensor</button>
+      <button class="btn btn-ghost" onclick="downloadBackupJSON()" title="Download a full backup of all data as a JSON file">⬇ Backup</button>
+      <input type="file" id="restoreFileInput" accept=".json" style="display:none" onchange="restoreBackupJSON(this)"/>
+      <button class="btn btn-ghost" onclick="document.getElementById('restoreFileInput').click()" title="Restore data from a previously downloaded backup JSON file">⬆ Restore</button>
       <button class="btn btn-p" onclick="printReport()">
         <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 2h7l3 3v7H2V2z"/><path d="M8 2v3h3M4 7h6M4 9h4"/></svg>
         Print PDF
@@ -1554,6 +1689,117 @@ canvas{display:block}
       </div>
     </div>
 
+    <!-- ========== INSTRUMENT DRAWINGS VIEW (SAP-style light module) ========== -->
+    <div id="view-drawings" class="view">
+      <div class="sap-shell">
+        <div class="sap-appbar">
+          <div class="sap-appbar-icon"><svg viewBox="0 0 16 16"><path d="M3 1h7l3 3v11H3V1z"/><path d="M8 2v3h3M5 8h6M5 10.5h6"/></svg></div>
+          <div>
+            <div class="sap-appbar-title">Instrument Drawings</div>
+            <div class="sap-appbar-sub">Fabrication / installation drawings for all monitoring instruments</div>
+          </div>
+          <div class="sap-appbar-right">
+            <button class="sap-btn sap-btn-primary" onclick="openDrawingModal()">+ Upload Drawing</button>
+          </div>
+        </div>
+
+        <div class="sap-toolbar">
+          <select class="sap-fs" id="drwTypeFilter" style="max-width:220px" onchange="renderDrawings()">
+            <option value="all">All Instrument Types</option>
+            <option>Load Cell</option><option>Strain Gauge</option><option>Inclinometer</option>
+            <option>CVT</option><option>MAT</option><option>TRT</option><option>Rock Bolt</option>
+            <option>Piezometer</option><option>Extensometer</option><option>Other</option>
+          </select>
+          <input class="sap-fi sap-search" id="drwSearch" placeholder="Search instrument ID / title / filename..." oninput="renderDrawings()"/>
+          <span style="margin-left:auto;font-size:11px;color:var(--sap-txt3)" id="drwCount">0 drawings</span>
+        </div>
+
+        <div class="sap-drawing-grid" id="drwGrid"></div>
+        <div class="sap-empty" id="drwEmpty" style="display:none">
+          <svg viewBox="0 0 24 24"><path d="M4 2h11l5 5v15H4V2z"/></svg>
+          <div class="sap-empty-txt">No drawings uploaded yet — click "+ Upload Drawing" to add one.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== INVENTORY & INDENT VIEW (SAP-style light module) ========== -->
+    <div id="view-inventory" class="view">
+      <div class="sap-shell">
+        <div class="sap-appbar">
+          <div class="sap-appbar-icon"><svg viewBox="0 0 16 16"><path d="M1.5 4.5 8 1l6.5 3.5v7L8 15l-6.5-3.5v-7z"/><path d="M1.5 4.5 8 8l6.5-3.5M8 8v7"/></svg></div>
+          <div>
+            <div class="sap-appbar-title">Inventory &amp; Indent Management</div>
+            <div class="sap-appbar-sub">Received / installed quantities, goods movement &amp; indent documents</div>
+          </div>
+        </div>
+
+        <div class="sap-kpi-row">
+          <div class="sap-kpi"><div class="sap-kpi-label">Total Received</div><div class="sap-kpi-val" id="invKpiReceived">0</div></div>
+          <div class="sap-kpi g"><div class="sap-kpi-label">Total Installed</div><div class="sap-kpi-val g" id="invKpiInstalled">0</div></div>
+          <div class="sap-kpi o"><div class="sap-kpi-label">Balance In Stock</div><div class="sap-kpi-val o" id="invKpiBalance">0</div></div>
+          <div class="sap-kpi r"><div class="sap-kpi-label">Open Indents</div><div class="sap-kpi-val r" id="invKpiIndents">0</div></div>
+        </div>
+
+        <div class="sap-tabs">
+          <div class="sap-tab active" id="invTabBtn-stock" onclick="switchInvTab('stock')">Stock Overview</div>
+          <div class="sap-tab" id="invTabBtn-movement" onclick="switchInvTab('movement')">Goods Movement</div>
+          <div class="sap-tab" id="invTabBtn-indent" onclick="switchInvTab('indent')">Indent Documents</div>
+        </div>
+
+        <div class="sap-tabpanel active" id="invTab-stock">
+          <div class="sap-toolbar">
+            <input class="sap-fi sap-search" id="invStockSearch" placeholder="Search instrument type / ID..." oninput="renderInventoryStock()"/>
+            <button class="sap-btn sap-btn-primary" style="margin-left:auto" onclick="openMaterialModal()">+ New Material</button>
+          </div>
+          <div class="sap-table-wrap">
+            <table class="sap-table">
+              <thead><tr><th>Instrument Type</th><th>Instrument ID</th><th>Received</th><th>Installed</th><th>Balance</th><th>Unit</th><th>Last Updated</th><th>Actions</th></tr></thead>
+              <tbody id="invStockBody"></tbody>
+            </table>
+          </div>
+          <div class="sap-empty" id="invStockEmpty" style="display:none">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+            <div class="sap-empty-txt">No materials added yet — click "+ New Material" to start tracking stock.</div>
+          </div>
+        </div>
+
+        <div class="sap-tabpanel" id="invTab-movement">
+          <div class="sap-toolbar">
+            <button class="sap-btn sap-btn-success" onclick="openMovementModal('RECEIVED')">+ Goods Receipt</button>
+            <button class="sap-btn sap-btn-danger-o" onclick="openMovementModal('INSTALLED')">+ Issue / Install</button>
+            <span style="margin-left:auto;font-size:11px;color:var(--sap-txt3)" id="invTxnCount">0 movements</span>
+          </div>
+          <div class="sap-table-wrap">
+            <table class="sap-table">
+              <thead><tr><th>Date</th><th>Movement</th><th>Instrument Type</th><th>Instrument ID</th><th>Qty</th><th>Ref Doc</th><th>Remarks</th><th>Done By</th><th></th></tr></thead>
+              <tbody id="invMovementBody"></tbody>
+            </table>
+          </div>
+          <div class="sap-empty" id="invMovementEmpty" style="display:none">
+            <svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/></svg>
+            <div class="sap-empty-txt">No stock movements logged yet.</div>
+          </div>
+        </div>
+
+        <div class="sap-tabpanel" id="invTab-indent">
+          <div class="sap-toolbar">
+            <input class="sap-fi sap-search" id="invIndentSearch" placeholder="Search indent no. / instrument..." oninput="renderIndents()"/>
+            <button class="sap-btn sap-btn-primary" style="margin-left:auto" onclick="openIndentModal()">+ New Indent</button>
+          </div>
+          <div class="sap-table-wrap">
+            <table class="sap-table">
+              <thead><tr><th>Indent No.</th><th>Date</th><th>Instrument Type</th><th>Instrument ID</th><th>Qty Req.</th><th>Status</th><th>Document</th><th>Actions</th></tr></thead>
+              <tbody id="invIndentBody"></tbody>
+            </table>
+          </div>
+          <div class="sap-empty" id="invIndentEmpty" style="display:none">
+            <svg viewBox="0 0 24 24"><path d="M4 2h11l5 5v15H4V2z"/></svg>
+            <div class="sap-empty-txt">No indent documents yet — click "+ New Indent" to raise one.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </main>
 </div>
 
@@ -1568,6 +1814,8 @@ const USERS = [
 ];
 let currentUser = null;
 let lcData = [], sgData = [], incData = [], cvtData = [], matData = [], trtData = [], rbData = [];
+let drawingsData = [], materialsData = [], inventoryTxns = [], indentData = [];
+let pendingDrwFile = null, pendingIndFile = null;
 let customMonths = {cvt:[], mat:[], trt:[], comb:[]};
 let editingLC = null, editingSG = null, editingInc = null, editingCVT = null, editingMAT = null, editingTRT = null, editingRB = null;
 let sensorData = [];
@@ -1594,15 +1842,15 @@ let charts = {};
 // Without these two settings, cloud save will silently fail.
 // ================================================================
 const firebaseConfig = {
-  apiKey: "AIzaSyAWFFcFTkj-qWSRC-5Hbm-3JtDeflTHGlw",
-  authDomain: "aa-gims-dashboard.firebaseapp.com",
-  databaseURL: "https://aa-gims-dashboard-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "aa-gims-dashboard",
-  storageBucket: "aa-gims-dashboard.firebasestorage.app",
-  messagingSenderId: "99550946961",
-  appId: "1:99550946961:web:1028b8bfa201b016864130"
+  apiKey: "AIzaSyDZgkauHbCKLqWf5YNuntj5sw0Bp8tHTU",
+  authDomain: "aa-gims-v2.firebaseapp.com",
+  databaseURL: "https://aa-gims-v2-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "aa-gims-v2",
+  storageBucket: "aa-gims-v2.firebasestorage.app",
+  messagingSenderId: "927117304690",
+  appId: "1:927117304690:web:404e592579c9959bea33eb"
 };
-let fbApp=null, fbDB=null, fbAuth=null, fbReady=false, fbAuthed=false;
+let fbApp=null, fbDB=null, fbAuth=null, fbStorage=null, fbReady=false, fbAuthed=false;
 
 // Robust init: the gstatic.com SDK scripts sometimes finish loading a beat
 // after this inline script runs (slow connection, first load, etc). Instead
@@ -1630,10 +1878,40 @@ function fbTryInit(){
     return false;
   }
 }
+
+// ================================================================
+// CLOUDINARY — free file hosting for Instrument Drawings + Indent
+// documents (Firebase Storage needs the paid "Blaze" plan, so
+// uploads go here instead; everything else still syncs via
+// Firebase Realtime Database as before).
+// ================================================================
+const CLOUDINARY_CLOUD_NAME = 'burxywhj';
+const CLOUDINARY_UPLOAD_PRESET = 'AAGIMS';
+
+async function cloudinaryUploadFile(file, folder){
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+  fd.append('folder', folder);
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`, { method:'POST', body: fd });
+  const data = await res.json();
+  if(!res.ok || !data.secure_url){
+    throw new Error(data.error?.message || 'Cloudinary upload failed');
+  }
+  return { url: data.secure_url, path: data.public_id, fileType: file.type||'', fileName: file.name };
+}
+// Kept as an alias so the rest of the drawings/indent code (written
+// against fbUploadFile) doesn't need to change.
+async function fbUploadFile(file, folder){ return cloudinaryUploadFile(file, folder); }
 function fbSetStatusBadge(text, color){
+  // Map the bright "signal" color callers pass in to a darker, readable
+  // text shade for the light theme, while keeping the small dot bright.
+  const textColor = color === '#2dd4bf' || color === '#00d4aa' ? '#0f766e'
+                   : color === '#ef4444' ? '#dc2626'
+                   : '#b45309';
   // Login page badge
   const el = document.getElementById('fbStatusBadge');
-  if(el){ el.textContent = text; if(color) el.style.color = color; }
+  if(el){ el.textContent = text; if(color) el.style.color = textColor; }
   // Sidebar cloud save status (always visible after login)
   const dot  = document.getElementById('cloudDot');
   const txt  = document.getElementById('cloudSaveTxt');
@@ -1642,20 +1920,20 @@ function fbSetStatusBadge(text, color){
   if(color === '#2dd4bf' || color === '#00d4aa'){
     // Green — cloud active
     dot.style.background  = '#2dd4bf';
-    txt.style.color       = '#2dd4bf';
-    bar.style.background  = 'rgba(0,212,170,0.08)';
+    txt.style.color       = '#0f766e';
+    bar.style.background  = 'rgba(15,118,110,0.08)';
     txt.textContent       = text;
   } else if(color === '#ef4444'){
     // Red — blocked / error
     dot.style.background  = '#ef4444';
-    txt.style.color       = '#ef4444';
-    bar.style.background  = 'rgba(239,68,68,0.08)';
+    txt.style.color       = '#dc2626';
+    bar.style.background  = 'rgba(220,38,38,0.08)';
     txt.textContent       = text;
   } else {
     // Orange — warning / local only
     dot.style.background  = '#f5a623';
-    txt.style.color       = '#f5a623';
-    bar.style.background  = 'rgba(245,166,35,0.08)';
+    txt.style.color       = '#b45309';
+    bar.style.background  = 'rgba(180,83,9,0.08)';
     txt.textContent       = text;
   }
 }
@@ -1790,6 +2068,10 @@ const LS_KEYS = {
   trtData: 'aageo_trtData',
   customMonths: 'aageo_customMonths',
   rbData: 'aageo_rbData',
+  drawingsData: 'aageo_drawingsData',
+  materialsData: 'aageo_materialsData',
+  inventoryTxns: 'aageo_inventoryTxns',
+  indentData: 'aageo_indentData',
 };
 
 function saveToStorage(){
@@ -1805,6 +2087,10 @@ function saveToStorage(){
     localStorage.setItem(LS_KEYS.trtData,       JSON.stringify(trtData));
     localStorage.setItem(LS_KEYS.customMonths,  JSON.stringify(customMonths));
     localStorage.setItem(LS_KEYS.rbData,        JSON.stringify(rbData));
+    localStorage.setItem(LS_KEYS.drawingsData,  JSON.stringify(drawingsData));
+    localStorage.setItem(LS_KEYS.materialsData, JSON.stringify(materialsData));
+    localStorage.setItem(LS_KEYS.inventoryTxns, JSON.stringify(inventoryTxns));
+    localStorage.setItem(LS_KEYS.indentData,    JSON.stringify(indentData));
     localStorage.setItem('gims_kimiSessions',   JSON.stringify(KIMI_REAL_DATA.sessions));
     // Mark that localStorage has real user data (prevents sample-data fallback on next load)
     localStorage.setItem('aageo_hasUserData', '1');
@@ -1832,6 +2118,7 @@ function saveToStorage(){
       lcData, sgData, incData, cvtData, sensorData,
       kimiBoreholes: KIMI_BOREHOLES,
       matData, trtData, customMonths, rbData,
+      drawingsData, materialsData, inventoryTxns, indentData,
       kimiSessions: KIMI_REAL_DATA.sessions,
       _updatedAt: Date.now(),
       _updatedBy: currentUser ? currentUser.name : 'unknown'
@@ -1866,6 +2153,71 @@ function saveToStorage(){
   }
 }
 
+// ── Test whether localStorage actually works in this browser context ──
+// file:// URLs opened by double-clicking a downloaded copy, or strict privacy
+// settings, can silently make localStorage a no-op — nothing throws, but
+// nothing is ever saved either. This check catches that and warns the user
+// instead of letting data vanish silently.
+function testLocalStorageWorks(){
+  try {
+    const testKey = '__aageo_ls_test__';
+    localStorage.setItem(testKey, '1');
+    const ok = localStorage.getItem(testKey) === '1';
+    localStorage.removeItem(testKey);
+    return ok;
+  } catch(e){ return false; }
+}
+function showStorageWarningBanner(){
+  if(document.getElementById('storageWarnBanner')) return;
+  const div = document.createElement('div');
+  div.id = 'storageWarnBanner';
+  div.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#dc2626;color:#fff;padding:10px 16px;font-size:13px;font-weight:600;text-align:center;font-family:var(--sans, sans-serif)';
+  div.innerHTML = '⚠ Local storage is not available in this browser/tab — entries will NOT be saved after refresh or close. Open this app from its hosted URL (not a local downloaded file), or click "⬇ Backup" often to save your data manually.';
+  document.body.prepend(div);
+}
+document.addEventListener('DOMContentLoaded', ()=>{
+  if(!testLocalStorageWorks()) showStorageWarningBanner();
+});
+
+// ── Manual backup/restore — works no matter what (Firebase down, localStorage
+// blocked, wrong file opened, etc). This is the ultimate safety net. ──
+function downloadBackupJSON(){
+  const backup = {
+    lcData, sgData, incData, cvtData, sensorData,
+    kimiBoreholes: KIMI_BOREHOLES,
+    matData, trtData, customMonths, rbData,
+    drawingsData, materialsData, inventoryTxns, indentData,
+    kimiSessions: KIMI_REAL_DATA.sessions,
+    _exportedAt: new Date().toISOString()
+  };
+  const blob = new Blob([JSON.stringify(backup, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `AA-GIMS-backup-${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+  showToast('✓ Backup downloaded');
+}
+function restoreBackupJSON(input){
+  const file = input.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (e)=>{
+    try {
+      const data = JSON.parse(e.target.result);
+      if(!confirm('This will replace all current data with the backup file. Continue?')) { input.value=''; return; }
+      applyDataSnapshot(data, {rerender:true});
+      saveToStorage();
+      showToast('✓ Backup restored');
+    } catch(err){
+      showToast('⚠ Invalid backup file', 3000, 'warn');
+      console.warn('Restore failed:', err);
+    }
+    input.value = '';
+  };
+  reader.readAsText(file);
+}
+
 // ── Emergency save on page close/refresh ──
 // This fires synchronously before the page unloads, ensuring the latest in-memory
 // state is always flushed to localStorage even if the user closes the tab mid-session.
@@ -1881,6 +2233,10 @@ window.addEventListener('beforeunload', ()=>{
     localStorage.setItem(LS_KEYS.trtData,       JSON.stringify(trtData));
     localStorage.setItem(LS_KEYS.customMonths,  JSON.stringify(customMonths));
     localStorage.setItem(LS_KEYS.rbData,        JSON.stringify(rbData));
+    localStorage.setItem(LS_KEYS.drawingsData,  JSON.stringify(drawingsData));
+    localStorage.setItem(LS_KEYS.materialsData, JSON.stringify(materialsData));
+    localStorage.setItem(LS_KEYS.inventoryTxns, JSON.stringify(inventoryTxns));
+    localStorage.setItem(LS_KEYS.indentData,    JSON.stringify(indentData));
     localStorage.setItem('gims_kimiSessions',   JSON.stringify(KIMI_REAL_DATA.sessions));
     localStorage.setItem('aageo_hasUserData', '1');
   } catch(e){ /* silent — browser is closing */ }
@@ -2748,6 +3104,10 @@ function applyDataSnapshot(snap, opts){
   if(Array.isArray(snap.matData))      matData      = snap.matData;
   if(Array.isArray(snap.trtData))      trtData      = snap.trtData;
   if(Array.isArray(snap.rbData))       rbData       = snap.rbData;
+  if(Array.isArray(snap.drawingsData)) drawingsData = snap.drawingsData;
+  if(Array.isArray(snap.materialsData))materialsData= snap.materialsData;
+  if(Array.isArray(snap.inventoryTxns))inventoryTxns= snap.inventoryTxns;
+  if(Array.isArray(snap.indentData))   indentData   = snap.indentData;
   if(Array.isArray(snap.kimiBoreholes)){
     KIMI_BOREHOLES.length=0;
     snap.kimiBoreholes.forEach(b=>KIMI_BOREHOLES.push(b));
@@ -2772,6 +3132,8 @@ function applyDataSnapshot(snap, opts){
     updateReportCounts();updateEntryStats();
     if(document.getElementById('view-overview')?.classList.contains('active')) renderOverviewSummary();
     if(typeof kimiInit==='function') kimiInit();
+    if(typeof renderDrawings==='function') renderDrawings();
+    if(typeof renderInventoryAll==='function') renderInventoryAll();
   }
 }
 
@@ -2792,6 +3154,10 @@ async function loadFromStorage(){
     const trt   = localStorage.getItem(LS_KEYS.trtData);
     const months= localStorage.getItem(LS_KEYS.customMonths);
     const rb    = localStorage.getItem(LS_KEYS.rbData);
+    const drw   = localStorage.getItem(LS_KEYS.drawingsData);
+    const matm  = localStorage.getItem(LS_KEYS.materialsData);
+    const itx   = localStorage.getItem(LS_KEYS.inventoryTxns);
+    const ind   = localStorage.getItem(LS_KEYS.indentData);
     const kimiSess = localStorage.getItem('gims_kimiSessions');
 
     if(kimiSess){
@@ -2812,6 +3178,10 @@ async function loadFromStorage(){
       trtData:       trt    ? JSON.parse(trt)    : undefined,
       customMonths:  months ? JSON.parse(months) : undefined,
       rbData:        rb     ? JSON.parse(rb)     : undefined,
+      drawingsData:  drw    ? JSON.parse(drw)    : undefined,
+      materialsData: matm   ? JSON.parse(matm)   : undefined,
+      inventoryTxns: itx    ? JSON.parse(itx)    : undefined,
+      indentData:    ind    ? JSON.parse(ind)    : undefined,
     }, {rerender: false});
 
   } catch(e){ console.warn('localStorage load failed:', e); }
@@ -2862,6 +3232,10 @@ async function loadFromStorage(){
         if(!matData.length){ const v=localStorage.getItem(LS_KEYS.matData); if(v) matData = JSON.parse(v); }
         if(!trtData.length){ const v=localStorage.getItem(LS_KEYS.trtData); if(v) trtData = JSON.parse(v); }
         if(!rbData.length){  const v=localStorage.getItem(LS_KEYS.rbData);  if(v) rbData  = JSON.parse(v); }
+        if(!drawingsData.length){ const v=localStorage.getItem(LS_KEYS.drawingsData); if(v) drawingsData = JSON.parse(v); }
+        if(!materialsData.length){const v=localStorage.getItem(LS_KEYS.materialsData);if(v) materialsData= JSON.parse(v); }
+        if(!inventoryTxns.length){const v=localStorage.getItem(LS_KEYS.inventoryTxns);if(v) inventoryTxns= JSON.parse(v); }
+        if(!indentData.length){   const v=localStorage.getItem(LS_KEYS.indentData);   if(v) indentData   = JSON.parse(v); }
       } catch(e2){ console.warn('LS fallback read failed:', e2); }
 
       // Mirror final in-memory state to localStorage (offline backup)
@@ -2892,6 +3266,10 @@ function _mirrorToLocalStorage(){
     localStorage.setItem(LS_KEYS.trtData,       JSON.stringify(trtData));
     localStorage.setItem(LS_KEYS.customMonths,  JSON.stringify(customMonths));
     localStorage.setItem(LS_KEYS.rbData,        JSON.stringify(rbData));
+    localStorage.setItem(LS_KEYS.drawingsData,  JSON.stringify(drawingsData));
+    localStorage.setItem(LS_KEYS.materialsData, JSON.stringify(materialsData));
+    localStorage.setItem(LS_KEYS.inventoryTxns, JSON.stringify(inventoryTxns));
+    localStorage.setItem(LS_KEYS.indentData,    JSON.stringify(indentData));
     localStorage.setItem('gims_kimiSessions',   JSON.stringify(KIMI_REAL_DATA.sessions));
     localStorage.setItem('aageo_hasUserData',   '1');
   } catch(e){ console.warn('localStorage mirror failed:', e); }
@@ -3151,7 +3529,7 @@ function startClock(){
 // ================================================================
 // NAVIGATION
 // ================================================================
-const viewMeta={overview:'Dashboard Overview',loadcell:'Load Cell Monitoring',strain:'Strain Gauge Monitoring',inclinometer:'Inclinometer Monitoring','kimi-inc':'Kimi Inclinometer System',cvt:'Convergence (CVT) Monitoring',mat:'MAT Monitoring',trt:'TRT Monitoring',rockbolt:'Rock Bolt Load Cell',combinedlog:'Combined Reading Log',dataentry:'Manual Data Entry',reports:'Reports & Export'};
+const viewMeta={overview:'Dashboard Overview',loadcell:'Load Cell Monitoring',strain:'Strain Gauge Monitoring',inclinometer:'Inclinometer Monitoring','kimi-inc':'Kimi Inclinometer System',cvt:'Convergence (CVT) Monitoring',mat:'MAT Monitoring',trt:'TRT Monitoring',rockbolt:'Rock Bolt Load Cell',combinedlog:'Combined Reading Log',dataentry:'Manual Data Entry',reports:'Reports & Export',drawings:'Instrument Drawings',inventory:'Inventory & Indent Management'};
 function switchView(id,el){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
@@ -3170,6 +3548,8 @@ function switchView(id,el){
     if(id==='rockbolt'){renderRBTable();renderRBCharts();updateRBMonthFilter();}
     if(id==='combinedlog'){renderCombinedLog();}
     if(id==='reports')updateReportCounts();
+    if(id==='drawings')renderDrawings();
+    if(id==='inventory')renderInventoryAll();
   },50);
 }
 
@@ -3545,11 +3925,6 @@ function renderCVTPositionCards(){
   }).join('');
 }
 
-function openCVTModalForPosition(position){
-  openCVTModal();
-  document.getElementById('cvtPosition').value=position;
-}
-
 function renderCVTTable(){
   const tbody=document.getElementById('cvtTbody');
   if(!tbody)return;
@@ -3686,10 +4061,10 @@ function renderCVTCharts(){
   if(allDates.length){
     datasets.push({label:'Alert ('+CVT_ALERT+'mm)',data:allDates.map(()=>CVT_ALERT),borderColor:'rgba(239,68,68,0.5)',borderDash:[4,4],pointRadius:0,borderWidth:1,backgroundColor:'transparent'});
   }
-  mkChart('cvtTrendChart',{type:'line',data:{labels:allDates,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8892a4',font:{family:'Space Mono',size:9},boxWidth:10}}},scales:{y:{ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'},title:{display:true,text:'Convergence (mm)',color:'#4a5568'}},x:{ticks:{color:'#4a5568',font:{family:'Space Mono',size:8},maxRotation:45},grid:{display:false}}}}});
+  mkChart('cvtTrendChart',{type:'line',data:{labels:allDates,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#64748b',font:{family:'Space Mono',size:9},boxWidth:10}}},scales:{y:{ticks:{color:'#64748b',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'},title:{display:true,text:'Convergence (mm)',color:'#334155'}},x:{ticks:{color:'#334155',font:{family:'Space Mono',size:8},maxRotation:45},grid:{display:false}}}}});
   // Bar chart latest per position
   const latestVals=positions.map(pos=>{const posRows=rows.filter(r=>r.position===pos);return posRows.length?posRows.sort((a,b)=>b.date.localeCompare(a.date))[0].convergence:0;});
-  mkChart('cvtBarChart',{type:'bar',data:{labels:positions,datasets:[{label:'Latest Convergence (mm)',data:latestVals,backgroundColor:positions.map((p,i)=>latestVals[i]>=CVT_ALERT?'rgba(239,68,68,0.7)':latestVals[i]>=6?'rgba(245,166,35,0.7)':CVT_COLORS[p]+'bb'),borderRadius:4,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'},title:{display:true,text:'mm',color:'#4a5568'}},x:{ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{display:false}}}}});
+  mkChart('cvtBarChart',{type:'bar',data:{labels:positions,datasets:[{label:'Latest Convergence (mm)',data:latestVals,backgroundColor:positions.map((p,i)=>latestVals[i]>=CVT_ALERT?'rgba(239,68,68,0.7)':latestVals[i]>=6?'rgba(245,166,35,0.7)':CVT_COLORS[p]+'bb'),borderRadius:4,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{color:'#64748b',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'},title:{display:true,text:'mm',color:'#334155'}},x:{ticks:{color:'#64748b',font:{family:'Space Mono',size:9}},grid:{display:false}}}}});
 }
 
 function exportCVTData(){
@@ -3731,9 +4106,9 @@ function quickEntryInc(){
 function showToast(msg, duration, type){
   // type: 'ok' (green, default) | 'warn' (orange) | 'err' (red)
   const colors = {
-    ok:   {bg:'var(--accent)',   color:'#0a0c10', shadow:'rgba(0,212,170,.4)'},
-    warn: {bg:'var(--warn)',     color:'#0a0c10', shadow:'rgba(245,166,35,.4)'},
-    err:  {bg:'var(--danger)',   color:'#fff',    shadow:'rgba(239,68,68,.4)'},
+    ok:   {bg:'var(--accent-solid)', color:'#0a0c10', shadow:'rgba(0,184,148,.4)'},
+    warn: {bg:'#f0a500',              color:'#0a0c10', shadow:'rgba(240,165,0,.4)'},
+    err:  {bg:'var(--danger)',       color:'#fff',    shadow:'rgba(220,38,38,.4)'},
   };
   const c = colors[type] || colors.ok;
   const t = document.createElement('div');
@@ -3883,8 +4258,8 @@ function initOverviewCharts(){
   const tlabels=[];for(let i=19;i>=0;i--)tlabels.push('-'+i+'s');
   const lc=Array.from({length:20},()=>+(0.5+Math.random()*1.5).toFixed(2));
   const sg=Array.from({length:20},()=>+(300+Math.random()*400).toFixed(0));
-  mkChart('telemetryChart',{type:'line',data:{labels:tlabels,datasets:[{label:'Avg LC (Ton)',data:lc,borderColor:'#00d4aa',backgroundColor:'rgba(0,212,170,0.08)',tension:0.4,pointRadius:0,yAxisID:'lc'},{label:'SG-01 (με)',data:sg,borderColor:'#60a5fa',backgroundColor:'rgba(96,165,250,0.08)',tension:0.4,pointRadius:0,yAxisID:'sg'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{lc:{type:'linear',position:'left',ticks:{color:'#4a5568',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'}},sg:{type:'linear',position:'right',ticks:{color:'#4a5568',font:{family:'Space Mono',size:9}},grid:{display:false}}}}});
-  mkChart('donutChart',{type:'doughnut',data:{labels:['Load Cells (16)','Strain Gauges (6)','Inclinometers (4)','Piezometers (4)'],datasets:[{data:[16,6,4,4],backgroundColor:['#00d4aa','#60a5fa','#f5a623','#a78bfa'],borderColor:'#181c24',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#8892a4',font:{family:'Space Mono',size:9},boxWidth:10,padding:10}}},cutout:'60%'}});
+  mkChart('telemetryChart',{type:'line',data:{labels:tlabels,datasets:[{label:'Avg LC (Ton)',data:lc,borderColor:'#00d4aa',backgroundColor:'rgba(0,212,170,0.08)',tension:0.4,pointRadius:0,yAxisID:'lc'},{label:'SG-01 (με)',data:sg,borderColor:'#60a5fa',backgroundColor:'rgba(96,165,250,0.08)',tension:0.4,pointRadius:0,yAxisID:'sg'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{lc:{type:'linear',position:'left',ticks:{color:'#334155',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'}},sg:{type:'linear',position:'right',ticks:{color:'#334155',font:{family:'Space Mono',size:9}},grid:{display:false}}}}});
+  mkChart('donutChart',{type:'doughnut',data:{labels:['Load Cells (16)','Strain Gauges (6)','Inclinometers (4)','Piezometers (4)'],datasets:[{data:[16,6,4,4],backgroundColor:['#00d4aa','#60a5fa','#f5a623','#a78bfa'],borderColor:'#ffffff',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#64748b',font:{family:'Space Mono',size:9},boxWidth:10,padding:10}}},cutout:'60%'}});
   renderOverviewSummary();
 }
 function renderOverviewSummary(){
@@ -3929,12 +4304,12 @@ function renderOverviewSummary(){
 function renderLCCharts(){
   const lcs=['LC MAT-LHS (4421)','LC MAT-CROWN (4422)','LC MAT-RHS (4423)'];
   const avgs=lcs.map(lc=>{const rows=lcData.filter(r=>r.lc===lc);return rows.length?+rows.sort((a,b)=>b.date.localeCompare(a.date))[0].avg.toFixed(3):0;});
-  mkChart('loadChart',{type:'bar',data:{labels:['LHS','CROWN','RHS'],datasets:[{label:'Avg Load (Ton)',data:avgs,backgroundColor:avgs.map(v=>v>=12?'rgba(239,68,68,0.7)':v>=7.5?'rgba(245,166,35,0.7)':'rgba(0,212,170,0.7)'),borderColor:avgs.map(v=>v>=12?'#ef4444':v>=7.5?'#f5a623':'#00d4aa'),borderWidth:1,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'}},x:{ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{display:false}}}}});
+  mkChart('loadChart',{type:'bar',data:{labels:['LHS','CROWN','RHS'],datasets:[{label:'Avg Load (Ton)',data:avgs,backgroundColor:avgs.map(v=>v>=12?'rgba(239,68,68,0.7)':v>=7.5?'rgba(245,166,35,0.7)':'rgba(0,212,170,0.7)'),borderColor:avgs.map(v=>v>=12?'#ef4444':v>=7.5?'#f5a623':'#00d4aa'),borderWidth:1,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{color:'#64748b',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'}},x:{ticks:{color:'#64748b',font:{family:'Space Mono',size:9}},grid:{display:false}}}}});
   const allDates=[...new Set(lcData.map(r=>r.date))].sort();
   const datasets=lcs.map((lc,i)=>({label:['LHS','CROWN','RHS'][i],data:allDates.map(d=>{const r=lcData.find(x=>x.lc===lc&&x.date===d);return r?r.avg:null;}),borderColor:['#00d4aa','#60a5fa','#f5a623'][i],backgroundColor:'transparent',tension:0.3,pointRadius:3,spanGaps:true}));
   datasets.push({label:'Alert (7.5T)',data:allDates.map(()=>7.5),borderColor:'rgba(245,166,35,0.5)',borderDash:[4,4],pointRadius:0,borderWidth:1,backgroundColor:'transparent'});
   datasets.push({label:'Alarm (12T)',data:allDates.map(()=>12),borderColor:'rgba(239,68,68,0.5)',borderDash:[4,4],pointRadius:0,borderWidth:1,backgroundColor:'transparent'});
-  mkChart('lcTrendChart',{type:'line',data:{labels:allDates,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8892a4',font:{family:'Space Mono',size:9},boxWidth:10}}},scales:{y:{ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'}},x:{ticks:{color:'#4a5568',font:{family:'Space Mono',size:8},maxRotation:45},grid:{display:false}}}}});
+  mkChart('lcTrendChart',{type:'line',data:{labels:allDates,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#64748b',font:{family:'Space Mono',size:9},boxWidth:10}}},scales:{y:{ticks:{color:'#64748b',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'}},x:{ticks:{color:'#334155',font:{family:'Space Mono',size:8},maxRotation:45},grid:{display:false}}}}});
 }
 function renderSGCharts(){
   const gauges=['SG-01','SG-02','SG-03','SG-04','SG-05','SG-06'];
@@ -3942,9 +4317,9 @@ function renderSGCharts(){
   const allDates=[...new Set(sgData.map(r=>r.date))].sort();
   const datasets=gauges.map((g,i)=>({label:g,data:allDates.map(d=>{const r=sgData.find(x=>x.gauge===g&&x.date===d);return r?r.val:null;}),borderColor:colors[i],backgroundColor:'transparent',tension:0.3,pointRadius:3,spanGaps:true}));
   datasets.push({label:'Alert ('+SG_ALERT+'με)',data:allDates.map(()=>SG_ALERT),borderColor:'rgba(239,68,68,0.5)',borderDash:[4,4],pointRadius:0,borderWidth:1,backgroundColor:'transparent'});
-  mkChart('strainChart',{type:'line',data:{labels:allDates,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8892a4',font:{family:'Space Mono',size:9},boxWidth:8}}},scales:{y:{ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'}},x:{ticks:{color:'#4a5568',font:{family:'Space Mono',size:8},maxRotation:45},grid:{display:false}}}}});
+  mkChart('strainChart',{type:'line',data:{labels:allDates,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#64748b',font:{family:'Space Mono',size:9},boxWidth:8}}},scales:{y:{ticks:{color:'#64748b',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'}},x:{ticks:{color:'#334155',font:{family:'Space Mono',size:8},maxRotation:45},grid:{display:false}}}}});
   const latestVals=gauges.map(g=>{const rows=sgData.filter(r=>r.gauge===g);return rows.length?rows.sort((a,b)=>b.date.localeCompare(a.date))[0].val:0;});
-  mkChart('sgCompareChart',{type:'bar',data:{labels:gauges,datasets:[{label:'Latest (με)',data:latestVals,backgroundColor:latestVals.map(v=>v>=SG_ALERT?'rgba(239,68,68,0.7)':v>=900?'rgba(245,166,35,0.7)':'rgba(0,212,170,0.7)'),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'}},x:{ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{display:false}}}}});
+  mkChart('sgCompareChart',{type:'bar',data:{labels:gauges,datasets:[{label:'Latest (με)',data:latestVals,backgroundColor:latestVals.map(v=>v>=SG_ALERT?'rgba(239,68,68,0.7)':v>=900?'rgba(245,166,35,0.7)':'rgba(0,212,170,0.7)'),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{color:'#64748b',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'}},x:{ticks:{color:'#64748b',font:{family:'Space Mono',size:9}},grid:{display:false}}}}});
 }
 function renderIncCharts(){
   if(!incSelectedBH&&getBoreholes().length)incSelectedBH=getBoreholes()[0];
@@ -3953,10 +4328,10 @@ function renderIncCharts(){
   const depths=[...new Set(bhRows.map(r=>r.depth))].sort((a,b)=>a-b);
   const latestDate=bhRows.map(r=>r.date).sort().reverse()[0];
   const latestRows=bhRows.filter(r=>r.date===latestDate);
-  mkChart('incDepthChart',{type:'line',data:{labels:depths,datasets:[{label:'A-axis (mm)',data:depths.map(d=>{const r=latestRows.find(x=>x.depth===d);return r?r.axisA:null;}),borderColor:'#00c8ff',backgroundColor:'rgba(0,200,255,0.08)',tension:0.3,pointRadius:4,spanGaps:true},{label:'B-axis (mm)',data:depths.map(d=>{const r=latestRows.find(x=>x.depth===d);return r?r.axisB:null;}),borderColor:'#ff6b35',backgroundColor:'rgba(255,107,53,0.08)',tension:0.3,pointRadius:4,spanGaps:true}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8892a4',font:{family:'Space Mono',size:9},boxWidth:10}}},scales:{x:{ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'},title:{display:true,text:'Displacement (mm)',color:'#4a5568'}},y:{title:{display:true,text:'Depth (m)',color:'#4a5568'},ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.3)'}}}}});
+  mkChart('incDepthChart',{type:'line',data:{labels:depths,datasets:[{label:'A-axis (mm)',data:depths.map(d=>{const r=latestRows.find(x=>x.depth===d);return r?r.axisA:null;}),borderColor:'#00c8ff',backgroundColor:'rgba(0,200,255,0.08)',tension:0.3,pointRadius:4,spanGaps:true},{label:'B-axis (mm)',data:depths.map(d=>{const r=latestRows.find(x=>x.depth===d);return r?r.axisB:null;}),borderColor:'#ff6b35',backgroundColor:'rgba(255,107,53,0.08)',tension:0.3,pointRadius:4,spanGaps:true}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#64748b',font:{family:'Space Mono',size:9},boxWidth:10}}},scales:{x:{ticks:{color:'#64748b',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'},title:{display:true,text:'Displacement (mm)',color:'#334155'}},y:{title:{display:true,text:'Depth (m)',color:'#334155'},ticks:{color:'#64748b',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.3)'}}}}});
   const timeDates=[...new Set(bhRows.map(r=>r.date))].sort();
   const cumByDate=timeDates.map(d=>{const rows=bhRows.filter(r=>r.date===d);return rows.length?+(rows.reduce((s,r)=>s+r.cumul,0)/rows.length).toFixed(3):null;});
-  mkChart('incTimeChart',{type:'line',data:{labels:timeDates,datasets:[{label:incSelectedBH+' Cumulative (mm)',data:cumByDate,borderColor:'#00ff9d',backgroundColor:'rgba(0,255,157,0.08)',tension:0.3,pointRadius:4,spanGaps:true},{label:'Alert ('+INC_ALERT+'mm)',data:timeDates.map(()=>INC_ALERT),borderColor:'rgba(239,68,68,0.5)',borderDash:[4,4],pointRadius:0,borderWidth:1,backgroundColor:'transparent'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8892a4',font:{family:'Space Mono',size:9},boxWidth:10}}},scales:{y:{ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'},title:{display:true,text:'mm',color:'#4a5568'}},x:{ticks:{color:'#4a5568',font:{family:'Space Mono',size:8},maxRotation:45},grid:{display:false}}}}});
+  mkChart('incTimeChart',{type:'line',data:{labels:timeDates,datasets:[{label:incSelectedBH+' Cumulative (mm)',data:cumByDate,borderColor:'#00ff9d',backgroundColor:'rgba(0,255,157,0.08)',tension:0.3,pointRadius:4,spanGaps:true},{label:'Alert ('+INC_ALERT+'mm)',data:timeDates.map(()=>INC_ALERT),borderColor:'rgba(239,68,68,0.5)',borderDash:[4,4],pointRadius:0,borderWidth:1,backgroundColor:'transparent'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#64748b',font:{family:'Space Mono',size:9},boxWidth:10}}},scales:{y:{ticks:{color:'#64748b',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'},title:{display:true,text:'mm',color:'#334155'}},x:{ticks:{color:'#334155',font:{family:'Space Mono',size:8},maxRotation:45},grid:{display:false}}}}});
 }
 setInterval(()=>{if(document.getElementById('view-overview').classList.contains('active'))initOverviewCharts();},4000);
 
@@ -4061,14 +4436,14 @@ function kimiRenderDepthChart(idx){
     options:{
       responsive:true,maintainAspectRatio:false,
       scales:{
-        x:{title:{display:true,text:'Displacement (mm)',color:'#8892a4'},
-           grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#8892a4'}},
-        y:{title:{display:true,text:'Depth (m)',color:'#8892a4'},
+        x:{title:{display:true,text:'Displacement (mm)',color:'#64748b'},
+           grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b'}},
+        y:{title:{display:true,text:'Depth (m)',color:'#64748b'},
            min:-20,max:0,
-           ticks:{color:'#8892a4',callback:v=>Math.abs(v)+'m'},
+           ticks:{color:'#64748b',callback:v=>Math.abs(v)+'m'},
            grid:{color:'rgba(255,255,255,0.05)'}},
       },
-      plugins:{legend:{labels:{color:'#8892a4',font:{size:10}}},
+      plugins:{legend:{labels:{color:'#64748b',font:{size:10}}},
                tooltip:{callbacks:{
                  label:ctx=>`Depth: ${Math.abs(ctx.parsed.y).toFixed(1)}m | Disp: ${ctx.parsed.x.toFixed(3)}mm`
                }}},
@@ -4106,11 +4481,11 @@ function kimiRenderTimeChart(){
     options:{
       responsive:true,maintainAspectRatio:false,
       scales:{
-        x:{ticks:{color:'#8892a4',maxRotation:45,font:{size:9}},grid:{color:'rgba(255,255,255,0.05)'}},
-        y:{title:{display:true,text:'Displacement (mm)',color:'#8892a4'},
-           ticks:{color:'#8892a4'},grid:{color:'rgba(255,255,255,0.05)'},min:0}
+        x:{ticks:{color:'#64748b',maxRotation:45,font:{size:9}},grid:{color:'rgba(255,255,255,0.05)'}},
+        y:{title:{display:true,text:'Displacement (mm)',color:'#64748b'},
+           ticks:{color:'#64748b'},grid:{color:'rgba(255,255,255,0.05)'},min:0}
       },
-      plugins:{legend:{labels:{color:'#8892a4',font:{size:10}}}},
+      plugins:{legend:{labels:{color:'#64748b',font:{size:10}}}},
     }
   });
 }
@@ -4121,7 +4496,7 @@ function kimiRenderOverlayChart(){
   if(!ctx)return;
   if(kimiOverlayChartInst)kimiOverlayChartInst.destroy();
 
-  const colors=['#4a5568','#6b7280','#9ca3af','#60a5fa','#34d399','#fbbf24','#f87171',
+  const colors=['#334155','#6b7280','#9ca3af','#60a5fa','#34d399','#fbbf24','#f87171',
                 '#a78bfa','#06b6d4','#84cc16','#f472b6','#fb923c',
                 '#00d4aa','#f5a623','#60a5fa','#e879f9','#22d3ee'];
 
@@ -4144,14 +4519,14 @@ function kimiRenderOverlayChart(){
     options:{
       responsive:true,maintainAspectRatio:false,
       scales:{
-        x:{title:{display:true,text:'A-Axis Displacement from Initial (mm)',color:'#8892a4'},
-           grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#8892a4'}},
-        y:{title:{display:true,text:'Depth (m)',color:'#8892a4'},min:-20,max:0,
-           ticks:{color:'#8892a4',callback:v=>Math.abs(v)+'m'},
+        x:{title:{display:true,text:'A-Axis Displacement from Initial (mm)',color:'#64748b'},
+           grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b'}},
+        y:{title:{display:true,text:'Depth (m)',color:'#64748b'},min:-20,max:0,
+           ticks:{color:'#64748b',callback:v=>Math.abs(v)+'m'},
            grid:{color:'rgba(255,255,255,0.05)'}},
       },
       plugins:{
-        legend:{labels:{color:'#8892a4',font:{size:9},boxWidth:12},
+        legend:{labels:{color:'#64748b',font:{size:9},boxWidth:12},
                 position:'right'},
         tooltip:{callbacks:{label:c=>`${c.dataset.label} | ${Math.abs(c.parsed.y).toFixed(1)}m: ${c.parsed.x.toFixed(2)}mm`}}
       },
@@ -4567,9 +4942,9 @@ function renderMATCharts(){
   if(allDates.length){
     datasets.push({label:'Alert (7.5T)',data:allDates.map(()=>MAT_ALERT),borderColor:'rgba(239,68,68,0.5)',borderDash:[4,4],pointRadius:0,borderWidth:1.5,backgroundColor:'transparent'});
   }
-  mkChart('matTrendChart',{type:'line',data:{labels:allDates,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8892a4',font:{family:'Space Mono',size:9},boxWidth:10}}},scales:{y:{min:0,max:10,ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'},title:{display:true,text:'Avg Load (Ton)',color:'#4a5568'}},x:{ticks:{color:'#4a5568',font:{family:'Space Mono',size:8},maxRotation:45},grid:{display:false}}}}});
+  mkChart('matTrendChart',{type:'line',data:{labels:allDates,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#64748b',font:{family:'Space Mono',size:9},boxWidth:10}}},scales:{y:{min:0,max:10,ticks:{color:'#64748b',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'},title:{display:true,text:'Avg Load (Ton)',color:'#334155'}},x:{ticks:{color:'#334155',font:{family:'Space Mono',size:8},maxRotation:45},grid:{display:false}}}}});
   const latestVals=insts.map(inst=>{const rows=matData.filter(r=>r.instId===inst);return rows.length?rows.sort((a,b)=>b.date.localeCompare(a.date))[0].avg:0;});
-  mkChart('matBarChart',{type:'bar',data:{labels:insts,datasets:[{label:'Latest Avg (Ton)',data:latestVals,backgroundColor:latestVals.map((v,i)=>colors[i%colors.length]+'99'),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:10,ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'}},x:{ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{display:false}}}}});
+  mkChart('matBarChart',{type:'bar',data:{labels:insts,datasets:[{label:'Latest Avg (Ton)',data:latestVals,backgroundColor:latestVals.map((v,i)=>colors[i%colors.length]+'99'),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:10,ticks:{color:'#64748b',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'}},x:{ticks:{color:'#64748b',font:{family:'Space Mono',size:9}},grid:{display:false}}}}});
 }
 
 // ================================================================
@@ -4672,9 +5047,9 @@ function renderTRTCharts(){
   if(allDates.length){
     datasets.push({label:'Alert (7.5T)',data:allDates.map(()=>TRT_ALERT),borderColor:'rgba(239,68,68,0.5)',borderDash:[4,4],pointRadius:0,borderWidth:1.5,backgroundColor:'transparent'});
   }
-  mkChart('trtTrendChart',{type:'line',data:{labels:allDates,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8892a4',font:{family:'Space Mono',size:9},boxWidth:10}}},scales:{y:{min:0,max:10,ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'},title:{display:true,text:'Avg Load (Ton)',color:'#4a5568'}},x:{ticks:{color:'#4a5568',font:{family:'Space Mono',size:8},maxRotation:45},grid:{display:false}}}}});
+  mkChart('trtTrendChart',{type:'line',data:{labels:allDates,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#64748b',font:{family:'Space Mono',size:9},boxWidth:10}}},scales:{y:{min:0,max:10,ticks:{color:'#64748b',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'},title:{display:true,text:'Avg Load (Ton)',color:'#334155'}},x:{ticks:{color:'#334155',font:{family:'Space Mono',size:8},maxRotation:45},grid:{display:false}}}}});
   const latestVals=insts.map(inst=>{const rows=trtData.filter(r=>r.instId===inst);return rows.length?rows.sort((a,b)=>b.date.localeCompare(a.date))[0].avg:0;});
-  mkChart('trtBarChart',{type:'bar',data:{labels:insts,datasets:[{label:'Latest Avg (Ton)',data:latestVals,backgroundColor:latestVals.map((v,i)=>colors[i%colors.length]+'99'),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:10,ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'}},x:{ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{display:false}}}}});
+  mkChart('trtBarChart',{type:'bar',data:{labels:insts,datasets:[{label:'Latest Avg (Ton)',data:latestVals,backgroundColor:latestVals.map((v,i)=>colors[i%colors.length]+'99'),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:10,ticks:{color:'#64748b',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'}},x:{ticks:{color:'#64748b',font:{family:'Space Mono',size:9}},grid:{display:false}}}}});
 }
 
 // ================================================================
@@ -5170,15 +5545,351 @@ function renderRBCharts(){
   }));
   // Alert line
   if(allDates.length) datasets.push({label:'Alert (7.5T)',data:allDates.map(()=>RB_ALERT),borderColor:'rgba(239,68,68,0.5)',borderDash:[4,4],pointRadius:0,borderWidth:1,backgroundColor:'transparent'});
-  mkChart('rbTrendChart',{type:'line',data:{labels:allDates,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8892a4',font:{family:'Space Mono',size:9},boxWidth:10}}},scales:{y:{ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'},title:{display:true,text:'Avg Load (Ton)',color:'#4a5568'}},x:{ticks:{color:'#4a5568',font:{family:'Space Mono',size:8},maxRotation:45},grid:{display:false}}}}});
+  mkChart('rbTrendChart',{type:'line',data:{labels:allDates,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#64748b',font:{family:'Space Mono',size:9},boxWidth:10}}},scales:{y:{ticks:{color:'#64748b',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'},title:{display:true,text:'Avg Load (Ton)',color:'#334155'}},x:{ticks:{color:'#334155',font:{family:'Space Mono',size:8},maxRotation:45},grid:{display:false}}}}});
   // Bar latest per inst
   const latestVals=insts.map(inst=>{const rows=rbData.filter(r=>r.instId===inst);return rows.length?rows.sort((a,b)=>b.date.localeCompare(a.date))[0].avg:0;});
-  mkChart('rbBarChart',{type:'bar',data:{labels:insts,datasets:[{label:'Latest Avg (Ton)',data:latestVals,backgroundColor:latestVals.map((_,i)=>colors[i%colors.length]+'99'),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'}},x:{ticks:{color:'#8892a4',font:{family:'Space Mono',size:9}},grid:{display:false}}}}});
+  mkChart('rbBarChart',{type:'bar',data:{labels:insts,datasets:[{label:'Latest Avg (Ton)',data:latestVals,backgroundColor:latestVals.map((_,i)=>colors[i%colors.length]+'99'),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{color:'#64748b',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'}},x:{ticks:{color:'#64748b',font:{family:'Space Mono',size:9}},grid:{display:false}}}}});
 }
 
 function exportRBData(){
   const csv=['Date,Month,InstID,RD(m),CH1(T),CH2(T),CH3(T),Avg(T),Status,Notes',...rbData.map(r=>`${r.date},"${getMonthLabel(r.date)}","${r.instId}",${r.rdm||'--'},${r.ch1.toFixed(2)},${r.ch2.toFixed(2)},${r.ch3.toFixed(2)},${r.avg.toFixed(3)},${rbStatus(r.avg).txt},"${(r.notes||'').replace(/"/g,'\'')}"`)].join('\n');
   downloadCSV(csv,'RockBolt_LC_Data.csv');
+}
+
+// ================================================================
+// SAP-STYLE MODULE — INSTRUMENT DRAWINGS + INVENTORY & INDENT
+// ================================================================
+function genId(){ return Date.now() + '_' + Math.random().toString(36).slice(2,8); }
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+function fmtDT(ts){ if(!ts) return '--'; const d=new Date(ts); return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
+function escHtml(s){ return (s==null?'':String(s)).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function openSapModal(id){ document.getElementById(id).classList.add('open'); }
+function closeSapModal(id){
+  document.getElementById(id).classList.remove('open');
+  if(id==='drwModal'){ pendingDrwFile=null; document.getElementById('drwFile').value=''; document.getElementById('drwFileChip').innerHTML=''; document.getElementById('drwUploadTxt').textContent='Click to choose a file'; }
+  if(id==='indModal'){ pendingIndFile=null; document.getElementById('indFile').value=''; document.getElementById('indFileChip').innerHTML=''; document.getElementById('indUploadTxt').textContent='Click to choose a file'; }
+}
+document.querySelectorAll('.sap-modal-bg').forEach(m=>m.addEventListener('click',e=>{ if(e.target===m) m.classList.remove('open'); }));
+
+// ---------------- INSTRUMENT DRAWINGS ----------------
+function openDrawingModal(){
+  document.getElementById('drwType').value='Load Cell';
+  document.getElementById('drwInstId').value='';
+  document.getElementById('drwTitle').value='';
+  document.getElementById('drwNotes').value='';
+  pendingDrwFile=null;
+  document.getElementById('drwFileChip').innerHTML='';
+  document.getElementById('drwUploadTxt').textContent='Click to choose a file';
+  openSapModal('drwModal');
+}
+function onDrwFilePicked(input){
+  const f=input.files && input.files[0];
+  if(!f) return;
+  if(f.size > 10*1024*1024){ showToast('⚠ File too large — max 10 MB', 3500, 'warn'); input.value=''; return; }
+  pendingDrwFile=f;
+  document.getElementById('drwUploadTxt').textContent='Change file';
+  document.getElementById('drwFileChip').innerHTML=`<div class="sap-file-chip"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 1h7l3 3v11H3V1z"/></svg>${escHtml(f.name)}</div>`;
+}
+async function saveDrawing(){
+  const instType=document.getElementById('drwType').value;
+  const instId=document.getElementById('drwInstId').value.trim();
+  const title=document.getElementById('drwTitle').value.trim();
+  const notes=document.getElementById('drwNotes').value.trim();
+  if(!instId){ showToast('⚠ Enter Instrument ID', 3000, 'warn'); return; }
+  if(!pendingDrwFile){ showToast('⚠ Choose a drawing file to upload', 3000, 'warn'); return; }
+  const btn=document.getElementById('drwSaveBtn');
+  const origTxt=btn.textContent; btn.textContent='Uploading…'; btn.disabled=true;
+  try{
+    const up = await fbUploadFile(pendingDrwFile, 'drawings');
+    drawingsData.push({
+      id: genId(), instType, instId, title: title||up.fileName,
+      fileName: up.fileName, fileUrl: up.url, storagePath: up.path, fileType: up.fileType,
+      notes, uploadedBy: currentUser?currentUser.name:'unknown', uploadedAt: Date.now()
+    });
+    saveToStorage();
+    renderDrawings();
+    closeSapModal('drwModal');
+    showToast('✓ Drawing uploaded');
+  }catch(e){
+    console.warn('Drawing upload failed:', e);
+    showToast('⚠ Upload failed — '+e.message, 4500, 'warn');
+  }finally{
+    btn.textContent=origTxt; btn.disabled=false;
+  }
+}
+function deleteDrawing(id){
+  if(!confirm('Delete this drawing?')) return;
+  drawingsData=drawingsData.filter(x=>x.id!==id);
+  saveToStorage(); renderDrawings();
+  showToast('Drawing deleted');
+}
+function isImageFile(d){ return (d.fileType&&d.fileType.startsWith('image/')) || /\.(png|jpe?g|gif|webp)$/i.test(d.fileName||''); }
+function renderDrawings(){
+  const grid=document.getElementById('drwGrid'); if(!grid) return;
+  const typeFilter=document.getElementById('drwTypeFilter').value;
+  const q=(document.getElementById('drwSearch').value||'').toLowerCase();
+  let list=drawingsData.filter(d=>{
+    if(typeFilter!=='all' && d.instType!==typeFilter) return false;
+    if(q && !((d.instId||'').toLowerCase().includes(q) || (d.title||'').toLowerCase().includes(q) || (d.fileName||'').toLowerCase().includes(q))) return false;
+    return true;
+  }).sort((a,b)=>b.uploadedAt-a.uploadedAt);
+  document.getElementById('drwCount').textContent=`${list.length} drawing${list.length!==1?'s':''}`;
+  document.getElementById('drwEmpty').style.display=list.length?'none':'block';
+  grid.innerHTML=list.map(d=>`
+    <div class="sap-drawing-card">
+      <div class="sap-drawing-thumb">${isImageFile(d)?`<img src="${d.fileUrl}" alt="${escHtml(d.title)}"/>`:`<svg viewBox="0 0 24 24"><path d="M4 2h11l5 5v15H4V2z"/><path d="M14 2v6h6"/></svg>`}</div>
+      <div class="sap-drawing-body">
+        <div class="sap-drawing-name" title="${escHtml(d.title)}">${escHtml(d.title)}</div>
+        <div class="sap-drawing-meta">${escHtml(d.instType)} · ${escHtml(d.instId)}</div>
+        <div class="sap-drawing-meta">${fmtDT(d.uploadedAt)}</div>
+      </div>
+      <div class="sap-drawing-actions">
+        <a class="sap-btn sap-btn-sm" style="flex:1;text-align:center" href="${d.fileUrl}" target="_blank" rel="noopener">View</a>
+        <button class="sap-btn sap-btn-sm sap-btn-danger-o" onclick="deleteDrawing('${d.id}')">Delete</button>
+      </div>
+    </div>`).join('');
+  const badge=document.getElementById('drawingsNavBadge');
+  if(badge){ if(drawingsData.length){ badge.style.display='inline-block'; badge.textContent=drawingsData.length; } else badge.style.display='none'; }
+}
+
+// ---------------- INVENTORY: MATERIALS / STOCK ----------------
+function stockFor(instType,instId){
+  let received=0, installed=0;
+  inventoryTxns.forEach(t=>{
+    if(t.instType===instType && t.instId===instId){
+      if(t.type==='RECEIVED') received+=t.qty;
+      else if(t.type==='INSTALLED') installed+=t.qty;
+    }
+  });
+  return {received, installed, balance:received-installed};
+}
+function openMaterialModal(){
+  document.getElementById('matMasterType').value='Load Cell';
+  document.getElementById('matMasterInstId').value='';
+  document.getElementById('matMasterUnit').value='Nos';
+  document.getElementById('matMasterReceived').value='';
+  document.getElementById('matMasterInstalled').value='';
+  document.getElementById('matMasterNotes').value='';
+  openSapModal('matMasterModal');
+}
+function saveMaterial(){
+  const instType=document.getElementById('matMasterType').value;
+  const instId=document.getElementById('matMasterInstId').value.trim();
+  const unit=document.getElementById('matMasterUnit').value;
+  const openRecv=+document.getElementById('matMasterReceived').value||0;
+  const openInst=+document.getElementById('matMasterInstalled').value||0;
+  const notes=document.getElementById('matMasterNotes').value.trim();
+  if(!instId){ showToast('⚠ Enter Instrument ID', 3000, 'warn'); return; }
+  if(materialsData.some(m=>m.instType===instType && m.instId===instId)){ showToast('⚠ This material already exists', 3000, 'warn'); return; }
+  materialsData.push({ id:genId(), instType, instId, unit, notes, createdAt:Date.now() });
+  if(openRecv>0) inventoryTxns.push({ id:genId(), instType, instId, type:'RECEIVED', qty:openRecv, date:todayStr(), refDoc:'', remarks:'Opening balance', doneBy:currentUser?currentUser.name:'unknown', createdAt:Date.now() });
+  if(openInst>0) inventoryTxns.push({ id:genId(), instType, instId, type:'INSTALLED', qty:openInst, date:todayStr(), refDoc:'', remarks:'Opening balance', doneBy:currentUser?currentUser.name:'unknown', createdAt:Date.now() });
+  saveToStorage();
+  renderInventoryAll();
+  closeSapModal('matMasterModal');
+  showToast('✓ Material added');
+}
+function deleteMaterial(id){
+  const m=materialsData.find(x=>x.id===id);
+  if(!m) return;
+  if(!confirm(`Delete material "${m.instType} — ${m.instId}"? This also removes its movement history.`)) return;
+  materialsData=materialsData.filter(x=>x.id!==id);
+  inventoryTxns=inventoryTxns.filter(t=>!(t.instType===m.instType && t.instId===m.instId));
+  saveToStorage(); renderInventoryAll();
+  showToast('Material deleted');
+}
+function renderInventoryStock(){
+  const body=document.getElementById('invStockBody'); if(!body) return;
+  const q=(document.getElementById('invStockSearch').value||'').toLowerCase();
+  let list=materialsData.filter(m=> !q || (m.instType+' '+m.instId).toLowerCase().includes(q));
+  document.getElementById('invStockEmpty').style.display=list.length?'none':'block';
+  body.innerHTML=list.map(m=>{
+    const s=stockFor(m.instType,m.instId);
+    const lastTxn=inventoryTxns.filter(t=>t.instType===m.instType&&t.instId===m.instId).sort((a,b)=>b.createdAt-a.createdAt)[0];
+    const low = s.balance<=0;
+    return `<tr>
+      <td>${escHtml(m.instType)}</td><td>${escHtml(m.instId)}</td>
+      <td>${s.received}</td><td>${s.installed}</td>
+      <td><span class="sap-badge ${low?'r':'g'}">${s.balance}</span></td>
+      <td>${escHtml(m.unit)}</td>
+      <td>${lastTxn?fmtDT(lastTxn.createdAt):fmtDT(m.createdAt)}</td>
+      <td><button class="sap-btn sap-btn-sm sap-btn-danger-o" onclick="deleteMaterial('${m.id}')">Delete</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ---------------- INVENTORY: GOODS MOVEMENT ----------------
+function openMovementModal(type){
+  if(!materialsData.length){ showToast('⚠ Add a material first (Stock Overview tab)', 3500, 'warn'); return; }
+  document.getElementById('movType').value=type;
+  document.getElementById('movModalTitle').textContent = type==='RECEIVED' ? 'Goods Receipt' : 'Issue / Install';
+  const sel=document.getElementById('movMaterialSelect');
+  sel.innerHTML=materialsData.map(m=>`<option value="${m.id}">${escHtml(m.instType)} — ${escHtml(m.instId)}</option>`).join('');
+  document.getElementById('movQty').value='';
+  document.getElementById('movDate').value=todayStr();
+  document.getElementById('movRefDoc').value='';
+  document.getElementById('movRemarks').value='';
+  const btn=document.getElementById('movSaveBtn');
+  btn.className='sap-btn '+(type==='RECEIVED'?'sap-btn-success':'sap-btn-danger-o');
+  openSapModal('movModal');
+}
+function saveMovement(){
+  const type=document.getElementById('movType').value;
+  const matId=document.getElementById('movMaterialSelect').value;
+  const m=materialsData.find(x=>x.id===matId);
+  const qty=+document.getElementById('movQty').value||0;
+  const date=document.getElementById('movDate').value||todayStr();
+  const refDoc=document.getElementById('movRefDoc').value.trim();
+  const remarks=document.getElementById('movRemarks').value.trim();
+  if(!m){ showToast('⚠ Select a material', 3000, 'warn'); return; }
+  if(qty<=0){ showToast('⚠ Enter a valid quantity', 3000, 'warn'); return; }
+  if(type==='INSTALLED'){
+    const s=stockFor(m.instType,m.instId);
+    if(qty>s.balance){ showToast(`⚠ Only ${s.balance} in stock — cannot issue ${qty}`, 4000, 'warn'); return; }
+  }
+  inventoryTxns.push({ id:genId(), instType:m.instType, instId:m.instId, type, qty, date, refDoc, remarks, doneBy:currentUser?currentUser.name:'unknown', createdAt:Date.now() });
+  saveToStorage();
+  renderInventoryAll();
+  closeSapModal('movModal');
+  showToast(type==='RECEIVED' ? '✓ Goods receipt recorded' : '✓ Issue / install recorded');
+}
+function deleteMovement(id){
+  if(!confirm('Delete this movement entry? This will change the stock balance.')) return;
+  inventoryTxns=inventoryTxns.filter(t=>t.id!==id);
+  saveToStorage(); renderInventoryAll();
+  showToast('Movement deleted');
+}
+function renderMovementLog(){
+  const body=document.getElementById('invMovementBody'); if(!body) return;
+  const list=[...inventoryTxns].sort((a,b)=>b.createdAt-a.createdAt);
+  document.getElementById('invTxnCount').textContent=`${list.length} movement${list.length!==1?'s':''}`;
+  document.getElementById('invMovementEmpty').style.display=list.length?'none':'block';
+  body.innerHTML=list.map(t=>`
+    <tr>
+      <td>${t.date}</td>
+      <td><span class="sap-badge ${t.type==='RECEIVED'?'g':'o'}">${t.type==='RECEIVED'?'Receipt':'Issue/Install'}</span></td>
+      <td>${escHtml(t.instType)}</td><td>${escHtml(t.instId)}</td>
+      <td>${t.qty}</td><td>${escHtml(t.refDoc||'--')}</td><td>${escHtml(t.remarks||'--')}</td>
+      <td>${escHtml(t.doneBy||'--')}</td>
+      <td><button class="sap-btn sap-btn-sm sap-btn-danger-o" onclick="deleteMovement('${t.id}')">Delete</button></td>
+    </tr>`).join('');
+}
+
+// ---------------- INDENT DOCUMENTS ----------------
+function openIndentModal(){
+  document.getElementById('indNo').value='';
+  document.getElementById('indDate').value=todayStr();
+  document.getElementById('indType').value='Load Cell';
+  document.getElementById('indInstId').value='';
+  document.getElementById('indQty').value='';
+  document.getElementById('indStatus').value='Pending';
+  document.getElementById('indNotes').value='';
+  pendingIndFile=null;
+  document.getElementById('indFileChip').innerHTML='';
+  document.getElementById('indUploadTxt').textContent='Click to choose a file';
+  openSapModal('indModal');
+}
+function onIndFilePicked(input){
+  const f=input.files && input.files[0];
+  if(!f) return;
+  if(f.size > 10*1024*1024){ showToast('⚠ File too large — max 10 MB', 3500, 'warn'); input.value=''; return; }
+  pendingIndFile=f;
+  document.getElementById('indUploadTxt').textContent='Change file';
+  document.getElementById('indFileChip').innerHTML=`<div class="sap-file-chip"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 1h7l3 3v11H3V1z"/></svg>${escHtml(f.name)}</div>`;
+}
+async function saveIndent(){
+  const indentNo=document.getElementById('indNo').value.trim();
+  const date=document.getElementById('indDate').value||todayStr();
+  const instType=document.getElementById('indType').value;
+  const instId=document.getElementById('indInstId').value.trim();
+  const qty=+document.getElementById('indQty').value||0;
+  const status=document.getElementById('indStatus').value;
+  const notes=document.getElementById('indNotes').value.trim();
+  if(!indentNo){ showToast('⚠ Enter Indent No.', 3000, 'warn'); return; }
+  if(qty<=0){ showToast('⚠ Enter a valid quantity', 3000, 'warn'); return; }
+  const btn=document.getElementById('indSaveBtn');
+  const origTxt=btn.textContent; btn.disabled=true;
+  try{
+    let up=null;
+    if(pendingIndFile){ btn.textContent='Uploading…'; up=await fbUploadFile(pendingIndFile,'indents'); }
+    indentData.push({
+      id:genId(), indentNo, date, instType, instId, qty, status,
+      fileName: up?up.fileName:'', fileUrl: up?up.url:'', storagePath: up?up.path:'',
+      notes, createdBy:currentUser?currentUser.name:'unknown', createdAt:Date.now()
+    });
+    saveToStorage();
+    renderIndents();
+    closeSapModal('indModal');
+    showToast('✓ Indent saved');
+  }catch(e){
+    console.warn('Indent save failed:', e);
+    showToast('⚠ Upload failed — '+e.message, 4500, 'warn');
+  }finally{
+    btn.textContent=origTxt; btn.disabled=false;
+  }
+}
+function deleteIndent(id){
+  if(!confirm('Delete this indent document?')) return;
+  indentData=indentData.filter(x=>x.id!==id);
+  saveToStorage(); renderIndents();
+  showToast('Indent deleted');
+}
+function setIndentStatus(id,status){
+  const d=indentData.find(x=>x.id===id);
+  if(!d) return;
+  d.status=status;
+  saveToStorage(); renderIndents();
+}
+function indentBadgeClass(status){
+  if(status==='Received'||status==='Closed') return 'g';
+  if(status==='Approved') return 'b';
+  return 'o';
+}
+function renderIndents(){
+  const body=document.getElementById('invIndentBody'); if(!body) return;
+  const q=(document.getElementById('invIndentSearch').value||'').toLowerCase();
+  let list=indentData.filter(d=> !q || (d.indentNo+' '+d.instType+' '+d.instId).toLowerCase().includes(q));
+  list=list.sort((a,b)=>b.createdAt-a.createdAt);
+  document.getElementById('invIndentEmpty').style.display=list.length?'none':'block';
+  body.innerHTML=list.map(d=>`
+    <tr>
+      <td>${escHtml(d.indentNo)}</td><td>${d.date}</td>
+      <td>${escHtml(d.instType)}</td><td>${escHtml(d.instId||'--')}</td><td>${d.qty}</td>
+      <td>
+        <select class="sap-fs" style="padding:4px 6px;font-size:10.5px;width:auto" onchange="setIndentStatus('${d.id}',this.value)">
+          ${['Pending','Approved','Received','Closed'].map(s=>`<option ${s===d.status?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </td>
+      <td>${d.fileUrl?`<a class="sap-btn sap-btn-sm" href="${d.fileUrl}" target="_blank" rel="noopener">View</a>`:'<span style="color:var(--sap-txt3);font-size:11px">No file</span>'}</td>
+      <td><button class="sap-btn sap-btn-sm sap-btn-danger-o" onclick="deleteIndent('${d.id}')">Delete</button></td>
+    </tr>`).join('');
+  const badge=document.getElementById('inventoryNavBadge');
+  const openCount=indentData.filter(d=>d.status!=='Received'&&d.status!=='Closed').length;
+  if(badge){ if(openCount){ badge.style.display='inline-block'; badge.textContent=openCount; } else badge.style.display='none'; }
+}
+
+// ---------------- SHARED: TABS + KPIs ----------------
+function switchInvTab(tab){
+  ['stock','movement','indent'].forEach(t=>{
+    document.getElementById('invTabBtn-'+t).classList.toggle('active', t===tab);
+    document.getElementById('invTab-'+t).classList.toggle('active', t===tab);
+  });
+}
+function updateInventoryKPIs(){
+  let recv=0, inst=0;
+  materialsData.forEach(m=>{ const s=stockFor(m.instType,m.instId); recv+=s.received; inst+=s.installed; });
+  document.getElementById('invKpiReceived').textContent=recv;
+  document.getElementById('invKpiInstalled').textContent=inst;
+  document.getElementById('invKpiBalance').textContent=recv-inst;
+  document.getElementById('invKpiIndents').textContent=indentData.filter(d=>d.status!=='Received'&&d.status!=='Closed').length;
+}
+function renderInventoryAll(){
+  if(!document.getElementById('invStockBody')) return;
+  renderInventoryStock();
+  renderMovementLog();
+  renderIndents();
+  updateInventoryKPIs();
 }
 
 // ================================================================
@@ -5245,6 +5956,125 @@ window.addEventListener('load',()=>{
       <div class="fg"><label class="fl">Notes</label><input class="fi" id="trtNotes" placeholder="Optional"/></div>
     </div>
     <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('trtDataModal')">Cancel</button><button class="btn btn-p" onclick="saveTRTData()">Save Reading</button></div>
+  </div>
+</div>
+
+<!-- ========== UPLOAD DRAWING MODAL ========== -->
+<div class="sap-modal-bg" id="drwModal">
+  <div class="sap-modal">
+    <div class="sap-modal-title"><span>Upload Instrument Drawing</span><button class="sap-modal-close" onclick="closeSapModal('drwModal')">×</button></div>
+    <div class="sap-form-grid">
+      <div class="sap-fg"><label class="sap-fl">Instrument Type</label>
+        <select class="sap-fs" id="drwType">
+          <option>Load Cell</option><option>Strain Gauge</option><option>Inclinometer</option>
+          <option>CVT</option><option>MAT</option><option>TRT</option><option>Rock Bolt</option>
+          <option>Piezometer</option><option>Extensometer</option><option>Other</option>
+        </select>
+      </div>
+      <div class="sap-fg"><label class="sap-fl">Instrument ID</label><input class="sap-fi" id="drwInstId" placeholder="e.g. MAT-LHS (4421)"/></div>
+      <div class="sap-fg" style="grid-column:1/-1"><label class="sap-fl">Drawing Title</label><input class="sap-fi" id="drwTitle" placeholder="e.g. Load Cell Fabrication Drawing Rev-2"/></div>
+      <div class="sap-fg" style="grid-column:1/-1">
+        <label class="sap-fl">Drawing File (PDF / Image)</label>
+        <div class="sap-upload" onclick="document.getElementById('drwFile').click()">
+          <svg viewBox="0 0 24 24"><path d="M12 3v13M6 9l6-6 6 6M4 21h16"/></svg>
+          <div class="sap-upload-txt" id="drwUploadTxt">Click to choose a file</div>
+          <div class="sap-upload-sub">PDF, JPG or PNG — max 10 MB</div>
+        </div>
+        <input type="file" id="drwFile" accept=".pdf,image/*" style="display:none" onchange="onDrwFilePicked(this)"/>
+        <div id="drwFileChip"></div>
+      </div>
+      <div class="sap-fg" style="grid-column:1/-1"><label class="sap-fl">Notes</label><textarea class="sap-ta" id="drwNotes" placeholder="Optional"></textarea></div>
+    </div>
+    <div class="sap-modal-foot">
+      <button class="sap-btn" onclick="closeSapModal('drwModal')">Cancel</button>
+      <button class="sap-btn sap-btn-primary" id="drwSaveBtn" onclick="saveDrawing()">Upload &amp; Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== NEW MATERIAL MODAL ========== -->
+<div class="sap-modal-bg" id="matMasterModal">
+  <div class="sap-modal">
+    <div class="sap-modal-title"><span>New Material (Instrument Stock)</span><button class="sap-modal-close" onclick="closeSapModal('matMasterModal')">×</button></div>
+    <div class="sap-form-grid">
+      <div class="sap-fg"><label class="sap-fl">Instrument Type</label>
+        <select class="sap-fs" id="matMasterType">
+          <option>Load Cell</option><option>Strain Gauge</option><option>Inclinometer</option>
+          <option>CVT</option><option>MAT</option><option>TRT</option><option>Rock Bolt</option>
+          <option>Piezometer</option><option>Extensometer</option><option>Other</option>
+        </select>
+      </div>
+      <div class="sap-fg"><label class="sap-fl">Instrument ID</label><input class="sap-fi" id="matMasterInstId" placeholder="e.g. RB-08"/></div>
+      <div class="sap-fg"><label class="sap-fl">Unit</label>
+        <select class="sap-fs" id="matMasterUnit"><option>Nos</option><option>Set</option><option>Mtr</option><option>Roll</option></select>
+      </div>
+      <div class="sap-fg"><label class="sap-fl">Opening Received Qty</label><input class="sap-fi" type="number" min="0" id="matMasterReceived" placeholder="0"/></div>
+      <div class="sap-fg"><label class="sap-fl">Opening Installed Qty</label><input class="sap-fi" type="number" min="0" id="matMasterInstalled" placeholder="0"/></div>
+      <div class="sap-fg" style="grid-column:1/-1"><label class="sap-fl">Notes</label><textarea class="sap-ta" id="matMasterNotes" placeholder="Optional"></textarea></div>
+    </div>
+    <div class="sap-modal-foot">
+      <button class="sap-btn" onclick="closeSapModal('matMasterModal')">Cancel</button>
+      <button class="sap-btn sap-btn-primary" onclick="saveMaterial()">Save Material</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== STOCK MOVEMENT MODAL (Goods Receipt / Issue) ========== -->
+<div class="sap-modal-bg" id="movModal">
+  <div class="sap-modal">
+    <div class="sap-modal-title"><span id="movModalTitle">Goods Receipt</span><button class="sap-modal-close" onclick="closeSapModal('movModal')">×</button></div>
+    <input type="hidden" id="movType"/>
+    <div class="sap-form-grid">
+      <div class="sap-fg" style="grid-column:1/-1"><label class="sap-fl">Material</label>
+        <select class="sap-fs" id="movMaterialSelect"></select>
+      </div>
+      <div class="sap-fg"><label class="sap-fl">Quantity</label><input class="sap-fi" type="number" min="1" id="movQty" placeholder="0"/></div>
+      <div class="sap-fg"><label class="sap-fl">Date</label><input class="sap-fi" type="date" id="movDate"/></div>
+      <div class="sap-fg"><label class="sap-fl">Ref. Doc / Indent No.</label><input class="sap-fi" id="movRefDoc" placeholder="Optional"/></div>
+      <div class="sap-fg"><label class="sap-fl">Remarks</label><input class="sap-fi" id="movRemarks" placeholder="Optional"/></div>
+    </div>
+    <div class="sap-modal-foot">
+      <button class="sap-btn" onclick="closeSapModal('movModal')">Cancel</button>
+      <button class="sap-btn sap-btn-primary" id="movSaveBtn" onclick="saveMovement()">Save Movement</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== NEW INDENT MODAL ========== -->
+<div class="sap-modal-bg" id="indModal">
+  <div class="sap-modal">
+    <div class="sap-modal-title"><span>New Indent Document</span><button class="sap-modal-close" onclick="closeSapModal('indModal')">×</button></div>
+    <div class="sap-form-grid">
+      <div class="sap-fg"><label class="sap-fl">Indent No.</label><input class="sap-fi" id="indNo" placeholder="e.g. IND/2026/014"/></div>
+      <div class="sap-fg"><label class="sap-fl">Date</label><input class="sap-fi" type="date" id="indDate"/></div>
+      <div class="sap-fg"><label class="sap-fl">Instrument Type</label>
+        <select class="sap-fs" id="indType">
+          <option>Load Cell</option><option>Strain Gauge</option><option>Inclinometer</option>
+          <option>CVT</option><option>MAT</option><option>TRT</option><option>Rock Bolt</option>
+          <option>Piezometer</option><option>Extensometer</option><option>Other</option>
+        </select>
+      </div>
+      <div class="sap-fg"><label class="sap-fl">Instrument ID</label><input class="sap-fi" id="indInstId" placeholder="Optional"/></div>
+      <div class="sap-fg"><label class="sap-fl">Qty Requested</label><input class="sap-fi" type="number" min="1" id="indQty" placeholder="0"/></div>
+      <div class="sap-fg"><label class="sap-fl">Status</label>
+        <select class="sap-fs" id="indStatus"><option>Pending</option><option>Approved</option><option>Received</option><option>Closed</option></select>
+      </div>
+      <div class="sap-fg" style="grid-column:1/-1">
+        <label class="sap-fl">Indent Document (PDF / Image)</label>
+        <div class="sap-upload" onclick="document.getElementById('indFile').click()">
+          <svg viewBox="0 0 24 24"><path d="M12 3v13M6 9l6-6 6 6M4 21h16"/></svg>
+          <div class="sap-upload-txt" id="indUploadTxt">Click to choose a file</div>
+          <div class="sap-upload-sub">PDF, JPG or PNG — max 10 MB</div>
+        </div>
+        <input type="file" id="indFile" accept=".pdf,image/*" style="display:none" onchange="onIndFilePicked(this)"/>
+        <div id="indFileChip"></div>
+      </div>
+      <div class="sap-fg" style="grid-column:1/-1"><label class="sap-fl">Notes</label><textarea class="sap-ta" id="indNotes" placeholder="Optional"></textarea></div>
+    </div>
+    <div class="sap-modal-foot">
+      <button class="sap-btn" onclick="closeSapModal('indModal')">Cancel</button>
+      <button class="sap-btn sap-btn-primary" id="indSaveBtn" onclick="saveIndent()">Save Indent</button>
+    </div>
   </div>
 </div>
 
