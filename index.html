@@ -2571,6 +2571,18 @@ let pendingDrwFile = null, pendingIndFile = null;
 let customMonths = {cvt:[], mat:[], trt:[], comb:[]};
 let editingLC = null, editingSG = null, editingInc = null, editingCVT = null, editingMAT = null, editingTRT = null, editingRB = null;
 let sensorData = [];
+// FIX: KIMI_BOREHOLES was read/written all over saveToStorage()/loadFromStorage()
+// but never actually declared anywhere — every single save (drawings, indent,
+// readings, anything) was throwing "KIMI_BOREHOLES is not defined" and aborting
+// mid-save. Restored from localStorage here, same pattern as the other arrays.
+let KIMI_BOREHOLES = [];
+try{
+  const _savedKimiBH = localStorage.getItem('aageo_kimiBoreholes');
+  if(_savedKimiBH){
+    const _parsedBH = JSON.parse(_savedKimiBH);
+    if(Array.isArray(_parsedBH)) KIMI_BOREHOLES = _parsedBH;
+  }
+}catch(e){ console.warn('Could not restore saved KIMI_BOREHOLES from localStorage:', e); }
 let editingSensor = null;
 let sgCurrentProject = 'all';
 let incSelectedBH = null;
