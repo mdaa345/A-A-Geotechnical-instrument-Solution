@@ -19,9 +19,9 @@
 ================================================================ */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#eef1f6;--surface:#ffffff;--panel:#ffffff;--card:#f7f9fb;
+  --bg:#eef2f7;--surface:#ffffff;--panel:#ffffff;--card:#f5f7fa;
   --border:#dde3ea;--border-hi:#c3ccd6;
-  --accent:#0f766e;--accent-solid:#00b894;--acc-dim:rgba(15,118,110,0.1);--acc-glow:rgba(15,118,110,0.25);
+  --accent:#1e40af;--accent-solid:#2563eb;--acc-dim:rgba(30,64,175,0.1);--acc-glow:rgba(37,99,235,0.28);
   --warn:#b45309;--warn-dim:rgba(180,83,9,0.1);
   --danger:#dc2626;--danger-dim:rgba(220,38,38,0.09);
   --info:#0a6ed1;--info-dim:rgba(10,110,209,0.1);
@@ -54,7 +54,7 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:14p
 .ni.active svg{opacity:1}
 .ni-badge{margin-left:auto;background:var(--danger);color:#fff;font-size:9px;font-family:var(--mono);padding:1px 5px;border-radius:10px;font-weight:700}
 .ni-badge.w{background:var(--warn)}
-.ni-badge.a{background:var(--accent-solid);color:#0a0c10}
+.ni-badge.a{background:var(--accent-solid);color:#fff}
 .ni-badge.b{background:#a78bfa;color:#0a0c10}
 .sb-foot{padding:10px 14px;border-top:1px solid var(--border);display:flex;align-items:center;gap:9px}
 .ua{width:30px;height:30px;border-radius:50%;background:var(--card);border:1px solid var(--border-hi);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;color:var(--accent)}
@@ -74,7 +74,7 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:14p
 .btn{display:inline-flex;align-items:center;gap:6px;padding:6px 13px;border-radius:var(--r);font-family:var(--mono);font-size:10px;font-weight:700;cursor:pointer;border:none;transition:all .15s;white-space:nowrap}
 .btn-ghost{background:transparent;color:var(--txt2);border:1px solid var(--border)}
 .btn-ghost:hover{border-color:var(--border-hi);color:var(--txt);background:var(--panel)}
-.btn-p{background:var(--accent-solid);color:#0a0c10}
+.btn-p{background:var(--accent-solid);color:#fff}
 .btn-p:hover{filter:brightness(1.1)}
 .btn-warn{background:var(--warn-dim);color:var(--warn);border:1px solid rgba(245,166,35,.3)}
 .btn-d{background:var(--danger-dim);color:var(--danger);border:1px solid rgba(239,68,68,.3)}
@@ -207,7 +207,7 @@ canvas{display:block}
 .login-err{background:var(--danger-dim);border:1px solid rgba(239,68,68,.3);color:var(--danger);font-family:var(--mono);font-size:11px;padding:8px 12px;border-radius:var(--r);margin-bottom:14px;display:none}
 .login-form .fg{margin-bottom:13px}
 .login-admin-info{background:var(--acc-dim);border:1px solid rgba(0,212,170,.2);border-radius:var(--r);padding:10px 12px;margin-bottom:14px;font-family:var(--mono);font-size:10px;color:var(--accent)}
-.login-btn{width:100%;padding:11px;border-radius:var(--r);background:var(--accent-solid);color:#0a0c10;font-family:var(--mono);font-size:12px;font-weight:700;border:none;cursor:pointer;transition:filter .15s;letter-spacing:.05em}
+.login-btn{width:100%;padding:11px;border-radius:var(--r);background:var(--accent-solid);color:#fff;font-family:var(--mono);font-size:12px;font-weight:700;border:none;cursor:pointer;transition:filter .15s;letter-spacing:.05em}
 .login-btn:hover{filter:brightness(1.1)}
 .login-footer{margin-top:18px;font-family:var(--mono);font-size:9px;color:var(--txt3);text-align:center}
 .perm-req{background:var(--warn-dim);border:1px solid rgba(245,166,35,.3);border-radius:var(--r);padding:12px;font-family:var(--mono);font-size:10px;color:var(--warn);display:none;margin-top:10px}
@@ -449,7 +449,7 @@ canvas{display:block}
    completely untouched. Palette intentionally mimics SAP Fiori.
 ================================================================ */
 .sap-shell{
-  --sap-bg:#eef1f6;--sap-panel:#ffffff;--sap-border:#d7dde5;--sap-border2:#e8ecf1;
+  --sap-bg:#eef2f7;--sap-panel:#ffffff;--sap-border:#d7dde5;--sap-border2:#e8ecf1;
   --sap-txt:#1c2733;--sap-txt2:#5b6b79;--sap-txt3:#8794a1;
   --sap-blue:#0a6ed1;--sap-blue-dim:#e8f1fc;--sap-navy:#354a5f;
   --sap-green:#107e3e;--sap-green-dim:#e6f4ea;
@@ -618,6 +618,146 @@ canvas{display:block}
   .sap-kpi-row{grid-template-columns:repeat(2,1fr)}
   .sap-form-grid{grid-template-columns:1fr}
 }
+
+/* ================= SAP MM MODULE (scoped under .mmwrap) ================= */
+.mmwrap {
+  --sap-gold: #F0AB00; --sap-blue: #356A9C; --sap-dark-blue: #00406A;
+  --sap-header-gray: #E8E8E8; --sap-row-gray: #F2F2F2; --sap-border: #BFBFBF;
+  --sap-text: #333333; --sap-white: #FFFFFF; --sap-hover: #D1E5FF;
+  --sap-success: #4CAF50; --sap-danger: #D32F2F; --sap-warning: #FF9800;
+  font-family: 'Arial','Helvetica',sans-serif; color: var(--sap-text); font-size:12px;
+  background:#E0E0E0; border-radius:8px; overflow:visible;
+}
+.mmwrap .sap-container{ display:flex; min-height:600px; }
+.mmwrap .sap-content-area{ max-height:70vh; }
+.mmwrap /* SAP EXACT COLOR CODES */
+        /* SAP TOP HEADER */
+        .sap-title-bar {
+            background: linear-gradient(to bottom, #5A8CBF, #356A9C);
+            color: var(--sap-white);
+            height: 32px;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            font-size: 14px;
+            font-weight: bold;
+            border-bottom: 2px solid var(--sap-gold);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            flex-shrink: 0;
+        }
+.mmwrap .sap-title-bar span { margin-right: 10px; }
+.mmwrap /* SAP MENU BAR */
+        .sap-menu-bar {
+            background-color: var(--sap-header-gray);
+            border-bottom: 1px solid var(--sap-border);
+            padding: 4px 10px;
+            display: flex;
+            gap: 15px;
+            flex-shrink: 0;
+        }
+.mmwrap .sap-menu-item {
+            font-size: 12px; color: var(--sap-text); cursor: pointer; padding: 2px 5px;
+        }
+.mmwrap .sap-menu-item:hover { background-color: var(--sap-hover); border: 1px solid var(--sap-blue); padding: 1px 4px; }
+.mmwrap /* SAP STANDARD TOOLBAR */
+        .sap-toolbar {
+            background-color: var(--sap-header-gray);
+            border-bottom: 1px solid var(--sap-border);
+            padding: 6px 10px;
+            display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+        }
+.mmwrap .sap-btn {
+            background: linear-gradient(to bottom, #FFFFFF, #E6E6E6);
+            border: 1px solid var(--sap-border);
+            padding: 4px 12px; font-size: 12px; cursor: pointer;
+            display: flex; align-items: center; gap: 6px; color: var(--sap-text); border-radius: 2px;
+        }
+.mmwrap .sap-btn:hover { background: linear-gradient(to bottom, #F0F0F0, #D1D1D1); border-color: var(--sap-blue); }
+.mmwrap .sap-btn-icon { width: 16px; height: 16px; }
+.mmwrap /* MAIN LAYOUT */
+        .sap-container { display: flex; flex: 1; overflow: hidden; }
+.mmwrap /* SAP LEFT SIDEBAR */
+        .sap-sidebar {
+            width: 220px; background-color: var(--sap-header-gray);
+            border-right: 1px solid var(--sap-border); padding: 10px 0; overflow-y: auto; flex-shrink: 0;
+        }
+.mmwrap .sap-nav-group-title {
+            padding: 8px 15px; font-size: 11px; font-weight: bold; color: #666;
+            text-transform: uppercase; border-bottom: 1px solid var(--sap-border); background-color: #DDDDDD;
+        }
+.mmwrap .sap-nav-item {
+            padding: 8px 20px; font-size: 12px; cursor: pointer;
+            border-left: 3px solid transparent; color: var(--sap-text); display: flex; align-items: center; gap: 8px;
+        }
+.mmwrap .sap-nav-item:hover { background-color: var(--sap-hover); }
+.mmwrap .sap-nav-item.active {
+            background-color: #FFFFFF; border-left: 3px solid var(--sap-gold);
+            font-weight: bold; color: var(--sap-dark-blue);
+        }
+.mmwrap .sap-nav-icon { width: 14px; height: 14px; fill: var(--sap-blue); }
+.mmwrap /* MAIN CONTENT AREA */
+        .sap-content-area { flex: 1; background-color: var(--sap-white); overflow-y: auto; padding: 15px; }
+.mmwrap /* SAP SCREEN SECTIONS */
+        .sap-section { border: 1px solid var(--sap-border); margin-bottom: 20px; background-color: var(--sap-white); }
+.mmwrap .sap-section-header {
+            background: linear-gradient(to bottom, #F0F0F0, #E0E0E0);
+            padding: 6px 10px; font-weight: bold; font-size: 12px;
+            border-bottom: 1px solid var(--sap-border); color: var(--sap-dark-blue);
+            display: flex; justify-content: space-between;
+        }
+.mmwrap .sap-form-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; padding: 10px; background-color: var(--sap-white); }
+.mmwrap .sap-form-field { display: flex; align-items: center; padding: 5px 10px; }
+.mmwrap .sap-form-field label { width: 140px; font-size: 12px; color: #555; padding-right: 10px; }
+.mmwrap .sap-form-field input, .mmwrap .sap-form-field select {
+            flex: 1; padding: 4px 6px; border: 1px solid var(--sap-border);
+            background-color: #FDFDFD; font-size: 12px; border-radius: 0;
+        }
+.mmwrap .sap-form-field input:focus, .mmwrap .sap-form-field select:focus { outline: none; border: 1px solid var(--sap-blue); background-color: var(--sap-white); }
+.mmwrap /* SAP ALV GRID TABLE */
+        .sap-alv-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.mmwrap .sap-alv-table thead th {
+            background: linear-gradient(to bottom, #E8F0FA, #C1D5E8);
+            color: var(--sap-dark-blue); padding: 6px 10px; text-align: left;
+            border: 1px solid var(--sap-border); font-weight: bold; position: sticky; top: 0;
+        }
+.mmwrap .sap-alv-table tbody td { padding: 6px 10px; border: 1px solid #E0E0E0; color: var(--sap-text); }
+.mmwrap .sap-alv-table tbody tr:nth-child(even) { background-color: var(--sap-row-gray); }
+.mmwrap .sap-alv-table tbody tr:hover { background-color: var(--sap-hover); }
+.mmwrap /* SAP STATUS BADGES */
+        .sap-status { padding: 2px 6px; border-radius: 2px; font-size: 11px; font-weight: bold; text-transform: uppercase; border: 1px solid; }
+.mmwrap .sap-status-open { background-color: #FFF3E0; color: #E65100; border-color: #FFB74D; }
+.mmwrap .sap-status-created { background-color: #E8EAF6; color: #1A237E; border-color: #7986CB; }
+.mmwrap .sap-status-received { background-color: #E8F5E9; color: #1B5E20; border-color: #66BB6A; }
+.mmwrap .sap-status-low { background-color: #FFEBEE; color: #B71C1C; border-color: #EF5350; }
+.mmwrap .sap-status-in { background-color: #E0F2F1; color: #004D40; border-color: #26A69A; }
+.mmwrap .hidden { display: none !important; }
+.mmwrap /* SCROLLBAR */
+        /* TOAST NOTIFICATION */
+        .toast-container { position: fixed; top: 40px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+.mmwrap .toast {
+            background: var(--sap-white); border-left: 4px solid var(--sap-success);
+            padding: 10px 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); min-width: 250px; font-size: 12px;
+            display: flex; align-items: center; gap: 10px;
+        }
+.mmwrap .toast.error { border-left-color: var(--sap-danger); }
+.mmwrap .toast.warning { border-left-color: var(--sap-warning); }
+    
+/* ================= NAVY / BLUE CORPORATE THEME — SIDEBAR ================= */
+.sidebar{background:linear-gradient(180deg,#0d2340,#132c4f)}
+.sb-logo{background:transparent;border-bottom:1px solid rgba(255,255,255,.09)}
+.sb-logo-txt{color:#eaf1fb}
+.sb-logo-sub{color:#7f97b8}
+.sb-status{background:rgba(255,255,255,.05);border-bottom:1px solid rgba(255,255,255,.09)}
+.sdot{background:#60a5fa}
+.stxt{color:#8fbcfa}
+.nav-sec{color:#5b7699}
+.ni{color:#b8c7dc}
+.ni:hover{background:rgba(255,255,255,.06);color:#fff}
+.ni.active{background:rgba(37,99,235,.22);border-left-color:#60a5fa;color:#bfdcff}
+.sb-foot{border-top:1px solid rgba(255,255,255,.09)}
+.ua{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#bfdcff}
+.un{color:#eaf1fb}
+.ur{color:#7f97b8}
 </style>
 </head>
 <!-- EmailJS for Gmail OTP -->
@@ -851,8 +991,9 @@ canvas{display:block}
 <div class="modal-bg" id="adminModal">
   <div class="modal" style="width:640px">
     <div class="modal-title">Admin Panel – User Management <button class="modal-close" onclick="closeModal('adminModal')">×</button></div>
+    <input class="fi" id="userSearch" placeholder="Search by name or username..." oninput="loadUserTable()" style="margin-bottom:10px"/>
     <table class="tbl" style="margin-bottom:14px">
-      <thead><tr><th>User</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
+      <thead><tr><th>User</th><th>Role</th><th>Status</th><th>Last Login</th><th>Actions</th></tr></thead>
       <tbody id="userTable"></tbody>
     </table>
     <div style="background:var(--warn-dim);border:1px solid rgba(245,166,35,.3);border-radius:var(--r);padding:11px;font-family:var(--mono);font-size:10px;color:var(--warn);margin-bottom:14px">Pending approval requests will send notification to admin when user logs in.</div>
@@ -913,6 +1054,7 @@ canvas{display:block}
         <option value="user">User (Field)</option>
         <option value="admin">Admin</option>
       </select>
+      <div id="editUserRoleLockNote" style="display:none;font-size:10.5px;color:var(--txt3);margin-top:4px">Primary admin ka role lock hai, change nahi ho sakta.</div>
     </div>
     <div id="editUserErr" style="display:none;background:var(--danger-dim);border:1px solid rgba(220,38,38,.25);border-radius:var(--r);padding:9px;font-size:11.5px;color:var(--danger);margin-bottom:12px"></div>
     <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('editUserModal')">Cancel</button><button class="btn btn-p" onclick="saveEditedUser()">Save Changes</button></div>
@@ -1061,6 +1203,10 @@ canvas{display:block}
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M1.5 4.5 8 1l6.5 3.5v7L8 15l-6.5-3.5v-7z"/><path d="M1.5 4.5 8 8l6.5-3.5M8 8v7"/></svg>
       Inventory &amp; Indent
       <span class="ni-badge w" id="inventoryNavBadge" style="display:none">0</span>
+    </div>
+    <div class="ni" id="navMM" onclick="switchView('mm',this)">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M2 4h12v2H2zM2 10h12v2H2z"/><path d="M2 7h8M2 13h8"/></svg>
+      Material Mgmt (SAP MM)
     </div>
     <div class="nav-sec">AI TOOLS</div>
     <div class="ni" onclick="switchView('aiinsights',this)">
@@ -1862,7 +2008,7 @@ canvas{display:block}
             <option>CVT</option><option>MAT</option><option>TRT</option><option>Rock Bolt</option>
             <option>Piezometer</option><option>Extensometer</option><option>Other</option>
           </select>
-          <input class="sap-fi sap-search" id="drwSearch" placeholder="Search instrument ID / title / filename..." oninput="renderDrawings()"/>
+          <input class="sap-fi sap-search" id="drwSearch" placeholder="Search location / drawing no. / title / filename..." oninput="renderDrawings()"/>
           <span style="margin-left:auto;font-size:11px;color:var(--sap-txt3)" id="drwCount">0 drawings</span>
         </div>
 
@@ -1905,7 +2051,7 @@ canvas{display:block}
           </div>
           <div class="sap-table-wrap">
             <table class="sap-table">
-              <thead><tr><th>Instrument Type</th><th>Instrument ID</th><th>Received</th><th>Installed</th><th>Balance</th><th>Unit</th><th>Last Updated</th><th>Actions</th></tr></thead>
+              <thead><tr><th>Instrument Type</th><th>Instrument ID</th><th>Material PR</th><th>Order Qty</th><th>Delivery Date</th><th>Site</th><th>Received</th><th>Installed</th><th>Balance</th><th>Unit</th><th>Last Updated</th><th>Actions</th></tr></thead>
               <tbody id="invStockBody"></tbody>
             </table>
           </div>
@@ -1950,6 +2096,238 @@ canvas{display:block}
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- ========== SAP MATERIAL MANAGEMENT (embedded standalone MM module) ========== -->
+    <div id="view-mm" class="view">
+<div class="mmwrap">
+
+
+<!-- TOAST -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- SAP TITLE BAR -->
+<div class="sap-title-bar">
+    <span>🏭</span>
+    <span>SAP S/4HANA</span>
+    <span>|</span>
+    <span>Material Management (MM)</span>
+    <span style="margin-left: auto; font-size: 11px; font-weight: normal;">User: MANAGER</span>
+</div>
+
+<!-- SAP STANDARD TOOLBAR -->
+<div class="sap-toolbar">
+    <button class="sap-btn" onclick="mmShowSection('dashboard', document.querySelector('.sap-nav-item.active'))">
+        <svg class="sap-btn-icon" viewBox="0 0 24 24" fill="#356A9C"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+        Dashboard
+    </button>
+    <button class="sap-btn" onclick="mmShowSection('materials', document.querySelectorAll('.sap-nav-item')[1])">
+        <svg class="sap-btn-icon" viewBox="0 0 24 24" fill="#356A9C"><path d="M20 2H4c-1 0-2 .9-2 2v3.01c0 .72.43 1.34 1 1.69V20c0 1.1 1.1 2 2 2h14c.9 0 2-.9 2-2V8.7c.57-.35 1-.97 1-1.69V4c0-1.1-1-2-2-2z"/></svg>
+        Create Material
+    </button>
+    <button class="sap-btn" onclick="mmShowSection('pr', document.querySelectorAll('.sap-nav-item')[2])">
+        <svg class="sap-btn-icon" viewBox="0 0 24 24" fill="#356A9C"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6z"/></svg>
+        Create PR
+    </button>
+    <div style="flex:1"></div>
+    <div style="font-size: 11px; color: #666;">Transaction: <strong>ZPR1</strong></div>
+</div>
+
+<!-- CONTAINER -->
+<div class="sap-container">
+    
+    <!-- SIDEBAR -->
+    <div class="sap-sidebar">
+        <div class="sap-nav-group-title">Material Management</div>
+        <div class="sap-nav-item active" onclick="mmShowSection('dashboard', this)">
+            <svg class="sap-nav-icon" viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+            Overview
+        </div>
+        <div class="sap-nav-item" onclick="mmShowSection('materials', this)">
+            <svg class="sap-nav-icon" viewBox="0 0 24 24"><path d="M20 2H4c-1 0-2 .9-2 2v3.01c0 .72.43 1.34 1 1.69V20c0 1.1 1.1 2 2 2h14c.9 0 2-.9 2-2V8.7c.57-.35 1-.97 1-1.69V4c0-1.1-1-2-2-2z"/></svg>
+            Material Master (MM01)
+        </div>
+        <div class="sap-nav-item" onclick="mmShowSection('pr', this)">
+            <svg class="sap-nav-icon" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6z"/></svg>
+            Purchase Req. (ME51N)
+        </div>
+        <div class="sap-nav-item" onclick="mmShowSection('po', this)">
+            <svg class="sap-nav-icon" viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1z"/></svg>
+            Purchase Order (ME21N)
+        </div>
+        <div class="sap-nav-item" onclick="mmShowSection('gr', this)">
+            <svg class="sap-nav-icon" viewBox="0 0 24 24"><path d="M20 2H4c-1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-9 14H5v-2h6v2zm0-4H5v-2h6v2zm0-4H5V6h6v2z"/></svg>
+            Goods Receipt (MIGO)
+        </div>
+        <div class="sap-nav-item" onclick="mmShowSection('gi', this)">
+            <svg class="sap-nav-icon" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z"/></svg>
+            Goods Issue (MIGO_GI)
+        </div>
+        <div class="sap-nav-item" onclick="mmShowSection('csv', this)">
+            <svg class="sap-nav-icon" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7z"/></svg>
+            Data Import/Export
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="sap-content-area">
+        
+        <!-- DASHBOARD -->
+        <div id="dashboard" class="content-section">
+            <div class="sap-section">
+                <div class="sap-section-header">Inventory Overview</div>
+                <table class="sap-alv-table">
+                    <thead><tr><th>Material Code</th><th>Short Text</th><th>Current Stock</th><th>UoM</th><th>Min Stock</th><th>Status</th></tr></thead>
+                    <tbody id="inv-table"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- MATERIAL MASTER -->
+        <div id="materials" class="content-section hidden">
+            <div class="sap-section">
+                <div class="sap-section-header">Create Material Master (MM01)</div>
+                <div class="sap-form-grid">
+                    <div class="sap-form-field"><label>Material Code *</label><input type="text" id="mat-code"></div>
+                    <div class="sap-form-field"><label>Short Text *</label><input type="text" id="mat-text"></div>
+                    <div class="sap-form-field"><label>Base UoM</label><input type="text" id="mat-uom" value="PCS"></div>
+                    <div class="sap-form-field"><label>Min Stock</label><input type="number" id="mat-min" value="0"></div>
+                </div>
+                <div style="padding: 10px; background: #F5F5F5; border-top: 1px solid #ddd;">
+                    <button class="sap-btn" style="background: linear-gradient(to bottom, #4CAF50, #388E3C); color: white; border-color: #2E7D32;" onclick="mmAddMaterial()">Save Material</button>
+                </div>
+            </div>
+            <div class="sap-section">
+                <div class="sap-section-header">Material Master Data</div>
+                <table class="sap-alv-table">
+                    <thead><tr><th>Code</th><th>Short Text</th><th>UoM</th><th>Min Stock</th><th>Current Stock</th></tr></thead>
+                    <tbody id="mat-table"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- PR -->
+        <div id="pr" class="content-section hidden">
+            <div class="sap-section">
+                <div class="sap-section-header">Create Purchase Requisition (ME51N)</div>
+                <div class="sap-form-grid">
+                    <div class="sap-form-field"><label>Item No</label><input type="text" id="pr-item" value="10"></div>
+                    <div class="sap-form-field"><label>Material *</label><select id="pr-mat"></select></div>
+                    <div class="sap-form-field"><label>Quantity *</label><input type="number" id="pr-qty" value="1"></div>
+                    <div class="sap-form-field"><label>Delivery Date *</label><input type="date" id="pr-date"></div>
+                </div>
+                <div style="padding: 10px; background: #F5F5F5; border-top: 1px solid #ddd;">
+                    <button class="sap-btn" style="background: linear-gradient(to bottom, #356A9C, #00406A); color: white; border-color: #00406A;" onclick="mmCreatePR()">Post PR</button>
+                </div>
+            </div>
+            <div class="sap-section">
+                <div class="sap-section-header">Purchase Requisitions (ME53N)</div>
+                <table class="sap-alv-table">
+                    <thead><tr><th>PR Number</th><th>Item</th><th>Material</th><th>Qty</th><th>Del Date</th><th>Status</th></tr></thead>
+                    <tbody id="pr-table"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- PO -->
+        <div id="po" class="content-section hidden">
+            <div class="sap-section">
+                <div class="sap-section-header">Create Purchase Order (ME21N)</div>
+                <div class="sap-form-grid">
+                    <div class="sap-form-field"><label>Select Open PR *</label><select id="po-pr"></select></div>
+                    <div class="sap-form-field"><label>Vendor *</label><input type="text" id="po-vendor"></div>
+                </div>
+                <div style="padding: 10px; background: #F5F5F5; border-top: 1px solid #ddd;">
+                    <button class="sap-btn" style="background: linear-gradient(to bottom, #356A9C, #00406A); color: white; border-color: #00406A;" onclick="mmCreatePO()">Create PO</button>
+                </div>
+            </div>
+            <div class="sap-section">
+                <div class="sap-section-header">Purchase Order History (ME23N)</div>
+                <table class="sap-alv-table">
+                    <thead><tr><th>PO Number</th><th>PR Ref</th><th>Material</th><th>Qty</th><th>Vendor</th><th>Status</th></tr></thead>
+                    <tbody id="po-table"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- GR -->
+        <div id="gr" class="content-section hidden">
+            <div class="sap-section">
+                <div class="sap-section-header">Post Goods Receipt (MIGO)</div>
+                <div class="sap-form-grid">
+                    <div class="sap-form-field"><label>Select Open PO *</label><select id="gr-po"></select></div>
+                    <div class="sap-form-field"><label>Received Qty *</label><input type="number" id="gr-qty" value="0"></div>
+                </div>
+                <div style="padding: 10px; background: #F5F5F5; border-top: 1px solid #ddd;">
+                    <button class="sap-btn" style="background: linear-gradient(to bottom, #4CAF50, #388E3C); color: white; border-color: #2E7D32;" onclick="mmPostGR()">Post Goods Receipt</button>
+                </div>
+            </div>
+            <div class="sap-section">
+                <div class="sap-section-header">Goods Receipt History</div>
+                <table class="sap-alv-table">
+                    <thead><tr><th>GR Number</th><th>PO Ref</th><th>Material</th><th>Recd Qty</th><th>Date</th></tr></thead>
+                    <tbody id="gr-table"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- GI -->
+        <div id="gi" class="content-section hidden">
+            <div class="sap-section">
+                <div class="sap-section-header">Post Goods Issue / Usage (MIGO_GI)</div>
+                <div class="sap-form-grid">
+                    <div class="sap-form-field"><label>Select Material *</label><select id="gi-mat"></select></div>
+                    <div class="sap-form-field"><label>Used Qty *</label><input type="number" id="gi-qty" value="0"></div>
+                    <div class="sap-form-field"><label>Used By Dept *</label><input type="text" id="gi-by"></div>
+                </div>
+                <div style="padding: 10px; background: #F5F5F5; border-top: 1px solid #ddd;">
+                    <button class="sap-btn" style="background: linear-gradient(to bottom, #FF9800, #F57C00); color: white; border-color: #E65100;" onclick="mmPostGI()">Post Goods Issue</button>
+                </div>
+            </div>
+            <div class="sap-section">
+                <div class="sap-section-header">Material Usage History</div>
+                <table class="sap-alv-table">
+                    <thead><tr><th>GI ID</th><th>Material</th><th>Used Qty</th><th>Used By</th><th>Date</th></tr></thead>
+                    <tbody id="gi-table"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- CSV -->
+        <div id="csv" class="content-section hidden">
+            <div class="sap-section">
+                <div class="sap-section-header">Export Data</div>
+                <div class="sap-form-grid">
+                    <div class="sap-form-field"><label>Select Table</label>
+                        <select id="csv-table">
+                            <option value="Materials">Material Master</option>
+                            <option value="PR">Purchase Requisitions</option>
+                            <option value="PO">Purchase Orders</option>
+                            <option value="GR">Goods Receipts</option>
+                            <option value="GI">Goods Issues</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="padding: 10px; background: #F5F5F5; border-top: 1px solid #ddd;">
+                    <button class="sap-btn" onclick="mmExportCSV()">Download CSV</button>
+                </div>
+            </div>
+            <div class="sap-section">
+                <div class="sap-section-header">Import Data</div>
+                <div style="padding: 10px;">
+                    <p style="margin-bottom: 10px;">Upload a CSV file. Ensure headers match exactly.</p>
+                    <input type="file" id="csv-file" accept=".csv" style="font-size: 12px; margin-bottom: 10px;">
+                    <br>
+                    <button class="sap-btn" style="background: linear-gradient(to bottom, #4CAF50, #388E3C); color: white; border-color: #2E7D32;" onclick="mmImportCSV()">Import CSV</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+</div>
     </div>
 
     <!-- ========== AI INSIGHTS VIEW (Anomaly Detection + Predictive Trend) ========== -->
@@ -2267,16 +2645,53 @@ async function cloudinaryUploadFile(file, folder){
   fd.append('file', file);
   fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
   fd.append('folder', folder);
-  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`, { method:'POST', body: fd });
-  const data = await res.json();
-  if(!res.ok || !data.secure_url){
-    throw new Error(data.error?.message || 'Cloudinary upload failed');
+  // PDFs (most drawings/indent scans) must go through the "raw" delivery
+  // type. Cloudinary's "image"/"auto" delivery blocks unsigned PDF & ZIP
+  // files by default as a security measure — that block was silently
+  // failing every PDF drawing upload while images uploaded fine.
+  const isPdf = (file.type === 'application/pdf') || /\.pdf$/i.test(file.name||'');
+  const resourceType = isPdf ? 'raw' : 'auto';
+  let res, data;
+  try{
+    res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resourceType}/upload`, { method:'POST', body: fd });
+  }catch(netErr){
+    throw new Error('Network error reaching Cloudinary — check your connection');
+  }
+  try{ data = await res.json(); }catch(_){ data = null; }
+  if(!res.ok || !data || !data.secure_url){
+    const msg = (data && data.error && data.error.message) ? data.error.message : `Upload failed (HTTP ${res.status})`;
+    throw new Error(msg);
   }
   return { url: data.secure_url, path: data.public_id, fileType: file.type||'', fileName: file.name };
 }
+function fileToDataURL(file){
+  return new Promise((resolve,reject)=>{
+    const r=new FileReader();
+    r.onload=()=>resolve(r.result);
+    r.onerror=()=>reject(new Error('Could not read the file'));
+    r.readAsDataURL(file);
+  });
+}
 // Kept as an alias so the rest of the drawings/indent code (written
-// against fbUploadFile) doesn't need to change.
-async function fbUploadFile(file, folder){ return cloudinaryUploadFile(file, folder); }
+// against fbUploadFile) doesn't need to change. If Cloudinary fails for
+// ANY reason (wrong preset, account not whitelisted for unsigned
+// uploads, PDF/ZIP delivery blocked, network issue, etc.) we fall back
+// to storing the file directly as a base64 data URL — so uploads keep
+// working for the user even without fixing the Cloudinary account,
+// as long as the file isn't too large for that fallback.
+async function fbUploadFile(file, folder){
+  try{
+    return await cloudinaryUploadFile(file, folder);
+  }catch(cloudErr){
+    console.warn('Cloudinary upload failed, falling back to local storage:', cloudErr.message);
+    const FALLBACK_LIMIT = 4*1024*1024; // 4 MB — base64 + DB overhead
+    if(file.size > FALLBACK_LIMIT){
+      throw new Error(`Cloudinary upload failed (${cloudErr.message}) and file is too large (>4 MB) for local fallback storage.`);
+    }
+    const dataUrl = await fileToDataURL(file);
+    return { url: dataUrl, path: 'local:'+genId(), fileType: file.type||'', fileName: file.name };
+  }
+}
 function fbSetStatusBadge(text, color){
   // Map the bright "signal" color callers pass in to a darker, readable
   // text shade for the light theme, while keeping the small dot bright.
@@ -3801,15 +4216,18 @@ const _sampleTRT = [
 // LOGIN — STEP 1 (Credentials)
 // ================================================================
 function doLoginStep1(){
-  const u=document.getElementById('loginUser').value.trim();
+  const u=document.getElementById('loginUser').value.trim().toLowerCase().replace(/\s+/g,'');
   const p=document.getElementById('loginPass').value;
   const err=document.getElementById('loginErr');
   const perm=document.getElementById('permReq');
   err.style.display='none'; perm.style.display='none';
-  const user=USERS.find(x=>x.name===u && x.pass===p);
-  if(!user){err.style.display='block';return;}
+  const user=USERS.find(x=>x.name.toLowerCase()===u && x.pass===p);
+  if(!user){err.textContent='Invalid username or password. Please try again.';err.style.display='block';return;}
+  if(user.status==='suspended'){err.textContent='Yeh account suspend kar diya gaya hai — Admin se contact karo.';err.style.display='block';return;}
   if(user.status==='pending'){perm.style.display='block';notifyAdmin('User "'+user.displayName+'" requested access.');return;}
   // Direct login
+  user.lastLogin = Date.now();
+  persistUsers();
   currentUser=user;
   document.getElementById('loginPage').style.display='none';
   document.getElementById('sidebarUser').textContent=currentUser.displayName;
@@ -3922,6 +4340,7 @@ function notifyAdmin(msg){
 // ================================================================
 async function initApp(){
   await loadFromStorage();
+  seedPR21010350();
   applyRolePermissions();
   normalizeCVTData();
   normalizeSectionPositions();
@@ -3965,7 +4384,7 @@ function startClock(){
 // ================================================================
 // NAVIGATION
 // ================================================================
-const viewMeta={overview:'Dashboard Overview',loadcell:'Load Cell Monitoring',strain:'Strain Gauge Monitoring',inclinometer:'Inclinometer Monitoring','kimi-inc':'Kimi Inclinometer System',cvt:'Convergence (CVT) Monitoring',mat:'MAT Monitoring',trt:'TRT Monitoring',rockbolt:'Rock Bolt Load Cell',combinedlog:'Combined Reading Log',dataentry:'Manual Data Entry',reports:'Reports & Export',bulkupload:'Bulk Data Upload',threshold:'Threshold Matrix',crosssection:'Cross-Section Comparison',drawings:'Instrument Drawings',inventory:'Inventory & Indent Management',aiinsights:'AI Anomaly & Trend Insights',askgkpsp:'Ask-GKPSP Assistant',syshealth:'System Health & Auto-Recovery'};
+const viewMeta={overview:'Dashboard Overview',loadcell:'Load Cell Monitoring',strain:'Strain Gauge Monitoring',inclinometer:'Inclinometer Monitoring','kimi-inc':'Kimi Inclinometer System',cvt:'Convergence (CVT) Monitoring',mat:'MAT Monitoring',trt:'TRT Monitoring',rockbolt:'Rock Bolt Load Cell',combinedlog:'Combined Reading Log',dataentry:'Manual Data Entry',reports:'Reports & Export',bulkupload:'Bulk Data Upload',threshold:'Threshold Matrix',crosssection:'Cross-Section Comparison',drawings:'Instrument Drawings',inventory:'Inventory & Indent Management',mm:'Material Management (SAP MM)',aiinsights:'AI Anomaly & Trend Insights',askgkpsp:'Ask-GKPSP Assistant',syshealth:'System Health & Auto-Recovery'};
 function switchView(id,el){
   if(ADMIN_ONLY_VIEWS.includes(id) && !isAdmin()){
     showToast('⚠ Yeh section sirf Admin ke liye hai.', 3500, 'warn');
@@ -3993,6 +4412,7 @@ function switchView(id,el){
     if(id==='crosssection')renderCrossSection();
     if(id==='drawings')renderDrawings();
     if(id==='inventory')renderInventoryAll();
+    if(id==='mm')mmRenderAll();
     if(id==='aiinsights')initAIInsights();
     if(id==='syshealth')initSysHealth();
   },50);
@@ -4552,7 +4972,7 @@ function quickEntryInc(){
 function showToast(msg, duration, type){
   // type: 'ok' (green, default) | 'warn' (orange) | 'err' (red)
   const colors = {
-    ok:   {bg:'var(--accent-solid)', color:'#0a0c10', shadow:'rgba(0,184,148,.4)'},
+    ok:   {bg:'var(--accent-solid)', color:'#fff', shadow:'rgba(37,99,235,.4)'},
     warn: {bg:'#f0a500',              color:'#0a0c10', shadow:'rgba(240,165,0,.4)'},
     err:  {bg:'var(--danger)',       color:'#fff',    shadow:'rgba(220,38,38,.4)'},
   };
@@ -4573,7 +4993,7 @@ function showToast(msg, duration, type){
 // Views only an Admin can open. Field ("user") accounts can still see
 // and enter readings in every monitoring module — they just can't touch
 // Reports/Export, Inventory & Indent (financial), or System Health (API keys).
-const ADMIN_ONLY_VIEWS = ['reports','inventory','syshealth'];
+const ADMIN_ONLY_VIEWS = ['reports','inventory','mm','syshealth'];
 function isAdmin(){ return !!(currentUser && currentUser.role==='admin'); }
 function requireAdmin(actionLabel){
   if(!isAdmin()){
@@ -4849,7 +5269,34 @@ async function generateAIReportSummary(){
   btn.disabled = false; btn.textContent = 'Generate Narrative Summary';
 }
 
-function loadUserTable(){const tbody=document.getElementById('userTable');tbody.innerHTML=USERS.map(u=>`<tr><td>${u.displayName} <span style="font-family:var(--mono);font-size:10px;color:var(--txt3)">(${u.name})</span></td><td><span class="chip ${u.role==='admin'?'chip-d':'chip-ok'}">${u.role.toUpperCase()}</span></td><td><span class="chip ${u.status==='active'?'chip-ok':u.status==='pending'?'chip-w':'chip-off'}">${u.status.toUpperCase()}</span></td><td><div class="tbl-actions"><button onclick="openEditUserModal(${u.id})">Edit</button>${u.status==='pending'?`<button onclick="approveUser(${u.id})">Approve</button>`:''}${u.id!==1?`<button class="del" onclick="deleteUser(${u.id})">Remove</button>`:''}</div></td></tr>`).join('');}
+function loadUserTable(){
+  const tbody=document.getElementById('userTable');
+  const q=(document.getElementById('userSearch')?.value||'').trim().toLowerCase();
+  const list=USERS.filter(u=> !q || u.displayName.toLowerCase().includes(q) || u.name.toLowerCase().includes(q));
+  tbody.innerHTML=list.map(u=>{
+    const statusChip = u.status==='active'?'chip-ok':u.status==='pending'?'chip-w':'chip-off';
+    const lastLogin = u.lastLogin ? new Date(u.lastLogin).toLocaleString() : '—';
+    const suspendBtn = u.id!==1
+      ? (u.status==='suspended'
+          ? `<button onclick="reactivateUser(${u.id})">Reactivate</button>`
+          : (u.status==='active' ? `<button onclick="suspendUser(${u.id})">Suspend</button>` : ''))
+      : '';
+    return `<tr><td>${u.displayName} <span style="font-family:var(--mono);font-size:10px;color:var(--txt3)">(${u.name})</span></td><td><span class="chip ${u.role==='admin'?'chip-d':'chip-ok'}">${u.role.toUpperCase()}</span></td><td><span class="chip ${statusChip}">${u.status.toUpperCase()}</span></td><td style="font-size:10.5px;color:var(--txt3)">${lastLogin}</td><td><div class="tbl-actions"><button onclick="openEditUserModal(${u.id})">Edit</button>${u.status==='pending'?`<button onclick="approveUser(${u.id})">Approve</button>`:''}${suspendBtn}${u.id!==1?`<button class="del" onclick="deleteUser(${u.id})">Remove</button>`:''}</div></td></tr>`;
+  }).join('');
+  if(list.length===0) tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--txt3);padding:14px">No users match your search.</td></tr>';
+}
+function suspendUser(id){
+  const u=USERS.find(x=>x.id===id); if(!u||u.id===1) return;
+  u.status='suspended'; loadUserTable(); persistUsers();
+  showToast('⚠ '+u.displayName+' suspended — they can no longer log in.', 3500, 'warn');
+  logActivity('Suspended user', u.displayName+' ('+u.name+')');
+}
+function reactivateUser(id){
+  const u=USERS.find(x=>x.id===id); if(!u) return;
+  u.status='active'; loadUserTable(); persistUsers();
+  showToast('✓ '+u.displayName+' reactivated.');
+  logActivity('Reactivated user', u.displayName+' ('+u.name+')');
+}
 function approveUser(id){const u=USERS.find(x=>x.id===id);if(u){u.status='active';loadUserTable();persistUsers();notifyAdmin('User "'+u.displayName+'" has been approved.');showToast('✓ '+u.displayName+' approved and saved.');logActivity('Approved user', u.displayName+' ('+u.name+')');}}
 function deleteUser(id){if(confirm('Remove user?')){const i=USERS.findIndex(x=>x.id===id);if(i>-1){const removed=USERS[i];USERS.splice(i,1);loadUserTable();persistUsers();showToast('User "'+removed.displayName+'" removed.');logActivity('Removed user', removed.displayName+' ('+removed.name+')');}}}
 function openEditUserModal(id){
@@ -4861,6 +5308,10 @@ function openEditUserModal(id){
   document.getElementById('editUserPassword').value = '';
   document.getElementById('editUserRole').value = u.role;
   document.getElementById('editUserErr').style.display = 'none';
+  const roleSel = document.getElementById('editUserRole');
+  const lockNote = document.getElementById('editUserRoleLockNote');
+  if(u.id===1){ roleSel.disabled=true; lockNote.style.display='block'; }
+  else { roleSel.disabled=false; lockNote.style.display='none'; }
   openModal('editUserModal');
 }
 function saveEditedUser(){
@@ -4868,22 +5319,22 @@ function saveEditedUser(){
   const u = USERS.find(x=>x.id===id);
   if(!u) return;
   const displayName = document.getElementById('editUserDisplayName').value.trim();
-  const username     = document.getElementById('editUserUsername').value.trim();
+  const username     = document.getElementById('editUserUsername').value.trim().toLowerCase().replace(/\s+/g,'');
   const password     = document.getElementById('editUserPassword').value;
-  const role         = document.getElementById('editUserRole').value;
+  const role         = id===1 ? 'admin' : document.getElementById('editUserRole').value;
   const err = document.getElementById('editUserErr');
   if(!displayName || !username){
     err.textContent = 'Display Name aur Username khaali nahi ho sakte.';
     err.style.display = 'block';
     return;
   }
-  if(USERS.some(x=>x.name===username && x.id!==id)){
+  if(USERS.some(x=>x.name.toLowerCase()===username && x.id!==id)){
     err.textContent = 'Yeh username pehle se kisi aur user ka hai.';
     err.style.display = 'block';
     return;
   }
-  if(id===1 && role!=='admin'){
-    err.textContent = 'Primary admin ka role change nahi kiya ja sakta.';
+  if(password && password.length<4){
+    err.textContent = 'Password kam se kam 4 characters ka hona chahiye.';
     err.style.display = 'block';
     return;
   }
@@ -4907,7 +5358,7 @@ function openAddUserModal(){
 }
 function saveNewUserFromModal(){
   const displayName = document.getElementById('newUserDisplayName').value.trim();
-  const username     = document.getElementById('newUserUsername').value.trim();
+  const username     = document.getElementById('newUserUsername').value.trim().toLowerCase().replace(/\s+/g,'');
   const password     = document.getElementById('newUserPassword').value;
   const role         = document.getElementById('newUserRole').value;
   const err = document.getElementById('newUserErr');
@@ -4916,7 +5367,12 @@ function saveNewUserFromModal(){
     err.style.display = 'block';
     return;
   }
-  if(USERS.some(u=>u.name===username)){
+  if(password.length<4){
+    err.textContent = 'Password kam se kam 4 characters ka hona chahiye.';
+    err.style.display = 'block';
+    return;
+  }
+  if(USERS.some(u=>u.name.toLowerCase()===username)){
     err.textContent = 'Yeh username pehle se maujood hai — koi doosra try karo.';
     err.style.display = 'block';
     return;
@@ -4928,7 +5384,9 @@ function saveNewUserFromModal(){
     role: role,
     status: 'active',
     displayName: displayName,
-    email: username+'@aa-geo.com'
+    email: username+'@aa-geo.com',
+    createdAt: Date.now(),
+    lastLogin: null
   });
   persistUsers();
   loadUserTable();
@@ -6390,7 +6848,9 @@ document.querySelectorAll('.sap-modal-bg').forEach(m=>m.addEventListener('click'
 // ---------------- INSTRUMENT DRAWINGS ----------------
 function openDrawingModal(){
   document.getElementById('drwType').value='Load Cell';
-  document.getElementById('drwInstId').value='';
+  document.getElementById('drwLocation').value='';
+  document.getElementById('drwNumber').value='';
+  document.getElementById('drwDrawingType').value='General Arrangement (GA)';
   document.getElementById('drwTitle').value='';
   document.getElementById('drwNotes').value='';
   pendingDrwFile=null;
@@ -6408,17 +6868,19 @@ function onDrwFilePicked(input){
 }
 async function saveDrawing(){
   const instType=document.getElementById('drwType').value;
-  const instId=document.getElementById('drwInstId').value.trim();
+  const location=document.getElementById('drwLocation').value.trim();
+  const drawingNumber=document.getElementById('drwNumber').value.trim();
+  const drawingType=document.getElementById('drwDrawingType').value;
   const title=document.getElementById('drwTitle').value.trim();
   const notes=document.getElementById('drwNotes').value.trim();
-  if(!instId){ showToast('⚠ Enter Instrument ID', 3000, 'warn'); return; }
+  if(!location){ showToast('⚠ Enter Location', 3000, 'warn'); return; }
   if(!pendingDrwFile){ showToast('⚠ Choose a drawing file to upload', 3000, 'warn'); return; }
   const btn=document.getElementById('drwSaveBtn');
   const origTxt=btn.textContent; btn.textContent='Uploading…'; btn.disabled=true;
   try{
     const up = await fbUploadFile(pendingDrwFile, 'drawings');
     drawingsData.push({
-      id: genId(), instType, instId, title: title||up.fileName,
+      id: genId(), instType, location, drawingNumber, drawingType, title: title||up.fileName,
       fileName: up.fileName, fileUrl: up.url, storagePath: up.path, fileType: up.fileType,
       notes, uploadedBy: currentUser?currentUser.name:'unknown', uploadedAt: Date.now()
     });
@@ -6447,7 +6909,7 @@ function renderDrawings(){
   const q=(document.getElementById('drwSearch').value||'').toLowerCase();
   let list=drawingsData.filter(d=>{
     if(typeFilter!=='all' && d.instType!==typeFilter) return false;
-    if(q && !((d.instId||'').toLowerCase().includes(q) || (d.title||'').toLowerCase().includes(q) || (d.fileName||'').toLowerCase().includes(q))) return false;
+    if(q && !((d.location||'').toLowerCase().includes(q) || (d.drawingNumber||'').toLowerCase().includes(q) || (d.title||'').toLowerCase().includes(q) || (d.fileName||'').toLowerCase().includes(q))) return false;
     return true;
   }).sort((a,b)=>b.uploadedAt-a.uploadedAt);
   document.getElementById('drwCount').textContent=`${list.length} drawing${list.length!==1?'s':''}`;
@@ -6457,7 +6919,8 @@ function renderDrawings(){
       <div class="sap-drawing-thumb">${isImageFile(d)?`<img src="${d.fileUrl}" alt="${escHtml(d.title)}"/>`:`<svg viewBox="0 0 24 24"><path d="M4 2h11l5 5v15H4V2z"/><path d="M14 2v6h6"/></svg>`}</div>
       <div class="sap-drawing-body">
         <div class="sap-drawing-name" title="${escHtml(d.title)}">${escHtml(d.title)}</div>
-        <div class="sap-drawing-meta">${escHtml(d.instType)} · ${escHtml(d.instId)}</div>
+        <div class="sap-drawing-meta">${escHtml(d.instType)}${d.drawingType?' · '+escHtml(d.drawingType):''}</div>
+        <div class="sap-drawing-meta">${d.drawingNumber?'No. '+escHtml(d.drawingNumber)+' · ':''}${escHtml(d.location||'')}</div>
         <div class="sap-drawing-meta">${fmtDT(d.uploadedAt)}</div>
       </div>
       <div class="sap-drawing-actions">
@@ -6483,7 +6946,11 @@ function stockFor(instType,instId){
 function openMaterialModal(){
   document.getElementById('matMasterType').value='Load Cell';
   document.getElementById('matMasterInstId').value='';
+  document.getElementById('matMasterPR').value='';
+  document.getElementById('matMasterOrderQty').value='';
   document.getElementById('matMasterUnit').value='Nos';
+  document.getElementById('matMasterDelivDate').value='';
+  document.getElementById('matMasterSite').value='';
   document.getElementById('matMasterReceived').value='';
   document.getElementById('matMasterInstalled').value='';
   document.getElementById('matMasterNotes').value='';
@@ -6492,15 +6959,19 @@ function openMaterialModal(){
 function saveMaterial(){
   const instType=document.getElementById('matMasterType').value;
   const instId=document.getElementById('matMasterInstId').value.trim();
+  const materialPR=document.getElementById('matMasterPR').value.trim();
+  const orderQty=+document.getElementById('matMasterOrderQty').value||0;
   const unit=document.getElementById('matMasterUnit').value;
+  const deliveryDate=document.getElementById('matMasterDelivDate').value||'';
+  const site=document.getElementById('matMasterSite').value.trim();
   const openRecv=+document.getElementById('matMasterReceived').value||0;
   const openInst=+document.getElementById('matMasterInstalled').value||0;
   const notes=document.getElementById('matMasterNotes').value.trim();
   if(!instId){ showToast('⚠ Enter Instrument ID', 3000, 'warn'); return; }
   if(materialsData.some(m=>m.instType===instType && m.instId===instId)){ showToast('⚠ This material already exists', 3000, 'warn'); return; }
-  materialsData.push({ id:genId(), instType, instId, unit, notes, createdAt:Date.now() });
-  if(openRecv>0) inventoryTxns.push({ id:genId(), instType, instId, type:'RECEIVED', qty:openRecv, date:todayStr(), refDoc:'', remarks:'Opening balance', doneBy:currentUser?currentUser.name:'unknown', createdAt:Date.now() });
-  if(openInst>0) inventoryTxns.push({ id:genId(), instType, instId, type:'INSTALLED', qty:openInst, date:todayStr(), refDoc:'', remarks:'Opening balance', doneBy:currentUser?currentUser.name:'unknown', createdAt:Date.now() });
+  materialsData.push({ id:genId(), instType, instId, materialPR, orderQty, unit, deliveryDate, site, notes, createdAt:Date.now() });
+  if(openRecv>0) inventoryTxns.push({ id:genId(), instType, instId, type:'RECEIVED', qty:openRecv, date:todayStr(), refDoc:materialPR, remarks:'Opening balance', doneBy:currentUser?currentUser.name:'unknown', createdAt:Date.now() });
+  if(openInst>0) inventoryTxns.push({ id:genId(), instType, instId, type:'INSTALLED', qty:openInst, date:todayStr(), refDoc:materialPR, remarks:'Opening balance', doneBy:currentUser?currentUser.name:'unknown', createdAt:Date.now() });
   saveToStorage();
   renderInventoryAll();
   closeSapModal('matMasterModal');
@@ -6527,6 +6998,8 @@ function renderInventoryStock(){
     const low = s.balance<=0;
     return `<tr>
       <td>${escHtml(m.instType)}</td><td>${escHtml(m.instId)}</td>
+      <td>${escHtml(m.materialPR||'—')}</td><td>${m.orderQty||0}</td>
+      <td>${m.deliveryDate||'—'}</td><td>${escHtml(m.site||'—')}</td>
       <td>${s.received}</td><td>${s.installed}</td>
       <td><span class="sap-badge ${low?'r':'g'}">${s.balance}</span></td>
       <td>${escHtml(m.unit)}</td>
@@ -6686,6 +7159,51 @@ function renderIndents(){
   const badge=document.getElementById('inventoryNavBadge');
   const openCount=indentData.filter(d=>d.status!=='Received'&&d.status!=='Closed').length;
   if(badge){ if(openCount){ badge.style.display='inline-block'; badge.textContent=openCount; } else badge.style.display='none'; }
+}
+
+// ---------------- SEED: PR 21010350 (Gandikota, Venkat Ramana Store@RPPL) ----------------
+// One-time seed from the photographed SAP ZPR1 Material PR screenshot.
+// Guarded so it only ever adds each line once, even if initApp runs
+// again on a later visit — never overwrites or duplicates.
+function seedPR21010350(){
+  const PR_NO='21010350';
+  const materials=[
+    {instType:'Rock Bolt', instId:'Rock Bolt Load Cell 50T (dia 25mm)', unit:'Nos'},
+    {instType:'Load Cell', instId:'Rib Load Cell -120TON',              unit:'Nos'},
+    {instType:'Other',     instId:'Crack Meter',                        unit:'Nos'},
+    {instType:'CVT',       instId:'Optical Target (Deformation)',       unit:'Nos'},
+    {instType:'Other',     instId:'Brown Tape 2"',                      unit:'Nos'},
+    {instType:'Other',     instId:'Straight Drill Bit 3mm',             unit:'Nos'},
+    {instType:'Other',     instId:'Rubber Hammer',                      unit:'Nos'},
+  ];
+  const indents=[
+    {instType:'Rock Bolt', instId:'Rock Bolt Load Cell 50T (dia 25mm)', qty:6,   notes:'In-Tunnel, TRT-Adit'},
+    {instType:'Load Cell', instId:'Rib Load Cell -120TON',              qty:1,   notes:''},
+    {instType:'Other',     instId:'Crack Meter',                        qty:3,   notes:''},
+    {instType:'CVT',       instId:'Optical Target (Deformation)',       qty:100, notes:''},
+    {instType:'Other',     instId:'Brown Tape 2"',                      qty:18,  notes:''},
+    {instType:'Other',     instId:'Straight Drill Bit 3mm',             qty:2,   notes:''},
+    {instType:'Other',     instId:'Rubber Hammer',                      qty:1,   notes:''},
+  ];
+  let changed=false;
+  materials.forEach(m=>{
+    if(!materialsData.some(x=>x.instType===m.instType && x.instId===m.instId)){
+      materialsData.push({ id:genId(), instType:m.instType, instId:m.instId, unit:m.unit, notes:`PR ${PR_NO}`, createdAt:Date.now() });
+      changed=true;
+    }
+  });
+  indents.forEach(d=>{
+    if(!indentData.some(x=>x.indentNo===PR_NO && x.instType===d.instType && x.instId===d.instId)){
+      indentData.push({
+        id:genId(), indentNo:PR_NO, date:'2026-02-02', instType:d.instType, instId:d.instId,
+        qty:d.qty, status:'Pending',
+        fileName:'', fileUrl:'', storagePath:'',
+        notes:d.notes||'PR Raised — Not yet PO done', createdBy:'seed', createdAt:Date.now()
+      });
+      changed=true;
+    }
+  });
+  if(changed) saveToStorage();
 }
 
 // ---------------- SHARED: TABS + KPIs ----------------
@@ -7003,12 +7521,32 @@ window.addEventListener('load',()=>{
     <div class="sap-form-grid">
       <div class="sap-fg"><label class="sap-fl">Instrument Type</label>
         <select class="sap-fs" id="drwType">
-          <option>Load Cell</option><option>Strain Gauge</option><option>Inclinometer</option>
-          <option>CVT</option><option>MAT</option><option>TRT</option><option>Rock Bolt</option>
-          <option>Piezometer</option><option>Extensometer</option><option>Other</option>
+          <option>Load Cell</option><option>Rock Bolt Load Cell</option><option>Rib Load Cell</option>
+          <option>Strain Gauge</option><option>Inclinometer</option><option>MPBX</option>
+          <option>CVT</option><option>Optical Target</option><option>Crack Meter</option>
+          <option>MAT</option><option>TRT</option><option>Rock Bolt</option>
+          <option>Piezometer</option><option>Extensometer</option><option>Data Logger</option>
+          <option>Convergence Pin</option><option>Consumables/Tools</option><option>Other</option>
         </select>
       </div>
-      <div class="sap-fg"><label class="sap-fl">Instrument ID</label><input class="sap-fi" id="drwInstId" placeholder="e.g. MAT-LHS (4421)"/></div>
+      <div class="sap-fg"><label class="sap-fl">Location</label><input class="sap-fi" id="drwLocation" placeholder="e.g. TRT-Adit, In-Tunnel Ch 250m"/></div>
+      <div class="sap-fg"><label class="sap-fl">Drawing Number</label><input class="sap-fi" id="drwNumber" placeholder="e.g. GKPSP-INS-DWG-014"/></div>
+      <div class="sap-fg"><label class="sap-fl">Type of Drawing</label>
+        <select class="sap-fs" id="drwDrawingType">
+          <option>General Arrangement (GA)</option>
+          <option>Fabrication Drawing</option>
+          <option>Installation Drawing</option>
+          <option>Shop Drawing</option>
+          <option>Detail Drawing</option>
+          <option>Layout Drawing</option>
+          <option>Sensor Location Plan</option>
+          <option>Wiring / Schematic Diagram</option>
+          <option>As-Built Drawing</option>
+          <option>Calibration Certificate</option>
+          <option>Datasheet</option>
+          <option>Other</option>
+        </select>
+      </div>
       <div class="sap-fg" style="grid-column:1/-1"><label class="sap-fl">Drawing Title</label><input class="sap-fi" id="drwTitle" placeholder="e.g. Load Cell Fabrication Drawing Rev-2"/></div>
       <div class="sap-fg" style="grid-column:1/-1">
         <label class="sap-fl">Drawing File (PDF / Image)</label>
@@ -7036,15 +7574,22 @@ window.addEventListener('load',()=>{
     <div class="sap-form-grid">
       <div class="sap-fg"><label class="sap-fl">Instrument Type</label>
         <select class="sap-fs" id="matMasterType">
-          <option>Load Cell</option><option>Strain Gauge</option><option>Inclinometer</option>
-          <option>CVT</option><option>MAT</option><option>TRT</option><option>Rock Bolt</option>
-          <option>Piezometer</option><option>Extensometer</option><option>Other</option>
+          <option>Load Cell</option><option>Rock Bolt Load Cell</option><option>Rib Load Cell</option>
+          <option>Strain Gauge</option><option>Inclinometer</option><option>MPBX</option>
+          <option>CVT</option><option>Optical Target</option><option>Crack Meter</option>
+          <option>MAT</option><option>TRT</option><option>Rock Bolt</option>
+          <option>Piezometer</option><option>Extensometer</option><option>Data Logger</option>
+          <option>Convergence Pin</option><option>Consumables/Tools</option><option>Other</option>
         </select>
       </div>
       <div class="sap-fg"><label class="sap-fl">Instrument ID</label><input class="sap-fi" id="matMasterInstId" placeholder="e.g. RB-08"/></div>
+      <div class="sap-fg"><label class="sap-fl">Material PR No.</label><input class="sap-fi" id="matMasterPR" placeholder="e.g. 21010350"/></div>
+      <div class="sap-fg"><label class="sap-fl">Order Quantity</label><input class="sap-fi" type="number" min="0" id="matMasterOrderQty" placeholder="0"/></div>
       <div class="sap-fg"><label class="sap-fl">Unit</label>
-        <select class="sap-fs" id="matMasterUnit"><option>Nos</option><option>Set</option><option>Mtr</option><option>Roll</option></select>
+        <select class="sap-fs" id="matMasterUnit"><option>Nos</option><option>Set</option><option>PC</option><option>Mtr</option><option>Roll</option><option>Box</option><option>Pair</option><option>Ltr</option><option>Kg</option></select>
       </div>
+      <div class="sap-fg"><label class="sap-fl">Delivery Date</label><input class="sap-fi" type="date" id="matMasterDelivDate"/></div>
+      <div class="sap-fg"><label class="sap-fl">Site Name</label><input class="sap-fi" id="matMasterSite" placeholder="e.g. Gandikota - Main Store"/></div>
       <div class="sap-fg"><label class="sap-fl">Opening Received Qty</label><input class="sap-fi" type="number" min="0" id="matMasterReceived" placeholder="0"/></div>
       <div class="sap-fg"><label class="sap-fl">Opening Installed Qty</label><input class="sap-fi" type="number" min="0" id="matMasterInstalled" placeholder="0"/></div>
       <div class="sap-fg" style="grid-column:1/-1"><label class="sap-fl">Notes</label><textarea class="sap-ta" id="matMasterNotes" placeholder="Optional"></textarea></div>
@@ -7086,9 +7631,12 @@ window.addEventListener('load',()=>{
       <div class="sap-fg"><label class="sap-fl">Date</label><input class="sap-fi" type="date" id="indDate"/></div>
       <div class="sap-fg"><label class="sap-fl">Instrument Type</label>
         <select class="sap-fs" id="indType">
-          <option>Load Cell</option><option>Strain Gauge</option><option>Inclinometer</option>
-          <option>CVT</option><option>MAT</option><option>TRT</option><option>Rock Bolt</option>
-          <option>Piezometer</option><option>Extensometer</option><option>Other</option>
+          <option>Load Cell</option><option>Rock Bolt Load Cell</option><option>Rib Load Cell</option>
+          <option>Strain Gauge</option><option>Inclinometer</option><option>MPBX</option>
+          <option>CVT</option><option>Optical Target</option><option>Crack Meter</option>
+          <option>MAT</option><option>TRT</option><option>Rock Bolt</option>
+          <option>Piezometer</option><option>Extensometer</option><option>Data Logger</option>
+          <option>Convergence Pin</option><option>Consumables/Tools</option><option>Other</option>
         </select>
       </div>
       <div class="sap-fg"><label class="sap-fl">Instrument ID</label><input class="sap-fi" id="indInstId" placeholder="Optional"/></div>
@@ -7128,5 +7676,184 @@ window.addEventListener('load',()=>{
     <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('renameModal')">Cancel</button><button class="btn btn-p" onclick="doRename()">Rename</button></div>
   </div>
 </div>
+<script>
+/* ===== SAP MM MODULE JS (namespaced under mm/MMDB, isolated from main app) ===== */
+// DATABASE SETUP
+let MMDB = JSON.parse(localStorage.getItem('aagims_mm_v1')) || {
+    Materials: [], PR: [], PO: [], GR: [], GI: []
+};
+
+function mmSaveDB() { localStorage.setItem('aagims_mm_v1', JSON.stringify(MMDB)); }
+function mmGenID(prefix) { return `${prefix}-${Date.now()}`; }
+
+// TOAST NOTIFICATION
+function mmShowToast(msg, type = 'success') {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerText = msg;
+    container.appendChild(toast);
+    setTimeout(() => { toast.style.display = 'none'; toast.remove(); }, 3000);
+}
+
+// NAVIGATION
+function mmShowSection(id, btn) {
+    document.querySelectorAll('.content-section').forEach(el => el.classList.add('hidden'));
+    document.getElementById(id).classList.remove('hidden');
+    document.querySelectorAll('.sap-nav-item').forEach(el => el.classList.remove('active'));
+    if(btn) btn.classList.add('active');
+    mmRenderAll();
+}
+
+function mmFillDropdown(id, items, valueKey, textKey, filterStatus = null) {
+    let sel = document.getElementById(id);
+    sel.innerHTML = '<option value="">-- Select --</option>';
+    items.forEach(item => {
+        if (!filterStatus || item.Status === filterStatus) {
+            let opt = document.createElement('option');
+            opt.value = item[valueKey];
+            opt.text = `${item[textKey]} (${item[valueKey]})`;
+            sel.add(opt);
+        }
+    });
+}
+
+// RENDER LOGIC
+function mmRenderAll() {
+    // Inv Table
+    let invHTML = '';
+    if(MMDB.Materials.length === 0) invHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:#999;">No Materials Found</td></tr>';
+    MMDB.Materials.forEach(m => {
+        let stock = m.CurrentStock || 0;
+        let status = stock < m.Min_Stock ? '<span class="sap-status sap-status-low">Low Stock</span>' : '<span class="sap-status sap-status-in">In Stock</span>';
+        invHTML += `<tr><td><strong>${m.Material_Code}</strong></td><td>${m.Short_Text}</td><td>${stock}</td><td>${m.UoM}</td><td>${m.Min_Stock}</td><td>${status}</td></tr>`;
+    });
+    document.getElementById('inv-table').innerHTML = invHTML;
+
+    // Mat Table
+    let matHTML = '';
+    MMDB.Materials.forEach(m => matHTML += `<tr><td><strong>${m.Material_Code}</strong></td><td>${m.Short_Text}</td><td>${m.UoM}</td><td>${m.Min_Stock}</td><td>${m.CurrentStock || 0}</td></tr>`);
+    document.getElementById('mat-table').innerHTML = matHTML;
+
+    // Dropdowns
+    mmFillDropdown('pr-mat', MMDB.Materials, 'Material_Code', 'Short_Text');
+    mmFillDropdown('gi-mat', MMDB.Materials, 'Material_Code', 'Short_Text');
+    mmFillDropdown('po-pr', MMDB.PR, 'PR_Number', 'Material_Code', 'Open');
+    mmFillDropdown('gr-po', MMDB.PO, 'PO_Number', 'Material_Code', 'Open');
+
+    // PR
+    let prHTML = '';
+    MMDB.PR.forEach(p => {
+        let s = p.Status === 'Open' ? '<span class="sap-status sap-status-open">Open</span>' : '<span class="sap-status sap-status-created">PO Created</span>';
+        prHTML += `<tr><td><strong>${p.PR_Number}</strong></td><td>${p.Item}</td><td>${p.Material_Code}</td><td>${p.PR_Qty}</td><td>${p.Delivery_Date}</td><td>${s}</td></tr>`;
+    });
+    document.getElementById('pr-table').innerHTML = prHTML;
+
+    // PO
+    let poHTML = '';
+    MMDB.PO.forEach(p => {
+        let s = p.Status === 'Open' ? '<span class="sap-status sap-status-open">Open</span>' : '<span class="sap-status sap-status-received">Received</span>';
+        poHTML += `<tr><td><strong>${p.PO_Number}</strong></td><td>${p.PR_Number}</td><td>${p.Material_Code}</td><td>${p.PO_Qty}</td><td>${p.Vendor}</td><td>${s}</td></tr>`;
+    });
+    document.getElementById('po-table').innerHTML = poHTML;
+
+    // GR
+    let grHTML = '';
+    MMDB.GR.forEach(g => grHTML += `<tr><td><strong>${g.GR_Number}</strong></td><td>${g.PO_Number}</td><td>${g.Material_Code}</td><td>${g.Recd_Qty}</td><td>${g.Recd_Date}</td></tr>`);
+    document.getElementById('gr-table').innerHTML = grHTML;
+
+    // GI
+    let giHTML = '';
+    MMDB.GI.forEach(g => giHTML += `<tr><td><strong>${g.Usage_ID}</strong></td><td>${g.Material_Code}</td><td>${g.Used_Qty}</td><td>${g.Used_By}</td><td>${g.Usage_Date}</td></tr>`);
+    document.getElementById('gi-table').innerHTML = giHTML;
+}
+
+// CRUD OPERATIONS
+function mmAddMaterial() {
+    let mat = { Material_Code: document.getElementById('mat-code').value, Short_Text: document.getElementById('mat-text').value, UoM: document.getElementById('mat-uom').value, Min_Stock: parseFloat(document.getElementById('mat-min').value), CurrentStock: 0 };
+    if(!mat.Material_Code || !mat.Short_Text) return mmShowToast('Error: Fill all required fields', 'error');
+    MMDB.Materials.push(mat); mmSaveDB(); mmRenderAll(); mmShowToast('Material Saved Successfully');
+    document.getElementById('mat-code').value = ''; document.getElementById('mat-text').value = '';
+}
+
+function mmCreatePR() {
+    let pr = { PR_Number: mmGenID('PR'), Item: document.getElementById('pr-item').value, Material_Code: document.getElementById('pr-mat').value, PR_Qty: parseFloat(document.getElementById('pr-qty').value), Delivery_Date: document.getElementById('pr-date').value, Status: 'Open' };
+    if(!pr.Material_Code) return mmShowToast('Error: Select Material', 'error');
+    MMDB.PR.push(pr); mmSaveDB(); mmRenderAll(); mmShowToast('PR Created: ' + pr.PR_Number);
+}
+
+function mmCreatePO() {
+    let prNum = document.getElementById('po-pr').value;
+    let pr = MMDB.PR.find(p => p.PR_Number === prNum);
+    if(!pr) return mmShowToast('Error: Select PR', 'error');
+    let po = { PO_Number: mmGenID('PO'), PR_Number: prNum, Material_Code: pr.Material_Code, PO_Qty: pr.PR_Qty, Vendor: document.getElementById('po-vendor').value, Status: 'Open' };
+    MMDB.PO.push(po); pr.Status = 'PO Created'; mmSaveDB(); mmRenderAll(); mmShowToast('PO Created: ' + po.PO_Number);
+}
+
+function mmPostGR() {
+    let poNum = document.getElementById('gr-po').value;
+    let po = MMDB.PO.find(p => p.PO_Number === poNum);
+    if(!po) return mmShowToast('Error: Select PO', 'error');
+    let qty = parseFloat(document.getElementById('gr-qty').value);
+    if(qty <= 0) return mmShowToast('Error: Invalid Qty', 'error');
+    let gr = { GR_Number: mmGenID('GR'), PO_Number: poNum, Material_Code: po.Material_Code, Recd_Qty: qty, Recd_Date: new Date().toISOString().split('T')[0] };
+    MMDB.GR.push(gr);
+    let mat = MMDB.Materials.find(m => m.Material_Code === po.Material_Code);
+    if(mat) mat.CurrentStock = (mat.CurrentStock || 0) + qty;
+    if(qty >= po.PO_Qty) po.Status = 'Received';
+    mmSaveDB(); mmRenderAll(); mmShowToast('Goods Receipt Posted!');
+}
+
+function mmPostGI() {
+    let matCode = document.getElementById('gi-mat').value;
+    let qty = parseFloat(document.getElementById('gi-qty').value);
+    let usedBy = document.getElementById('gi-by').value;
+    if(!matCode || qty <= 0 || !usedBy) return mmShowToast('Error: Fill all fields', 'error');
+    let gi = { Usage_ID: mmGenID('GI'), Material_Code: matCode, Used_Qty: qty, Used_By: usedBy, Usage_Date: new Date().toISOString().split('T')[0] };
+    MMDB.GI.push(gi);
+    let mat = MMDB.Materials.find(m => m.Material_Code === matCode);
+    if(mat) mat.CurrentStock = (mat.CurrentStock || 0) - qty;
+    mmSaveDB(); mmRenderAll(); mmShowToast('Goods Issue Posted!', 'warning');
+}
+
+// CSV LOGIC
+function mmExportCSV() {
+    let tableName = document.getElementById('csv-table').value;
+    let data = MMDB[tableName];
+    if(data.length === 0) return mmShowToast('No data to export', 'error');
+    let keys = Object.keys(data[0]);
+    let csv = keys.join(',') + '\n';
+    data.forEach(row => { csv += keys.map(k => row[k]).join(',') + '\n'; });
+    let blob = new Blob([csv], { type: 'text/csv' });
+    let link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `${tableName}_export.csv`;
+    link.click();
+    mmShowToast('CSV Downloaded');
+}
+
+function mmImportCSV() {
+    let tableName = document.getElementById('csv-table').value;
+    let file = document.getElementById('csv-file').files[0];
+    if(!file) return mmShowToast('Select a file', 'error');
+    let reader = new FileReader();
+    reader.onload = function(e) {
+        let text = e.target.result;
+        let lines = text.split('\n').filter(l => l.trim() !== '');
+        let keys = lines[0].split(',');
+        for(let i=1; i<lines.length; i++) {
+            let values = lines[i].split(',');
+            let obj = {};
+            keys.forEach((k, idx) => obj[k.trim()] = values[idx].trim());
+            MMDB[tableName].push(obj);
+        }
+        mmSaveDB(); mmRenderAll(); mmShowToast('CSV Imported Successfully');
+    }
+    reader.readAsText(file);
+}
+
+// INITIATE APP
+mmRenderAll();
+</script>
 </body>
 </html>
