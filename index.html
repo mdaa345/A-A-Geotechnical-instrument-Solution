@@ -6627,7 +6627,7 @@ function addBenchTargetRow(prefill){
   row.className='bench-target-row';
   row.style.cssText='display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-bottom:6px';
   row.innerHTML=`
-    <input class="sap-fi bench-t-id" placeholder="Target ID (e.g. SOP-4)" value="${prefill?escHtml(prefill.id):''}"/>
+    <input class="sap-fi bench-t-id" placeholder="Target ID (e.g. SOP-4)" value="${prefill?escHtml(prefill.id):''}" oninput="refreshBenchPairTargetOptions()"/>
     <input class="sap-fi bench-t-e" type="number" step="any" placeholder="Easting" value="${prefill?prefill.easting:''}"/>
     <input class="sap-fi bench-t-n" type="number" step="any" placeholder="Northing" value="${prefill?prefill.northing:''}"/>
     <input class="sap-fi bench-t-el" type="number" step="any" placeholder="Elevation" value="${prefill?prefill.elevation:''}"/>`;
@@ -6654,6 +6654,10 @@ function refreshBenchPairTargetOptions(){
 function addBenchPairRow(prefill){
   const wrap=document.getElementById('benchPairRows');
   const ids=currentBenchTargetIds();
+  if(ids.length<2 && !prefill){
+    showToast('⚠ Name at least 2 targets first, then add a pair', 3500, 'warn');
+    return;
+  }
   const row=document.createElement('div');
   row.className='bench-pair-row';
   row.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px';
@@ -6703,7 +6707,10 @@ function openBenchSetupModal(editMode){
     document.getElementById('benchAlignment').value='';
     for(let i=0;i<5;i++) addBenchTargetRow();
     refreshBenchPairTargetOptions();
-    addBenchPairRow();
+    // NOTE: no auto-added pair row here — target ID fields start blank in
+    // New Bench mode, so a pair row created right now would get an empty
+    // dropdown with nothing to select. The user adds pairs via "+ Add Pair"
+    // once they've named their targets, when real options actually exist.
     document.getElementById('benchThWarnPos').value=15;
     document.getElementById('benchThAlarmPos').value=25;
     document.getElementById('benchThWarnNeg').value=-15;
