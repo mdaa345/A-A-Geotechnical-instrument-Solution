@@ -1160,6 +1160,10 @@ canvas{display:block}
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="2" y="6" width="12" height="4" rx="1"/><line x1="4" y1="4" x2="4" y2="6"/><line x1="8" y1="3" x2="8" y2="6"/><line x1="12" y1="4" x2="12" y2="6"/><line x1="4" y1="10" x2="4" y2="12"/><line x1="8" y1="10" x2="8" y2="13"/><line x1="12" y1="10" x2="12" y2="12"/></svg>
       MAT Monitor
     </div>
+    <div class="ni" onclick="switchView('bench3d',this)">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="4" cy="4" r="1.6"/><circle cx="12" cy="4" r="1.6"/><circle cx="8" cy="12" r="1.6"/><line x1="4" y1="4" x2="12" y2="4"/><line x1="4" y1="4" x2="8" y2="12"/><line x1="12" y1="4" x2="8" y2="12"/></svg>
+      Bench Convergence (3D)
+    </div>
     <div class="ni" onclick="switchView('trt',this)">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M2 14 Q2 4 8 2 Q14 4 14 14"/><line x1="5" y1="8" x2="11" y2="8"/><line x1="4" y1="11" x2="12" y2="11"/></svg>
       TRT Monitor
@@ -1561,6 +1565,114 @@ canvas{display:block}
             <thead><tr><th>Date</th><th>Month</th><th>Instrument ID</th><th>Position</th><th>RD (m)</th><th>CH-1 (T)</th><th>CH-2 (T)</th><th>CH-3 (T)</th><th>Avg (T)</th><th>Status</th><th>Notes</th><th class="no-print">Actions</th></tr></thead>
             <tbody id="matTbody"></tbody>
           </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== BENCH CONVERGENCE (3D SURVEY) ===== -->
+    <div id="view-bench3d" class="view">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <div>
+          <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--txt)">Bench Convergence (3D Survey)</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--txt3);margin-top:2px">Total-station target monitoring — settlement &amp; pairwise convergence</div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+          <select class="fs" id="benchSelect" onchange="renderBench3D()" style="padding:5px 8px;font-size:10px;min-width:180px"></select>
+          <button class="btn btn-ghost no-print" onclick="openBenchSetupModal()">+ New Bench</button>
+          <button class="btn btn-ghost no-print" onclick="openBenchSetupModal(true)">Edit Bench</button>
+          <button class="btn btn-ghost no-print" onclick="openBenchReadingModal()">+ Add Reading</button>
+        </div>
+      </div>
+      <div id="benchEmptyState" style="display:none;padding:30px;text-align:center;color:var(--txt3);font-family:var(--mono);font-size:11px">
+        No Bench set up yet — click "+ New Bench" to define targets, alignment and thresholds (like MAT_Bench-241).
+      </div>
+      <div id="benchContent">
+        <div class="g2" style="margin-bottom:14px">
+          <div class="panel">
+            <div class="ph"><span class="pt">Convergence Trend (per target pair)</span><span class="ptag" style="background:rgba(96,165,250,.12);color:var(--info)">mm</span></div>
+            <div class="pb"><div class="ch" style="height:220px"><canvas id="benchConvChart"></canvas></div></div>
+          </div>
+          <div class="panel">
+            <div class="ph"><span class="pt">Per-Target Displacement (D)</span><span class="ptag" style="background:rgba(96,165,250,.12);color:var(--info)">mm</span></div>
+            <div class="pb"><div class="ch" style="height:220px"><canvas id="benchTargetChart"></canvas></div></div>
+          </div>
+        </div>
+        <div class="panel" style="margin-bottom:14px">
+          <div class="ph">
+            <span class="pt">Convergence Log — per target pair</span>
+            <span class="ptag i" id="benchConvRowCount">0 Entries</span>
+          </div>
+          <div class="pb" style="padding:0;overflow-x:auto">
+            <table class="tbl"><thead id="benchConvThead"></thead><tbody id="benchConvTbody"></tbody></table>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="ph">
+            <span class="pt">Target Displacement Log</span>
+            <span class="ptag i" id="benchTargetRowCount">0 Entries</span>
+          </div>
+          <div class="pb" style="padding:0;overflow-x:auto">
+            <table class="tbl"><thead id="benchTargetThead"></thead><tbody id="benchTargetTbody"></tbody></table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bench Setup Modal -->
+    <div class="sap-modal-bg" id="benchSetupModal">
+      <div class="sap-modal" style="max-width:640px">
+        <div class="sap-modal-title"><span id="benchSetupTitle">New Bench</span><button class="sap-modal-close" onclick="closeSapModal('benchSetupModal')">×</button></div>
+        <div class="sap-modal-body">
+          <div class="sap-fg"><label class="sap-fl">Bench Name</label><input class="sap-fi" id="benchName" placeholder="e.g. MAT_Bench-241"/></div>
+          <div class="sap-fg"><label class="sap-fl">Location</label><input class="sap-fi" id="benchLocation" placeholder="e.g. MAT / TRT-Adit"/></div>
+          <div class="sap-fg"><label class="sap-fl">Elevation (EL)</label><input class="sap-fi" id="benchElevation" placeholder="e.g. 241m"/></div>
+          <div class="sap-fg"><label class="sap-fl">Alignment (deg)</label><input class="sap-fi" type="number" step="0.001" id="benchAlignment" placeholder="e.g. 338"/></div>
+          <div style="grid-column:1/-1;font-family:var(--mono);font-size:10.5px;color:var(--txt3);margin-top:6px;border-top:1px solid var(--border);padding-top:8px">
+            TARGETS (baseline Easting / Northing / Elevation) — 3 to 5 targets
+          </div>
+          <div style="grid-column:1/-1" id="benchTargetRows"></div>
+          <div style="grid-column:1/-1;display:flex;gap:6px">
+            <button class="btn btn-ghost no-print" onclick="addBenchTargetRow()">+ Add Target</button>
+            <button class="btn btn-ghost no-print" onclick="removeBenchTargetRow()">− Remove Last</button>
+          </div>
+          <div style="grid-column:1/-1;font-family:var(--mono);font-size:10.5px;color:var(--txt3);margin-top:10px;border-top:1px solid var(--border);padding-top:8px">
+            TARGET PAIRS TO MONITOR (convergence between these)
+          </div>
+          <div style="grid-column:1/-1" id="benchPairRows"></div>
+          <div style="grid-column:1/-1;display:flex;gap:6px">
+            <button class="btn btn-ghost no-print" onclick="addBenchPairRow()">+ Add Pair</button>
+            <button class="btn btn-ghost no-print" onclick="removeBenchPairRow()">− Remove Last</button>
+          </div>
+          <div style="grid-column:1/-1;font-family:var(--mono);font-size:10.5px;color:var(--txt3);margin-top:10px;border-top:1px solid var(--border);padding-top:8px">
+            THRESHOLDS (mm) — defaults match standard MAT convergence criteria
+          </div>
+          <div class="sap-fg"><label class="sap-fl">Warning (+)</label><input class="sap-fi" type="number" id="benchThWarnPos" value="15"/></div>
+          <div class="sap-fg"><label class="sap-fl">Alarm (+)</label><input class="sap-fi" type="number" id="benchThAlarmPos" value="25"/></div>
+          <div class="sap-fg"><label class="sap-fl">Warning (−)</label><input class="sap-fi" type="number" id="benchThWarnNeg" value="-15"/></div>
+          <div class="sap-fg"><label class="sap-fl">Action (−)</label><input class="sap-fi" type="number" id="benchThAction" value="-32"/></div>
+        </div>
+        <div class="sap-modal-foot">
+          <button class="sap-btn" onclick="closeSapModal('benchSetupModal')">Cancel</button>
+          <button class="sap-btn sap-btn-primary" id="benchSetupSaveBtn" onclick="saveBenchSetup()">Save Bench</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bench Add Reading Modal -->
+    <div class="sap-modal-bg" id="benchReadingModal">
+      <div class="sap-modal" style="max-width:560px">
+        <div class="sap-modal-title"><span>Add Bench Reading — <span id="benchReadingBenchLabel" style="color:var(--sap-blue)"></span></span><button class="sap-modal-close" onclick="closeSapModal('benchReadingModal')">×</button></div>
+        <div class="sap-modal-body">
+          <div class="sap-fg"><label class="sap-fl">Date</label><input class="sap-fi" type="date" id="benchReadDate"/></div>
+          <div style="grid-column:1/-1;font-family:var(--mono);font-size:10.5px;color:var(--txt3);margin-top:6px;border-top:1px solid var(--border);padding-top:8px">
+            CURRENT TARGET COORDINATES (Easting / Northing / Elevation)
+          </div>
+          <div style="grid-column:1/-1" id="benchReadTargetRows"></div>
+          <div class="sap-fg" style="grid-column:1/-1"><label class="sap-fl">Notes</label><textarea class="sap-ta" id="benchReadNotes" placeholder="Optional"></textarea></div>
+        </div>
+        <div class="sap-modal-foot">
+          <button class="sap-btn" onclick="closeSapModal('benchReadingModal')">Cancel</button>
+          <button class="sap-btn sap-btn-primary" onclick="saveBenchReading()">Save Reading</button>
         </div>
       </div>
     </div>
@@ -2572,6 +2684,7 @@ function persistUsers(){
 migratePlaintextPasswords();
 let currentUser = null;
 let lcData = [], sgData = [], incData = [], cvtData = [], matData = [], trtData = [], rbData = [];
+let benchDefs = [], benchReadings = [];
 let drawingsData = [], materialsData = [], inventoryTxns = [], indentData = [];
 let pendingDrwFile = null, pendingIndFile = null;
 let customMonths = {cvt:[], mat:[], trt:[], comb:[]};
@@ -2945,6 +3058,8 @@ function saveToStorage(){
     localStorage.setItem(LS_KEYS.inventoryTxns, JSON.stringify(inventoryTxns));
     localStorage.setItem(LS_KEYS.indentData,    JSON.stringify(indentData));
     localStorage.setItem('gims_kimiSessions',   JSON.stringify(KIMI_REAL_DATA.sessions));
+    localStorage.setItem('gims_benchDefs',      JSON.stringify(benchDefs));
+    localStorage.setItem('gims_benchReadings',  JSON.stringify(benchReadings));
     // Mark that localStorage has real user data (prevents sample-data fallback on next load)
     localStorage.setItem('aageo_hasUserData', '1');
   } catch(e){ console.warn('localStorage save failed:', e); }
@@ -2973,6 +3088,7 @@ function saveToStorage(){
       matData, trtData, customMonths, rbData,
       drawingsData, materialsData, inventoryTxns, indentData,
       kimiSessions: KIMI_REAL_DATA.sessions,
+      benchDefs, benchReadings,
       mm: (typeof MMDB!=='undefined') ? MMDB : undefined,
       users: USERS,
       activityLog: activityLog,
@@ -3094,6 +3210,8 @@ window.addEventListener('beforeunload', ()=>{
     localStorage.setItem(LS_KEYS.inventoryTxns, JSON.stringify(inventoryTxns));
     localStorage.setItem(LS_KEYS.indentData,    JSON.stringify(indentData));
     localStorage.setItem('gims_kimiSessions',   JSON.stringify(KIMI_REAL_DATA.sessions));
+    localStorage.setItem('gims_benchDefs',      JSON.stringify(benchDefs));
+    localStorage.setItem('gims_benchReadings',  JSON.stringify(benchReadings));
     if(typeof MMDB!=='undefined') localStorage.setItem('aagims_mm_v1', JSON.stringify(MMDB));
     localStorage.setItem('aageo_hasUserData', '1');
   } catch(e){ /* silent — browser is closing */ }
@@ -3994,6 +4112,8 @@ function applyDataSnapshot(snap, opts){
       if(Array.isArray(snap.mm[k])) MMDB[k] = snap.mm[k];
     });
   }
+  if(Array.isArray(snap.benchDefs)) benchDefs = snap.benchDefs;
+  if(Array.isArray(snap.benchReadings)) benchReadings = snap.benchReadings;
 
   if(opts.rerender){
     renderLCTable();renderLCCharts();
@@ -4011,6 +4131,7 @@ function applyDataSnapshot(snap, opts){
     if(typeof renderDrawings==='function') renderDrawings();
     if(typeof renderInventoryAll==='function') renderInventoryAll();
     if(typeof mmRenderAll==='function') mmRenderAll();
+    if(typeof renderBench3D==='function') renderBench3D();
   }
 }
 
@@ -4037,6 +4158,8 @@ async function loadFromStorage(){
     const ind   = localStorage.getItem(LS_KEYS.indentData);
     const kimiSess = localStorage.getItem('gims_kimiSessions');
     const mmLS = localStorage.getItem('aagims_mm_v1');
+    const benchDefsLS = localStorage.getItem('gims_benchDefs');
+    const benchReadingsLS = localStorage.getItem('gims_benchReadings');
 
     if(kimiSess){
       try{
@@ -4061,6 +4184,8 @@ async function loadFromStorage(){
       inventoryTxns: itx    ? JSON.parse(itx)    : undefined,
       indentData:    ind    ? JSON.parse(ind)    : undefined,
       mm:            mmLS   ? JSON.parse(mmLS)   : undefined,
+      benchDefs:     benchDefsLS ? JSON.parse(benchDefsLS) : undefined,
+      benchReadings: benchReadingsLS ? JSON.parse(benchReadingsLS) : undefined,
     }, {rerender: false});
 
   } catch(e){ console.warn('localStorage load failed:', e); }
@@ -4150,6 +4275,8 @@ function _mirrorToLocalStorage(){
     localStorage.setItem(LS_KEYS.inventoryTxns, JSON.stringify(inventoryTxns));
     localStorage.setItem(LS_KEYS.indentData,    JSON.stringify(indentData));
     localStorage.setItem('gims_kimiSessions',   JSON.stringify(KIMI_REAL_DATA.sessions));
+    localStorage.setItem('gims_benchDefs',      JSON.stringify(benchDefs));
+    localStorage.setItem('gims_benchReadings',  JSON.stringify(benchReadings));
     if(typeof MMDB!=='undefined') localStorage.setItem('aagims_mm_v1', JSON.stringify(MMDB));
     localStorage.setItem('aageo_hasUserData',   '1');
   } catch(e){ console.warn('localStorage mirror failed:', e); }
@@ -4444,7 +4571,7 @@ function startClock(){
 // ================================================================
 // NAVIGATION
 // ================================================================
-const viewMeta={overview:'Dashboard Overview',loadcell:'Load Cell Monitoring',strain:'Strain Gauge Monitoring',inclinometer:'Inclinometer Monitoring','kimi-inc':'Kimi Inclinometer System',cvt:'Convergence (CVT) Monitoring',mat:'MAT Monitoring',trt:'TRT Monitoring',rockbolt:'Rock Bolt Load Cell',combinedlog:'Combined Reading Log',dataentry:'Manual Data Entry',reports:'Reports & Export',bulkupload:'Bulk Data Upload',threshold:'Threshold Matrix',crosssection:'Cross-Section Comparison',drawings:'Instrument Drawings',inventory:'Inventory & Indent Management',mm:'Material Management (SAP MM)',aiinsights:'AI Anomaly & Trend Insights',askgkpsp:'Ask-GKPSP Assistant',syshealth:'System Health & Auto-Recovery'};
+const viewMeta={overview:'Dashboard Overview',loadcell:'Load Cell Monitoring',strain:'Strain Gauge Monitoring',inclinometer:'Inclinometer Monitoring','kimi-inc':'Kimi Inclinometer System',cvt:'Convergence (CVT) Monitoring',mat:'MAT Monitoring',bench3d:'Bench Convergence (3D Survey)',trt:'TRT Monitoring',rockbolt:'Rock Bolt Load Cell',combinedlog:'Combined Reading Log',dataentry:'Manual Data Entry',reports:'Reports & Export',bulkupload:'Bulk Data Upload',threshold:'Threshold Matrix',crosssection:'Cross-Section Comparison',drawings:'Instrument Drawings',inventory:'Inventory & Indent Management',mm:'Material Management (SAP MM)',aiinsights:'AI Anomaly & Trend Insights',askgkpsp:'Ask-GKPSP Assistant',syshealth:'System Health & Auto-Recovery'};
 function switchView(id,el){
   if(ADMIN_ONLY_VIEWS.includes(id) && !isAdmin()){
     showToast('⚠ Yeh section sirf Admin ke liye hai.', 3500, 'warn');
@@ -4473,6 +4600,7 @@ function switchView(id,el){
     if(id==='drawings')renderDrawings();
     if(id==='inventory')renderInventoryAll();
     if(id==='mm')mmRenderAll();
+    if(id==='bench3d')renderBench3D();
     if(id==='aiinsights')initAIInsights();
     if(id==='syshealth')initSysHealth();
   },50);
@@ -6341,6 +6469,350 @@ function renderMATCharts(){
   mkChart('matTrendChart',{type:'line',data:{labels:allDates,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#64748b',font:{family:'Space Mono',size:9},boxWidth:10}}},scales:{y:{min:0,max:10,ticks:{color:'#64748b',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'},title:{display:true,text:'Avg Load (Ton)',color:'#334155'}},x:{ticks:{color:'#334155',font:{family:'Space Mono',size:8},maxRotation:45},grid:{display:false}}}}});
   const latestVals=insts.map(inst=>{const rows=matData.filter(r=>r.instId===inst);return rows.length?rows.sort((a,b)=>b.date.localeCompare(a.date))[0].avg:0;});
   mkChart('matBarChart',{type:'bar',data:{labels:insts,datasets:[{label:'Latest Avg (Ton)',data:latestVals,backgroundColor:latestVals.map((v,i)=>colors[i%colors.length]+'99'),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:10,ticks:{color:'#64748b',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.5)'}},x:{ticks:{color:'#64748b',font:{family:'Space Mono',size:9}},grid:{display:false}}}}});
+}
+
+// ================================================================
+// BENCH CONVERGENCE (3D SURVEY) — mirrors the MAT_Bench-241.xlsm
+// "Raw"/"Comp" sheet methodology exactly:
+//   diff (mm) = (current - baseline) * 1000 for Easting/Northing/Elevation
+//   rotated x = dx*cos(theta) - dy*sin(theta); y = dx*sin(theta) + dy*cos(theta)
+//   per-target D = sqrt(x^2 + dz^2)
+//   pair distance = sqrt((Ea-Eb)^2 + (Na-Nb)^2 + (Ela-Elb)^2)  [current 3D coords]
+//   pair convergence (mm) = (distance_today - distance_baseline) * 1000
+// ================================================================
+let benchTargetRowCount = 5, benchPairRowCount = 1, benchEditingId = null;
+
+function benchAlignRad(bench){ return (bench.alignmentDeg||0) * Math.PI/180; }
+
+// Sorted readings for a bench, oldest first — the first one is the baseline.
+function benchSortedReadings(benchId){
+  return benchReadings.filter(r=>r.benchId===benchId).slice().sort((a,b)=>a.date.localeCompare(b.date));
+}
+
+// Per-target diff/rotation/D for every reading of a bench.
+function benchComputeTargetSeries(bench){
+  const readings = benchSortedReadings(bench.id);
+  if(!readings.length) return {};
+  const baseline = readings[0];
+  const theta = benchAlignRad(bench);
+  const out = {};
+  bench.targets.forEach(t=>{
+    const baseCoord = baseline.targets.find(x=>x.id===t.id);
+    out[t.id] = readings.map(r=>{
+      const cur = r.targets.find(x=>x.id===t.id);
+      if(!cur || !baseCoord) return {date:r.date, dx:0, dy:0, dz:0, D:0};
+      const dx=(cur.easting-baseCoord.easting)*1000;
+      const dy=(cur.northing-baseCoord.northing)*1000;
+      const dz=(cur.elevation-baseCoord.elevation)*1000;
+      const rx=dx*Math.cos(theta)-dy*Math.sin(theta);
+      const D=Math.sqrt(rx*rx+dz*dz);
+      return {date:r.date, dx, dy, dz, D};
+    });
+  });
+  return out;
+}
+
+// Per-pair distance/convergence + threshold status for every reading of a bench.
+function benchComputePairSeries(bench){
+  const readings = benchSortedReadings(bench.id);
+  if(!readings.length) return [];
+  const baseline = readings[0];
+  const th = bench.thresholds || {warnPos:15, alarmPos:25, warnNeg:-15, action:-32};
+  const pairDist = (reading, a, b)=>{
+    const ta=reading.targets.find(x=>x.id===a), tb=reading.targets.find(x=>x.id===b);
+    if(!ta||!tb) return null;
+    return Math.sqrt((ta.easting-tb.easting)**2 + (ta.northing-tb.northing)**2 + (ta.elevation-tb.elevation)**2);
+  };
+  return bench.pairs.map(p=>{
+    const baseDist = pairDist(baseline, p.a, p.b);
+    const series = readings.map(r=>{
+      const d = pairDist(r, p.a, p.b);
+      const conv = (d!==null && baseDist!==null) ? (d-baseDist)*1000 : null;
+      let status='NORMAL';
+      if(conv!==null){
+        if(conv<=th.action) status='ACTION';
+        else if(conv<=th.warnNeg) status='WARNING';
+        else if(conv>=th.alarmPos) status='ALARM';
+        else if(conv>=th.warnPos) status='WARNING';
+      }
+      return {date:r.date, distance:d, convergence:conv, status};
+    });
+    return {label:p.a+'-'+p.b, a:p.a, b:p.b, series};
+  });
+}
+
+function benchStatusChip(status){
+  if(status==='ACTION') return '<span class="chip chip-d">ACTION</span>';
+  if(status==='ALARM')  return '<span class="chip chip-d">ALARM</span>';
+  if(status==='WARNING')return '<span class="chip chip-w">WARNING</span>';
+  return '<span class="chip chip-ok">NORMAL</span>';
+}
+
+function populateBenchSelect(){
+  const sel=document.getElementById('benchSelect'); if(!sel) return;
+  const cur=sel.value;
+  sel.innerHTML = benchDefs.map(b=>`<option value="${b.id}">${escHtml(b.name)}</option>`).join('');
+  if(benchDefs.some(b=>String(b.id)===cur)) sel.value=cur;
+}
+
+function renderBench3D(){
+  populateBenchSelect();
+  const empty=document.getElementById('benchEmptyState');
+  const content=document.getElementById('benchContent');
+  if(!benchDefs.length){
+    if(empty) empty.style.display='block';
+    if(content) content.style.display='none';
+    return;
+  }
+  if(empty) empty.style.display='none';
+  if(content) content.style.display='block';
+  const sel=document.getElementById('benchSelect');
+  const benchId = sel ? sel.value : benchDefs[0].id;
+  const bench = benchDefs.find(b=>String(b.id)===String(benchId)) || benchDefs[0];
+  if(!bench) return;
+
+  const pairSeries = benchComputePairSeries(bench);
+  const targetSeries = benchComputeTargetSeries(bench);
+  const allDates = benchSortedReadings(bench.id).map(r=>r.date);
+
+  // ---- Convergence table ----
+  const cThead=document.getElementById('benchConvThead'), cTbody=document.getElementById('benchConvTbody');
+  if(cThead) cThead.innerHTML = '<tr><th>Date</th>'+pairSeries.map(p=>`<th>${escHtml(p.label)} (mm)</th><th>Status</th>`).join('')+'</tr>';
+  if(cTbody){
+    cTbody.innerHTML = allDates.map((d,i)=>{
+      const cells = pairSeries.map(p=>{
+        const pt=p.series[i];
+        const val = pt && pt.convergence!==null ? pt.convergence.toFixed(2) : '—';
+        return `<td>${val}</td><td>${pt?benchStatusChip(pt.status):'—'}</td>`;
+      }).join('');
+      return `<tr><td>${d}</td>${cells}</tr>`;
+    }).join('');
+  }
+  const convCount=document.getElementById('benchConvRowCount');
+  if(convCount) convCount.textContent = allDates.length+' Entries';
+
+  // ---- Target displacement table ----
+  const tThead=document.getElementById('benchTargetThead'), tTbody=document.getElementById('benchTargetTbody');
+  if(tThead) tThead.innerHTML = '<tr><th>Date</th>'+bench.targets.map(t=>`<th>${escHtml(t.id)} — D (mm)</th>`).join('')+'</tr>';
+  if(tTbody){
+    tTbody.innerHTML = allDates.map((d,i)=>{
+      const cells = bench.targets.map(t=>{
+        const s=targetSeries[t.id]; const pt=s?s[i]:null;
+        return `<td>${pt?pt.D.toFixed(2):'—'}</td>`;
+      }).join('');
+      return `<tr><td>${d}</td>${cells}</tr>`;
+    }).join('');
+  }
+  const targetCount=document.getElementById('benchTargetRowCount');
+  if(targetCount) targetCount.textContent = allDates.length+' Entries';
+
+  // ---- Charts ----
+  const colors=['#60a5fa','#00d4aa','#f5a623','#a78bfa','#f472b6','#34d399'];
+  mkChart('benchConvChart',{type:'line',data:{labels:allDates,datasets:pairSeries.map((p,i)=>({
+    label:p.label, data:p.series.map(s=>s.convergence!==null?+s.convergence.toFixed(2):null),
+    borderColor:colors[i%colors.length], backgroundColor:'transparent', tension:0.3, pointRadius:3, spanGaps:true
+  }))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#64748b',font:{family:'Space Mono',size:9},boxWidth:10}}},scales:{y:{ticks:{color:'#64748b',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.3)'},title:{display:true,text:'mm',color:'#334155'}},x:{ticks:{color:'#334155',font:{family:'Space Mono',size:8},maxRotation:45},grid:{display:false}}}}});
+
+  mkChart('benchTargetChart',{type:'line',data:{labels:allDates,datasets:bench.targets.map((t,i)=>({
+    label:t.id, data:(targetSeries[t.id]||[]).map(s=>+s.D.toFixed(2)), borderColor:colors[i%colors.length],
+    backgroundColor:'transparent', tension:0.3, pointRadius:3, spanGaps:true
+  }))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#64748b',font:{family:'Space Mono',size:9},boxWidth:10}}},scales:{y:{ticks:{color:'#64748b',font:{family:'Space Mono',size:9}},grid:{color:'rgba(42,47,61,0.3)'},title:{display:true,text:'mm',color:'#334155'}},x:{ticks:{color:'#334155',font:{family:'Space Mono',size:8},maxRotation:45},grid:{display:false}}}}});
+}
+
+// ---- Bench Setup modal: dynamic target/pair rows ----
+function addBenchTargetRow(prefill){
+  const wrap=document.getElementById('benchTargetRows');
+  const idx=wrap.children.length;
+  const row=document.createElement('div');
+  row.className='bench-target-row';
+  row.style.cssText='display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-bottom:6px';
+  row.innerHTML=`
+    <input class="sap-fi bench-t-id" placeholder="Target ID (e.g. SOP-4)" value="${prefill?escHtml(prefill.id):''}"/>
+    <input class="sap-fi bench-t-e" type="number" step="any" placeholder="Easting" value="${prefill?prefill.easting:''}"/>
+    <input class="sap-fi bench-t-n" type="number" step="any" placeholder="Northing" value="${prefill?prefill.northing:''}"/>
+    <input class="sap-fi bench-t-el" type="number" step="any" placeholder="Elevation" value="${prefill?prefill.elevation:''}"/>`;
+  wrap.appendChild(row);
+  refreshBenchPairTargetOptions();
+}
+function removeBenchTargetRow(){
+  const wrap=document.getElementById('benchTargetRows');
+  if(wrap.children.length>3) wrap.removeChild(wrap.lastElementChild);
+  else showToast('⚠ Minimum 3 targets required', 3000, 'warn');
+  refreshBenchPairTargetOptions();
+}
+function currentBenchTargetIds(){
+  return [...document.querySelectorAll('#benchTargetRows .bench-t-id')].map(i=>i.value.trim()).filter(Boolean);
+}
+function refreshBenchPairTargetOptions(){
+  const ids=currentBenchTargetIds();
+  document.querySelectorAll('#benchPairRows select').forEach(sel=>{
+    const cur=sel.value;
+    sel.innerHTML=ids.map(id=>`<option value="${escHtml(id)}">${escHtml(id)}</option>`).join('');
+    if(ids.includes(cur)) sel.value=cur;
+  });
+}
+function addBenchPairRow(prefill){
+  const wrap=document.getElementById('benchPairRows');
+  const ids=currentBenchTargetIds();
+  const row=document.createElement('div');
+  row.className='bench-pair-row';
+  row.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px';
+  const opts=ids.map(id=>`<option value="${escHtml(id)}">${escHtml(id)}</option>`).join('');
+  row.innerHTML=`
+    <select class="sap-fs bench-p-a">${opts}</select>
+    <select class="sap-fs bench-p-b">${opts}</select>`;
+  wrap.appendChild(row);
+  if(prefill){
+    row.querySelector('.bench-p-a').value=prefill.a;
+    row.querySelector('.bench-p-b').value=prefill.b;
+  }
+}
+function removeBenchPairRow(){
+  const wrap=document.getElementById('benchPairRows');
+  if(wrap.children.length>1) wrap.removeChild(wrap.lastElementChild);
+  else showToast('⚠ At least one pair is needed', 3000, 'warn');
+}
+
+function openBenchSetupModal(editMode){
+  const wrap=document.getElementById('benchTargetRows'); wrap.innerHTML='';
+  const pwrap=document.getElementById('benchPairRows'); pwrap.innerHTML='';
+  if(editMode){
+    const sel=document.getElementById('benchSelect');
+    const bench=benchDefs.find(b=>String(b.id)===String(sel.value));
+    if(!bench){ showToast('⚠ Select a Bench to edit first', 3000, 'warn'); return; }
+    benchEditingId=bench.id;
+    document.getElementById('benchSetupTitle').textContent='Edit Bench — '+bench.name;
+    document.getElementById('benchName').value=bench.name;
+    document.getElementById('benchLocation').value=bench.location||'';
+    document.getElementById('benchElevation').value=bench.elevation||'';
+    document.getElementById('benchAlignment').value=bench.alignmentDeg;
+    bench.targets.forEach(t=>addBenchTargetRow(t));
+    refreshBenchPairTargetOptions();
+    bench.pairs.forEach(p=>addBenchPairRow(p));
+    const th=bench.thresholds||{warnPos:15,alarmPos:25,warnNeg:-15,action:-32};
+    document.getElementById('benchThWarnPos').value=th.warnPos;
+    document.getElementById('benchThAlarmPos').value=th.alarmPos;
+    document.getElementById('benchThWarnNeg').value=th.warnNeg;
+    document.getElementById('benchThAction').value=th.action;
+  } else {
+    benchEditingId=null;
+    document.getElementById('benchSetupTitle').textContent='New Bench';
+    document.getElementById('benchName').value='';
+    document.getElementById('benchLocation').value='';
+    document.getElementById('benchElevation').value='';
+    document.getElementById('benchAlignment').value='';
+    for(let i=0;i<5;i++) addBenchTargetRow();
+    refreshBenchPairTargetOptions();
+    addBenchPairRow();
+    document.getElementById('benchThWarnPos').value=15;
+    document.getElementById('benchThAlarmPos').value=25;
+    document.getElementById('benchThWarnNeg').value=-15;
+    document.getElementById('benchThAction').value=-32;
+  }
+  openSapModal('benchSetupModal');
+}
+
+function saveBenchSetup(){
+  const name=document.getElementById('benchName').value.trim();
+  const location=document.getElementById('benchLocation').value.trim();
+  const elevation=document.getElementById('benchElevation').value.trim();
+  const alignmentDeg=parseFloat(document.getElementById('benchAlignment').value)||0;
+  if(!name){ showToast('⚠ Enter a Bench Name', 3000, 'warn'); return; }
+
+  const targets=[...document.querySelectorAll('#benchTargetRows .bench-target-row')].map(row=>({
+    id: row.querySelector('.bench-t-id').value.trim(),
+    easting: parseFloat(row.querySelector('.bench-t-e').value),
+    northing: parseFloat(row.querySelector('.bench-t-n').value),
+    elevation: parseFloat(row.querySelector('.bench-t-el').value),
+  }));
+  if(targets.length<3){ showToast('⚠ Minimum 3 targets required', 3000, 'warn'); return; }
+  if(targets.some(t=>!t.id || isNaN(t.easting) || isNaN(t.northing) || isNaN(t.elevation))){
+    showToast('⚠ Fill Target ID + Easting/Northing/Elevation for every target', 4000, 'warn'); return;
+  }
+  const idSet = new Set(targets.map(t=>t.id.toLowerCase()));
+  if(idSet.size!==targets.length){ showToast('⚠ Target IDs must be unique', 3000, 'warn'); return; }
+
+  const pairs=[...document.querySelectorAll('#benchPairRows .bench-pair-row')].map(row=>({
+    a: row.querySelector('.bench-p-a').value, b: row.querySelector('.bench-p-b').value
+  }));
+  if(!pairs.length || pairs.some(p=>!p.a||!p.b||p.a===p.b)){
+    showToast('⚠ Each pair needs two different targets', 3000, 'warn'); return;
+  }
+
+  const thresholds = {
+    warnPos: parseFloat(document.getElementById('benchThWarnPos').value)||15,
+    alarmPos: parseFloat(document.getElementById('benchThAlarmPos').value)||25,
+    warnNeg: parseFloat(document.getElementById('benchThWarnNeg').value)||-15,
+    action: parseFloat(document.getElementById('benchThAction').value)||-32,
+  };
+
+  if(benchEditingId){
+    const bench=benchDefs.find(b=>b.id===benchEditingId);
+    Object.assign(bench, {name, location, elevation, alignmentDeg, targets, pairs, thresholds});
+  } else {
+    if(benchDefs.some(b=>b.name.toLowerCase()===name.toLowerCase())){
+      showToast('⚠ A Bench with this name already exists', 3000, 'warn'); return;
+    }
+    benchDefs.push({ id: genId(), name, location, elevation, alignmentDeg, targets, pairs, thresholds, createdAt: Date.now() });
+  }
+  saveToStorage();
+  populateBenchSelect();
+  const sel=document.getElementById('benchSelect');
+  if(sel && !benchEditingId) sel.value = benchDefs[benchDefs.length-1].id;
+  renderBench3D();
+  closeSapModal('benchSetupModal');
+  showToast('✓ Bench "'+name+'" saved');
+}
+
+// ---- Add Reading modal ----
+function openBenchReadingModal(){
+  const sel=document.getElementById('benchSelect');
+  const bench=benchDefs.find(b=>String(b.id)===String(sel?.value));
+  if(!bench){ showToast('⚠ Set up a Bench first', 3000, 'warn'); return; }
+  document.getElementById('benchReadingBenchLabel').textContent=bench.name;
+  document.getElementById('benchReadDate').value='';
+  document.getElementById('benchReadNotes').value='';
+  const wrap=document.getElementById('benchReadTargetRows'); wrap.innerHTML='';
+  bench.targets.forEach(t=>{
+    const row=document.createElement('div');
+    row.className='bench-read-row';
+    row.style.cssText='display:grid;grid-template-columns:auto 1fr 1fr 1fr;gap:6px;align-items:center;margin-bottom:6px';
+    row.innerHTML=`
+      <label class="sap-fl" style="min-width:70px">${escHtml(t.id)}</label>
+      <input class="sap-fi bench-r-e" type="number" step="any" placeholder="Easting"/>
+      <input class="sap-fi bench-r-n" type="number" step="any" placeholder="Northing"/>
+      <input class="sap-fi bench-r-el" type="number" step="any" placeholder="Elevation"/>`;
+    row.dataset.targetId=t.id;
+    wrap.appendChild(row);
+  });
+  openSapModal('benchReadingModal');
+}
+
+function saveBenchReading(){
+  const sel=document.getElementById('benchSelect');
+  const bench=benchDefs.find(b=>String(b.id)===String(sel?.value));
+  if(!bench){ showToast('⚠ Set up a Bench first', 3000, 'warn'); return; }
+  const date=document.getElementById('benchReadDate').value;
+  if(!date){ showToast('⚠ Select a Date', 3000, 'warn'); return; }
+  if(benchReadings.some(r=>r.benchId===bench.id && r.date===date)){
+    showToast('⚠ A reading for this Bench on this date already exists', 4000, 'warn'); return;
+  }
+  const rows=[...document.querySelectorAll('#benchReadTargetRows .bench-read-row')];
+  const targets=rows.map(row=>({
+    id: row.dataset.targetId,
+    easting: parseFloat(row.querySelector('.bench-r-e').value),
+    northing: parseFloat(row.querySelector('.bench-r-n').value),
+    elevation: parseFloat(row.querySelector('.bench-r-el').value),
+  }));
+  if(targets.some(t=>isNaN(t.easting)||isNaN(t.northing)||isNaN(t.elevation))){
+    showToast('⚠ Fill Easting/Northing/Elevation for every target', 4000, 'warn'); return;
+  }
+  const notes=document.getElementById('benchReadNotes').value.trim();
+  benchReadings.push({ id: genId(), benchId: bench.id, date, targets, notes, createdBy: currentUser?currentUser.name:'unknown', createdAt: Date.now() });
+  saveToStorage();
+  renderBench3D();
+  closeSapModal('benchReadingModal');
+  showToast('✓ Reading saved for '+date);
 }
 
 // ================================================================
