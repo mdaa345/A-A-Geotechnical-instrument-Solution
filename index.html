@@ -1777,6 +1777,8 @@ canvas{display:block}
             <option value="initial">Initial (19-02-2026)</option>
             <option value="previous">Previous session</option>
           </select>
+          <button class="kimi-btn kimi-btn-outline" style="margin-left:auto" onclick="kimiOpenAddReadingModal()">+ Add Reading</button>
+          <button class="kimi-btn kimi-btn-outline" onclick="kimiOpenAddBHModal()">+ Add Borehole</button>
         </div>
 
         <!-- Charts row -->
@@ -2564,6 +2566,10 @@ function persistUsers(){
     fbDB.ref('gimsData/users').set(USERS).catch(e=>console.warn('User Firebase sync failed:', e));
   }
 }
+// Hash any plaintext password (the 3 defaults above, or older saved data)
+// before the login page can even be used, so nothing plaintext is ever
+// read from/written to localStorage or Firebase from this point on.
+migratePlaintextPasswords();
 let currentUser = null;
 let lcData = [], sgData = [], incData = [], cvtData = [], matData = [], trtData = [], rbData = [];
 let drawingsData = [], materialsData = [], inventoryTxns = [], indentData = [];
@@ -2967,6 +2973,7 @@ function saveToStorage(){
       matData, trtData, customMonths, rbData,
       drawingsData, materialsData, inventoryTxns, indentData,
       kimiSessions: KIMI_REAL_DATA.sessions,
+      mm: (typeof MMDB!=='undefined') ? MMDB : undefined,
       users: USERS,
       activityLog: activityLog,
       _updatedAt: Date.now(),
@@ -3087,6 +3094,7 @@ window.addEventListener('beforeunload', ()=>{
     localStorage.setItem(LS_KEYS.inventoryTxns, JSON.stringify(inventoryTxns));
     localStorage.setItem(LS_KEYS.indentData,    JSON.stringify(indentData));
     localStorage.setItem('gims_kimiSessions',   JSON.stringify(KIMI_REAL_DATA.sessions));
+    if(typeof MMDB!=='undefined') localStorage.setItem('aagims_mm_v1', JSON.stringify(MMDB));
     localStorage.setItem('aageo_hasUserData', '1');
   } catch(e){ /* silent — browser is closing */ }
 });
@@ -3978,6 +3986,14 @@ function applyDataSnapshot(snap, opts){
     try{ localStorage.setItem('aageo_activityLog', JSON.stringify(activityLog)); }catch(e){}
     renderActivityLog();
   }
+  // SAP MM module (Material Master, PR, PO, GR, GI) — merge each table
+  // separately rather than replacing the whole object, so a snapshot that's
+  // missing one table (e.g. an older save) never wipes the others.
+  if(snap.mm && typeof snap.mm === 'object' && typeof MMDB!=='undefined'){
+    ['Materials','PR','PO','GR','GI'].forEach(k=>{
+      if(Array.isArray(snap.mm[k])) MMDB[k] = snap.mm[k];
+    });
+  }
 
   if(opts.rerender){
     renderLCTable();renderLCCharts();
@@ -3994,6 +4010,7 @@ function applyDataSnapshot(snap, opts){
     if(typeof kimiInit==='function') kimiInit();
     if(typeof renderDrawings==='function') renderDrawings();
     if(typeof renderInventoryAll==='function') renderInventoryAll();
+    if(typeof mmRenderAll==='function') mmRenderAll();
   }
 }
 
@@ -4019,6 +4036,7 @@ async function loadFromStorage(){
     const itx   = localStorage.getItem(LS_KEYS.inventoryTxns);
     const ind   = localStorage.getItem(LS_KEYS.indentData);
     const kimiSess = localStorage.getItem('gims_kimiSessions');
+    const mmLS = localStorage.getItem('aagims_mm_v1');
 
     if(kimiSess){
       try{
@@ -4042,6 +4060,7 @@ async function loadFromStorage(){
       materialsData: matm   ? JSON.parse(matm)   : undefined,
       inventoryTxns: itx    ? JSON.parse(itx)    : undefined,
       indentData:    ind    ? JSON.parse(ind)    : undefined,
+      mm:            mmLS   ? JSON.parse(mmLS)   : undefined,
     }, {rerender: false});
 
   } catch(e){ console.warn('localStorage load failed:', e); }
@@ -4131,6 +4150,7 @@ function _mirrorToLocalStorage(){
     localStorage.setItem(LS_KEYS.inventoryTxns, JSON.stringify(inventoryTxns));
     localStorage.setItem(LS_KEYS.indentData,    JSON.stringify(indentData));
     localStorage.setItem('gims_kimiSessions',   JSON.stringify(KIMI_REAL_DATA.sessions));
+    if(typeof MMDB!=='undefined') localStorage.setItem('aagims_mm_v1', JSON.stringify(MMDB));
     localStorage.setItem('aageo_hasUserData',   '1');
   } catch(e){ console.warn('localStorage mirror failed:', e); }
 }
@@ -4227,31 +4247,59 @@ const _sampleTRT = [
 // ================================================================
 // LOGIN — STEP 1 (Credentials)
 // ================================================================
+// Hash passwords before they ever touch localStorage/Firebase — nothing
+// stored anywhere is plaintext anymore. Not a substitute for a real backend
+// auth system, but a big step up from storing raw passwords.
+async function sha256Hex(text){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+function looksHashed(s){ return typeof s==='string' && /^[0-9a-f]{64}$/.test(s); }
+// One-time migration: any plaintext password still sitting in USERS (the
+// defaults, or older data saved before hashing existed) gets hashed in place.
+async function migratePlaintextPasswords(){
+  let changed=false;
+  for(const u of USERS){
+    if(u.pass && !looksHashed(u.pass)){
+      u.pass = await sha256Hex(u.pass);
+      changed=true;
+    }
+  }
+  if(changed) persistUsers();
+}
 function doLoginStep1(){
-  const u=document.getElementById('loginUser').value.trim().toLowerCase().replace(/\s+/g,'');
-  const p=document.getElementById('loginPass').value;
+  const uField=document.getElementById('loginUser');
+  const pField=document.getElementById('loginPass');
+  const u=uField.value.trim().toLowerCase().replace(/\s+/g,'');
+  const pPlain=pField.value;
   const err=document.getElementById('loginErr');
   const perm=document.getElementById('permReq');
   err.style.display='none'; perm.style.display='none';
-  const user=USERS.find(x=>x.name.toLowerCase()===u && x.pass===p);
-  if(!user){err.textContent='Invalid username or password. Please try again.';err.style.display='block';return;}
-  if(user.status==='suspended'){err.textContent='Yeh account suspend kar diya gaya hai — Admin se contact karo.';err.style.display='block';return;}
-  if(user.status==='pending'){perm.style.display='block';notifyAdmin('User "'+user.displayName+'" requested access.');return;}
-  // Direct login
-  user.lastLogin = Date.now();
-  persistUsers();
-  currentUser=user;
-  document.getElementById('loginPage').style.display='none';
-  document.getElementById('sidebarUser').textContent=currentUser.displayName;
-  document.getElementById('sidebarRole').textContent=currentUser.role.toUpperCase()+' ACCESS';
-  document.getElementById('sidebarAvatar').textContent=currentUser.displayName.split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase();
-  if(currentUser.role==='admin'){
-    document.getElementById('adminNavSec').style.display='block';
-    document.getElementById('adminNavBtn').style.display='flex';
-  }
-  applyRolePermissions();
-  showToast('Login successful! Welcome, '+currentUser.displayName);
-  initApp();
+  sha256Hex(pPlain).then(pHash=>{
+    // x.pass===pPlain kept as a fallback for the brief window right after
+    // load, before migratePlaintextPasswords() finishes hashing everyone.
+    const user=USERS.find(x=>x.name.toLowerCase()===u && (x.pass===pHash || x.pass===pPlain));
+    if(!user){err.textContent='Invalid username or password. Please try again.';err.style.display='block';return;}
+    if(user.status==='suspended'){err.textContent='Yeh account suspend kar diya gaya hai — Admin se contact karo.';err.style.display='block';return;}
+    if(user.status==='pending'){perm.style.display='block';notifyAdmin('User "'+user.displayName+'" requested access.');return;}
+    // Direct login — also re-hash this user's password now if it was still
+    // plaintext (i.e. migration hadn't reached them yet).
+    if(!looksHashed(user.pass)) user.pass = pHash;
+    user.lastLogin = Date.now();
+    persistUsers();
+    currentUser=user;
+    document.getElementById('loginPage').style.display='none';
+    document.getElementById('sidebarUser').textContent=currentUser.displayName;
+    document.getElementById('sidebarRole').textContent=currentUser.role.toUpperCase()+' ACCESS';
+    document.getElementById('sidebarAvatar').textContent=currentUser.displayName.split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase();
+    if(currentUser.role==='admin'){
+      document.getElementById('adminNavSec').style.display='block';
+      document.getElementById('adminNavBtn').style.display='flex';
+    }
+    applyRolePermissions();
+    showToast('Login successful! Welcome, '+currentUser.displayName);
+    initApp();
+  });
 }
 function maskEmail(email){
   const [u,d]=email.split('@');
@@ -5352,13 +5400,19 @@ function saveEditedUser(){
   }
   u.displayName = displayName;
   u.name = username;
-  if(password) u.pass = password;
   u.role = role;
-  persistUsers();
-  loadUserTable();
-  closeModal('editUserModal');
-  showToast('✓ '+displayName+' ki details update ho gayi.');
-  logActivity('Edited user', displayName+' ('+username+') — role: '+role);
+  const finishSave = ()=>{
+    persistUsers();
+    loadUserTable();
+    closeModal('editUserModal');
+    showToast('✓ '+displayName+' ki details update ho gayi.');
+    logActivity('Edited user', displayName+' ('+username+') — role: '+role);
+  };
+  if(password){
+    sha256Hex(password).then(hash=>{ u.pass=hash; finishSave(); });
+  } else {
+    finishSave();
+  }
 }
 function openAddUserModal(){
   document.getElementById('newUserDisplayName').value='';
@@ -5389,22 +5443,24 @@ function saveNewUserFromModal(){
     err.style.display = 'block';
     return;
   }
-  USERS.push({
-    id: Date.now(),
-    name: username,
-    pass: password,
-    role: role,
-    status: 'active',
-    displayName: displayName,
-    email: username+'@aa-geo.com',
-    createdAt: Date.now(),
-    lastLogin: null
+  sha256Hex(password).then(hash=>{
+    USERS.push({
+      id: Date.now(),
+      name: username,
+      pass: hash,
+      role: role,
+      status: 'active',
+      displayName: displayName,
+      email: username+'@aa-geo.com',
+      createdAt: Date.now(),
+      lastLogin: null
+    });
+    persistUsers();
+    loadUserTable();
+    closeModal('addUserModal');
+    showToast('✓ User "'+displayName+'" added and saved.');
+    logActivity('Added new user', displayName+' ('+username+') — role: '+role);
   });
-  persistUsers();
-  loadUserTable();
-  closeModal('addUserModal');
-  showToast('✓ User "'+displayName+'" added and saved.');
-  logActivity('Added new user', displayName+' ('+username+') — role: '+role);
 }
 // ================================================================
 // SENSOR REGISTRY
@@ -5632,6 +5688,63 @@ function kimiInit(){
   kimiPopulateSessionSelect();
   kimiRenderAll();
   kimiRenderAllSessions();
+}
+
+// ---- Kimi modals: open/close + save (previously referenced by buttons but never implemented) ----
+function kimiCloseModal(id){
+  const m=document.getElementById(id);
+  if(m) m.classList.remove('open');
+}
+function kimiOpenAddBHModal(){
+  document.getElementById('kimiBHId').value='';
+  document.getElementById('kimiBHStatus').value='ok';
+  document.getElementById('kimiAddBHModal').classList.add('open');
+}
+function kimiSaveBorehole(){
+  const id=document.getElementById('kimiBHId').value.trim();
+  const status=document.getElementById('kimiBHStatus').value;
+  if(!id){ showToast('⚠ Enter Borehole ID', 3000, 'warn'); return; }
+  if(KIMI_BOREHOLES.some(b=>b.id===id)){ showToast('⚠ This Borehole ID already exists', 3000, 'warn'); return; }
+  KIMI_BOREHOLES.push({ id, status, createdAt: Date.now() });
+  saveToStorage();
+  kimiCloseModal('kimiAddBHModal');
+  showToast('✓ Borehole "'+id+'" added to the registry');
+}
+// Opens the Add Reading modal for the CURRENTLY selected session — this
+// updates a single depth-point on the live displacement profile (the same
+// data the depth/time charts read from), not a separate record.
+function kimiOpenAddReadingModal(){
+  document.getElementById('kimiReadingBHLabel').textContent = KIMI_REAL_DATA.bhId || 'BH-INC-01';
+  document.getElementById('kimiReadDepth').value='';
+  document.getElementById('kimiReadA').value='';
+  document.getElementById('kimiReadB').value='';
+  document.getElementById('kimiReadMaxA').value='';
+  document.getElementById('kimiReadMaxB').value='';
+  document.getElementById('kimiReadRateA').value='';
+  document.getElementById('kimiAddReadingModal').classList.add('open');
+}
+function kimiSaveReading(){
+  const idx=parseInt(document.getElementById('kimiSessionSelect')?.value||0);
+  const sess=KIMI_REAL_DATA.sessions[idx];
+  if(!sess){ showToast('⚠ Select a session first', 3000, 'warn'); return; }
+  const depth=parseFloat(document.getElementById('kimiReadDepth').value);
+  const a=parseFloat(document.getElementById('kimiReadA').value);
+  const b=parseFloat(document.getElementById('kimiReadB').value);
+  if(isNaN(depth)){ showToast('⚠ Enter a Depth value', 3000, 'warn'); return; }
+  if(isNaN(a) && isNaN(b)){ showToast('⚠ Enter at least one of A-Axis / B-Axis', 3000, 'warn'); return; }
+  const spacing = KIMI_REAL_DATA.spacing || 0.5;
+  let sensorIdx = Math.round(depth/spacing);
+  sensorIdx = Math.max(0, Math.min(sensorIdx, sess.depths.length-1));
+  if(!isNaN(a)) sess.dispA[sensorIdx]=a;
+  if(!isNaN(b)) sess.dispB[sensorIdx]=b;
+  // Keep the session's max-displacement summary (used by KPIs/status) consistent
+  sess.maxDispA = Math.max(...sess.dispA.map(v=>Math.abs(v)));
+  sess.maxDispB = Math.max(...sess.dispB.map(v=>Math.abs(v)));
+  saveToStorage();
+  kimiCloseModal('kimiAddReadingModal');
+  kimiUpdateKPIs();
+  kimiRenderAll();
+  showToast('✓ Reading updated at depth '+depth+'m');
 }
 
 function kimiUpdateKPIs(){
@@ -6980,7 +7093,7 @@ function saveMaterial(){
   const openInst=+document.getElementById('matMasterInstalled').value||0;
   const notes=document.getElementById('matMasterNotes').value.trim();
   if(!instId){ showToast('⚠ Enter Instrument ID', 3000, 'warn'); return; }
-  if(materialsData.some(m=>m.instType===instType && m.instId===instId)){ showToast('⚠ This material already exists', 3000, 'warn'); return; }
+  if(materialsData.some(m=>m.instType===instType && m.instId.toLowerCase()===instId.toLowerCase())){ showToast('⚠ This material already exists', 3000, 'warn'); return; }
   materialsData.push({ id:genId(), instType, instId, materialPR, orderQty, unit, deliveryDate, site, notes, createdAt:Date.now() });
   if(openRecv>0) inventoryTxns.push({ id:genId(), instType, instId, type:'RECEIVED', qty:openRecv, date:todayStr(), refDoc:materialPR, remarks:'Opening balance', doneBy:currentUser?currentUser.name:'unknown', createdAt:Date.now() });
   if(openInst>0) inventoryTxns.push({ id:genId(), instType, instId, type:'INSTALLED', qty:openInst, date:todayStr(), refDoc:materialPR, remarks:'Opening balance', doneBy:currentUser?currentUser.name:'unknown', createdAt:Date.now() });
@@ -7111,6 +7224,10 @@ async function saveIndent(){
   const notes=document.getElementById('indNotes').value.trim();
   if(!indentNo){ showToast('⚠ Enter Indent No.', 3000, 'warn'); return; }
   if(qty<=0){ showToast('⚠ Enter a valid quantity', 3000, 'warn'); return; }
+  if(indentData.some(d=>d.indentNo.toLowerCase()===indentNo.toLowerCase() && d.instType===instType && d.instId.toLowerCase()===instId.toLowerCase())){
+    showToast('⚠ This item is already on this Indent/PR — edit the existing line instead', 4000, 'warn');
+    return;
+  }
   const btn=document.getElementById('indSaveBtn');
   const origTxt=btn.textContent; btn.disabled=true;
   try{
@@ -7695,7 +7812,12 @@ let MMDB = JSON.parse(localStorage.getItem('aagims_mm_v1')) || {
     Materials: [], PR: [], PO: [], GR: [], GI: []
 };
 
-function mmSaveDB() { localStorage.setItem('aagims_mm_v1', JSON.stringify(MMDB)); }
+function mmSaveDB() {
+  localStorage.setItem('aagims_mm_v1', JSON.stringify(MMDB));
+  // Piggyback on the main app's Firebase sync so Materials/PR/PO/GR/GI
+  // are shared across every device/team member, not just this browser.
+  if(typeof saveToStorage === 'function') saveToStorage();
+}
 function mmGenID(prefix) { return `${prefix}-${Date.now()}`; }
 
 // TOAST NOTIFICATION
