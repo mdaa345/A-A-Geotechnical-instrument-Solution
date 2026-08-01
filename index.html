@@ -8829,5 +8829,455 @@ function mmImportCSV() {
 // INITIATE APP
 mmRenderAll();
 </script>
+
+<!-- ================================================================
+     AI AGENTS SUITE — Chat/Analysis, Auto-Report, Anomaly Detection,
+     Photo/Voice Data-Entry. All calls go straight from this browser
+     to Anthropic's API using a key YOU paste in Settings below.
+     The key lives only in this browser's localStorage — it is never
+     written into this HTML file or any repo.
+================================================================ -->
+<style>
+.ai-launcher{position:fixed;bottom:22px;right:22px;z-index:9000;width:56px;height:56px;border-radius:50%;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#0d2340,#2563eb);color:#fff;font-size:22px;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 10px 24px rgba(37,99,235,.4),0 2px 0 rgba(255,255,255,.25) inset;transition:transform .18s}
+.ai-launcher:hover{transform:scale(1.07)}
+.ai-panel{position:fixed;top:0;right:-420px;width:400px;max-width:92vw;height:100%;background:var(--sap-bg,#eef1f6);z-index:9001;
+  box-shadow:-12px 0 40px rgba(10,20,40,.35);display:flex;flex-direction:column;transition:right .25s ease;font-family:var(--sans,sans-serif)}
+.ai-panel.open{right:0}
+.ai-panel-head{background:linear-gradient(135deg,#0a1a33,#123a6b 60%,#1d56a8);color:#fff;padding:16px 18px;display:flex;align-items:center;gap:10px}
+.ai-panel-head b{font-family:var(--mono);font-size:14px}
+.ai-panel-head .ai-sub{font-size:10.5px;color:#a9c6ee;margin-top:2px}
+.ai-panel-head button{margin-left:auto;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:#fff;
+  width:28px;height:28px;border-radius:8px;cursor:pointer;font-size:14px}
+.ai-panel-head button:hover{background:rgba(255,255,255,.22)}
+.ai-tabs{display:flex;border-bottom:1px solid #dde3ec;background:#fff}
+.ai-tab{flex:1;padding:11px 4px;text-align:center;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.03em;
+  color:var(--sap-txt2,#667);cursor:pointer;border-bottom:2px solid transparent;text-transform:uppercase}
+.ai-tab.active{color:var(--accent,#2563eb);border-bottom-color:var(--accent,#2563eb)}
+.ai-tabpane{display:none;flex:1;overflow-y:auto;padding:14px}
+.ai-tabpane.active{display:flex;flex-direction:column}
+.ai-msg{max-width:88%;padding:9px 12px;border-radius:11px;font-size:12.5px;line-height:1.45;margin-bottom:8px;white-space:pre-wrap}
+.ai-msg.user{align-self:flex-end;background:linear-gradient(135deg,#0d2340,#2563eb);color:#fff;border-bottom-right-radius:3px}
+.ai-msg.bot{align-self:flex-start;background:#fff;border:1px solid #e2e8f0;color:#1e293b;border-bottom-left-radius:3px}
+.ai-chat-log{flex:1;display:flex;flex-direction:column;overflow-y:auto;margin-bottom:10px;gap:2px}
+.ai-chat-inputrow{display:flex;gap:8px}
+.ai-chat-inputrow textarea{flex:1;resize:none;border:1px solid #dbe2ec;border-radius:9px;padding:9px 10px;font-size:12.5px;font-family:var(--sans);height:40px}
+.ai-chat-inputrow button{background:linear-gradient(135deg,#0d2340,#2563eb);color:#fff;border:none;border-radius:9px;padding:0 16px;cursor:pointer;font-weight:600;font-size:12px}
+.ai-section-title{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--accent,#2563eb);text-transform:uppercase;letter-spacing:.05em;margin:4px 0 8px}
+.ai-checklist{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;background:#fff;border:1px solid #e6ebf2;border-radius:10px;padding:10px}
+.ai-checklist label{display:flex;align-items:center;gap:8px;font-size:12px;color:#334}
+.ai-daterow{display:flex;gap:8px;margin-bottom:12px}
+.ai-daterow input{flex:1;border:1px solid #dbe2ec;border-radius:8px;padding:7px 8px;font-size:12px}
+.ai-btn{background:linear-gradient(135deg,#0d2340,#2563eb);color:#fff;border:none;border-radius:9px;padding:10px;cursor:pointer;font-weight:600;font-size:12.5px;width:100%;box-shadow:0 6px 14px rgba(37,99,235,.3)}
+.ai-btn:hover{filter:brightness(1.1)}
+.ai-btn.ghost{background:#fff;color:var(--accent,#2563eb);border:1px solid #cbd8ec;box-shadow:none}
+.ai-anomaly-card{background:#fff;border:1px solid #f1c9c9;border-left:4px solid var(--danger,#dc2626);border-radius:9px;padding:10px 11px;margin-bottom:9px}
+.ai-anomaly-card.mid{border-color:#fde3c0;border-left-color:var(--warn,#d97706)}
+.ai-anomaly-card b{font-size:12.5px}
+.ai-anomaly-card .meta{font-size:11px;color:#667;margin-top:3px}
+.ai-anomaly-card button{margin-top:7px}
+.ai-explain-box{margin-top:8px;background:#f6f8fb;border-radius:8px;padding:8px 9px;font-size:11.5px;color:#334;line-height:1.5}
+.ai-photo-drop{border:1.5px dashed #b9c8dd;border-radius:12px;padding:22px 10px;text-align:center;color:var(--accent,#2563eb);cursor:pointer;font-size:12px;margin-bottom:12px;background:#f6f8fb}
+.ai-photo-drop:hover{background:var(--acc-dim,#eaf1fd)}
+.ai-result-box{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:12px;font-size:12.5px;margin-top:6px}
+.ai-result-box .big{font-family:var(--mono);font-size:22px;font-weight:700;color:#0d2340}
+.ai-voice-btn{width:64px;height:64px;border-radius:50%;border:none;background:linear-gradient(135deg,#0d2340,#2563eb);color:#fff;font-size:22px;cursor:pointer;margin:6px auto;display:block;box-shadow:0 8px 18px rgba(37,99,235,.35)}
+.ai-voice-btn.listening{animation:aiPulse 1.1s infinite}
+@keyframes aiPulse{0%{box-shadow:0 0 0 0 rgba(37,99,235,.5)}70%{box-shadow:0 0 0 16px rgba(37,99,235,0)}100%{box-shadow:0 0 0 0 rgba(37,99,235,0)}}
+.ai-settings-bg{position:fixed;inset:0;background:rgba(10,16,26,.5);z-index:9500;display:none;align-items:center;justify-content:center}
+.ai-settings-bg.open{display:flex}
+.ai-settings-box{background:#fff;border-radius:14px;padding:20px;width:320px;max-width:90vw}
+.ai-settings-box h3{font-family:var(--mono);font-size:13px;margin-bottom:10px}
+.ai-settings-box input{width:100%;border:1px solid #dbe2ec;border-radius:8px;padding:9px 10px;font-size:12px;margin-bottom:10px}
+.ai-settings-box p{font-size:10.5px;color:#667;line-height:1.5;margin-bottom:12px}
+.ai-loading{display:inline-block;width:13px;height:13px;border:2px solid #c9d7f5;border-top-color:#2563eb;border-radius:50%;animation:aiSpin .7s linear infinite;margin-right:6px;vertical-align:-2px}
+@keyframes aiSpin{to{transform:rotate(360deg)}}
+</style>
+
+<button class="ai-launcher" onclick="toggleAIPanel()" title="AI Agents">✨</button>
+
+<div class="ai-panel" id="aiPanel">
+  <div class="ai-panel-head">
+    <div><b>AI AGENTS</b><div class="ai-sub">Chat · Reports · Anomaly · Data-Entry</div></div>
+    <button onclick="openAISettings()" title="API Key Settings">⚙</button>
+    <button onclick="toggleAIPanel()" title="Close">✕</button>
+  </div>
+  <div class="ai-tabs">
+    <div class="ai-tab active" data-tab="chat" onclick="aiSwitchTab('chat')">Chat</div>
+    <div class="ai-tab" data-tab="report" onclick="aiSwitchTab('report')">Reports</div>
+    <div class="ai-tab" data-tab="anomaly" onclick="aiSwitchTab('anomaly')">Anomaly</div>
+    <div class="ai-tab" data-tab="entry" onclick="aiSwitchTab('entry')">Data-Entry</div>
+  </div>
+
+  <!-- TAB 1: CHAT / ANALYSIS AGENT -->
+  <div class="ai-tabpane active" data-pane="chat">
+    <div class="ai-chat-log" id="aiChatLog">
+      <div class="ai-msg bot">Namaste Ja! Mujhse GKPSP instrumentation data ke baare me kuch bhi pucho — jaise "aaj kaunse instruments ALARM status me hai" ya "load cell LC-05 ka trend kaisa hai".</div>
+    </div>
+    <div class="ai-chat-inputrow">
+      <textarea id="aiChatInput" placeholder="Apna sawaal likho..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();aiChatSend();}"></textarea>
+      <button onclick="aiChatSend()">Send</button>
+    </div>
+  </div>
+
+  <!-- TAB 2: AUTO REPORT-WRITING AGENT -->
+  <div class="ai-tabpane" data-pane="report">
+    <div class="ai-section-title">Include Modules</div>
+    <div class="ai-checklist" id="aiReportModules">
+      <label><input type="checkbox" value="loadcell" checked/> Load Cell</label>
+      <label><input type="checkbox" value="strain" checked/> Strain Gauge</label>
+      <label><input type="checkbox" value="mat" checked/> MPBX (MAT)</label>
+      <label><input type="checkbox" value="trt" checked/> TRT</label>
+      <label><input type="checkbox" value="rockbolt" checked/> Rock Bolt Load Cell</label>
+      <label><input type="checkbox" value="cvt" checked/> CVT Convergence</label>
+      <label><input type="checkbox" value="inc" checked/> Inclinometer</label>
+      <label><input type="checkbox" value="bench" checked/> Bench Convergence — 3D Survey</label>
+    </div>
+    <div class="ai-section-title">Date Range</div>
+    <div class="ai-daterow"><input type="date" id="aiReportFrom"/><input type="date" id="aiReportTo"/></div>
+    <button class="ai-btn" onclick="aiGenerateReport()" id="aiReportBtn">Generate Report</button>
+    <div id="aiReportStatus" style="margin-top:10px;font-size:11.5px;color:#667"></div>
+  </div>
+
+  <!-- TAB 3: ANOMALY DETECTION AGENT -->
+  <div class="ai-tabpane" data-pane="anomaly">
+    <button class="ai-btn" onclick="aiRunAnomalyScan()">Run Anomaly Scan</button>
+    <div style="font-size:10.5px;color:#667;margin:8px 0">Statistical scan (z-score / sudden-jump) across all instrument types — instant, no API cost. Tap "Explain" on any flagged item for an AI-written explanation.</div>
+    <div id="aiAnomalyResults" style="margin-top:6px"></div>
+  </div>
+
+  <!-- TAB 4: DATA-ENTRY ASSISTANT (photo OCR + voice) -->
+  <div class="ai-tabpane" data-pane="entry">
+    <div class="ai-section-title">Photo → Reading (Vision)</div>
+    <div class="ai-photo-drop" onclick="document.getElementById('aiPhotoInput').click()">📷 Tap to capture / upload gauge photo</div>
+    <input type="file" id="aiPhotoInput" accept="image/*" capture="environment" style="display:none" onchange="aiHandlePhoto(event)"/>
+    <div id="aiPhotoResult"></div>
+
+    <div class="ai-section-title" style="margin-top:18px">Voice → Reading</div>
+    <button class="ai-voice-btn" id="aiVoiceBtn" onclick="aiToggleVoice()">🎤</button>
+    <div id="aiVoiceResult" style="text-align:center;font-size:12px;color:#667;margin-top:6px">Tap mic and bolo, e.g. "Load cell one two point five ton"</div>
+  </div>
+</div>
+
+<div class="ai-settings-bg" id="aiSettingsBg">
+  <div class="ai-settings-box">
+    <h3>Google AI Studio Key (FREE)</h3>
+    <p><b>aistudio.google.com</b> pe Google account se sign in karo → left sidebar me "Get API key" → "Create API key" dabao. Koi credit card nahi chahiye. Key "AIza..." se start hogi, wahi yahan paste karo. Ye key sirf is browser ke localStorage me rehti hai, kabhi HTML/GitHub me nahi jaati.</p>
+    <input type="password" id="aiApiKeyInput" placeholder="AIzaSy..."/>
+    <button class="ai-btn" onclick="saveAIKey()">Save Key</button>
+  </div>
+</div>
+
+<script>
+// ================================================================
+// AI AGENTS SUITE
+// ================================================================
+// FREE provider — Google AI Studio (Gemini). No credit card required.
+// Get a key at https://aistudio.google.com → "Get API key".
+const AI_MODEL = 'gemini-2.5-flash';
+const AI_KEY_LS = 'aagims_gemini_key';
+
+function toggleAIPanel(){ document.getElementById('aiPanel').classList.toggle('open'); }
+function aiSwitchTab(tab){
+  document.querySelectorAll('.ai-tab').forEach(t=>t.classList.toggle('active', t.dataset.tab===tab));
+  document.querySelectorAll('.ai-tabpane').forEach(p=>p.classList.toggle('active', p.dataset.pane===tab));
+}
+function openAISettings(){
+  document.getElementById('aiApiKeyInput').value = localStorage.getItem(AI_KEY_LS) || '';
+  document.getElementById('aiSettingsBg').classList.add('open');
+}
+function saveAIKey(){
+  const k = document.getElementById('aiApiKeyInput').value.trim();
+  if(k) localStorage.setItem(AI_KEY_LS, k);
+  document.getElementById('aiSettingsBg').classList.remove('open');
+  showToast('✓ API key saved locally');
+}
+function aiGetKey(){
+  const k = localStorage.getItem(AI_KEY_LS);
+  if(!k){ openAISettings(); showToast('⚠ Pehle apni FREE Google AI Studio key Settings (⚙) me daalo', 4000, 'warn'); }
+  return k;
+}
+
+// Converts our Anthropic-style content blocks (string OR array of {type:'text'|'image',...})
+// into Gemini's "parts" format, so the rest of the app's code didn't need to change.
+function aiContentToGeminiParts(content){
+  if(typeof content === 'string') return [{ text: content }];
+  return content.map(block=>{
+    if(block.type === 'text') return { text: block.text };
+    if(block.type === 'image') return { inline_data: { mime_type: block.source.media_type, data: block.source.data } };
+    return { text: JSON.stringify(block) };
+  });
+}
+
+// Shared caller. `content` can be a string (text-only) or an array of content blocks (for images).
+async function callClaude(content, system, maxTokens){
+  const key = aiGetKey();
+  if(!key) throw new Error('NO_KEY');
+  const body = {
+    contents: [{ role:'user', parts: aiContentToGeminiParts(content) }],
+    generationConfig: { maxOutputTokens: maxTokens || 1024 }
+  };
+  if(system) body.systemInstruction = { parts:[{ text: system }] };
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${AI_MODEL}:generateContent?key=${encodeURIComponent(key)}`, {
+    method:'POST',
+    headers:{ 'Content-Type':'application/json' },
+    body: JSON.stringify(body)
+  });
+  if(!res.ok){
+    const errText = await res.text().catch(()=> '');
+    throw new Error('API '+res.status+': '+errText.slice(0,200));
+  }
+  const data = await res.json();
+  const cand = data.candidates && data.candidates[0];
+  const parts = cand && cand.content && cand.content.parts;
+  return parts ? parts.map(p=>p.text||'').join('\n') : '(Gemini se koi response nahi mila — dobara try karo)';
+}
+
+// ---- Context builder: compact live-data summary shared by Chat + Reports ----
+function aiCompileContext(){
+  const lines = [];
+  lines.push('Project: Gandikota Pumped Storage Project (GKPSP, 1800MW), Powerhouse Cavern instrumentation.');
+  const safe = (fn)=>{ try{ return fn(); }catch(e){ return null; } };
+  const counts = {
+    'Load Cell readings': (typeof lcData!=='undefined'?lcData.length:0),
+    'Strain Gauge readings': (typeof sgData!=='undefined'?sgData.length:0),
+    'MPBX readings': (typeof matData!=='undefined'?matData.length:0),
+    'TRT readings': (typeof trtData!=='undefined'?trtData.length:0),
+    'Rock Bolt readings': (typeof rbData!=='undefined'?rbData.length:0),
+    'CVT readings': (typeof cvtData!=='undefined'?cvtData.length:0),
+    'Inclinometer readings': (typeof incData!=='undefined'?incData.length:0),
+    'Bench defs / readings': (typeof benchDefs!=='undefined'?benchDefs.length:0)+' / '+(typeof benchReadings!=='undefined'?benchReadings.length:0),
+  };
+  Object.keys(counts).forEach(k=> lines.push(k+': '+counts[k]));
+  const anomalies = safe(()=>runAnomalyScanCore());
+  if(anomalies && anomalies.length){
+    lines.push('--- CURRENTLY FLAGGED ANOMALIES ---');
+    anomalies.slice(0,10).forEach(a=> lines.push(`${a.type} ${a.id}: latest=${a.latest.toFixed(2)} (mean ${a.mean.toFixed(2)}, z=${a.z.toFixed(1)}) on ${a.date}`));
+  }
+  return lines.join('\n');
+}
+
+// ---- TAB 1: CHAT AGENT ----
+let aiChatHistory = [];
+function aiAppendMsg(role, text){
+  const log = document.getElementById('aiChatLog');
+  const div = document.createElement('div');
+  div.className = 'ai-msg '+(role==='user'?'user':'bot');
+  div.textContent = text;
+  log.appendChild(div);
+  log.scrollTop = log.scrollHeight;
+}
+async function aiChatSend(){
+  const inp = document.getElementById('aiChatInput');
+  const q = inp.value.trim();
+  if(!q) return;
+  aiAppendMsg('user', q);
+  inp.value='';
+  const log = document.getElementById('aiChatLog');
+  const loadingDiv = document.createElement('div');
+  loadingDiv.className='ai-msg bot';
+  loadingDiv.innerHTML='<span class="ai-loading"></span>Sochh raha hoon...';
+  log.appendChild(loadingDiv); log.scrollTop = log.scrollHeight;
+  try{
+    const system = 'Tum ek Geotechnical Instrumentation assistant ho jo GKPSP (Gandikota Pumped Storage Project) hydro cavern instrumentation dashboard ke data ka analysis karte ho. Hinglish me, seedha aur action-oriented jawab do. Yahan live dashboard data hai:\n\n'+aiCompileContext();
+    const reply = await callClaude(q, system, 900);
+    loadingDiv.remove();
+    aiAppendMsg('bot', reply);
+  }catch(e){
+    loadingDiv.remove();
+    if(e.message==='NO_KEY') return;
+    aiAppendMsg('bot', '⚠ Error: '+e.message);
+  }
+}
+
+// ---- TAB 2: AUTO REPORT AGENT ----
+const AI_REPORT_SOURCES = {
+  loadcell:{label:'Load Cell', arr:()=>lcData, date:'date'},
+  strain:{label:'Strain Gauge', arr:()=>sgData, date:'date'},
+  mat:{label:'MPBX (MAT)', arr:()=>matData, date:'date'},
+  trt:{label:'TRT', arr:()=>trtData, date:'date'},
+  rockbolt:{label:'Rock Bolt Load Cell', arr:()=>rbData, date:'date'},
+  cvt:{label:'CVT Convergence', arr:()=>cvtData, date:'date'},
+  inc:{label:'Inclinometer', arr:()=>incData, date:'date'},
+  bench:{label:'Bench Convergence — 3D Survey', arr:()=>benchReadings, date:'date'},
+};
+async function aiGenerateReport(){
+  const statusEl = document.getElementById('aiReportStatus');
+  const btn = document.getElementById('aiReportBtn');
+  const selected = [...document.querySelectorAll('#aiReportModules input:checked')].map(c=>c.value);
+  if(!selected.length){ showToast('⚠ Kam se kam ek module select karo', 3000, 'warn'); return; }
+  const from = document.getElementById('aiReportFrom').value;
+  const to = document.getElementById('aiReportTo').value;
+  btn.disabled = true; statusEl.innerHTML = '<span class="ai-loading"></span>Data compile ho raha hai...';
+
+  const moduleSummaries = [];
+  selected.forEach(key=>{
+    const src = AI_REPORT_SOURCES[key];
+    if(!src) return;
+    let rows = (src.arr()||[]).slice();
+    if(from) rows = rows.filter(r=> r[src.date] && r[src.date] >= from);
+    if(to)   rows = rows.filter(r=> r[src.date] && r[src.date] <= to);
+    moduleSummaries.push({label:src.label, count:rows.length, sample:rows.slice(-8)});
+  });
+
+  try{
+    statusEl.innerHTML = '<span class="ai-loading"></span>AI summary likh raha hai...';
+    const dataDump = moduleSummaries.map(m=> `### ${m.label} (${m.count} readings in range)\n`+JSON.stringify(m.sample)).join('\n\n');
+    const system = 'Tum ek senior geotechnical instrumentation engineer ho jo GKPSP Powerhouse Cavern ke liye ek professional monitoring report likhte ho. Structured sections do: 1) Executive Summary 2) Per-module observations aur trend 3) Any threshold exceedances / concerns 4) Recommendations. Professional English me likho (report ke liye), concise rahna.';
+    const narrative = await callClaude('Yahan raw readings hai, in par based ek monitoring report likho:\n\n'+dataDump, system, 1800);
+    aiOpenReportWindow(narrative, moduleSummaries, from, to);
+    statusEl.textContent = '✓ Report generated — new tab me khula hai (Print → Save as PDF)';
+  }catch(e){
+    statusEl.textContent = e.message==='NO_KEY' ? '' : ('⚠ Failed: '+e.message);
+  }finally{ btn.disabled = false; }
+}
+function aiOpenReportWindow(narrative, summaries, from, to){
+  const w = window.open('', '_blank');
+  const tableRows = summaries.map(m=>`<tr><td>${m.label}</td><td>${m.count}</td></tr>`).join('');
+  w.document.write(`<!DOCTYPE html><html><head><title>GKPSP Instrumentation Report</title>
+  <style>body{font-family:Georgia,serif;max-width:780px;margin:40px auto;padding:0 20px;color:#1a1a1a;line-height:1.6}
+  h1{font-size:20px;border-bottom:3px solid #123a6b;padding-bottom:8px}
+  h2{font-size:15px;color:#123a6b;margin-top:26px}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:12.5px}
+  td,th{border:1px solid #ccc;padding:6px 10px;text-align:left}
+  pre{white-space:pre-wrap;font-family:Georgia,serif;font-size:13px}
+  .meta{color:#667;font-size:11.5px;margin-bottom:20px}
+  button{padding:8px 16px;margin-bottom:20px;cursor:pointer}
+  @media print{button{display:none}}</style></head><body>
+  <button onclick="window.print()">🖨 Print / Save as PDF</button>
+  <h1>GKPSP Powerhouse Cavern — Instrumentation Monitoring Report</h1>
+  <div class="meta">Period: ${from||'—'} to ${to||'—'} · Generated: ${new Date().toLocaleString()}</div>
+  <h2>Data Summary</h2>
+  <table><tr><th>Module</th><th>Readings in range</th></tr>${tableRows}</table>
+  <h2>Report</h2>
+  <pre>${narrative.replace(/</g,'&lt;')}</pre>
+  </body></html>`);
+  w.document.close();
+}
+
+// ---- TAB 3: ANOMALY DETECTION AGENT (pure client-side stats, no API cost) ----
+const ANOMALY_TARGETS = [
+  {key:'loadcell', label:'Load Cell', arr:()=>lcData, group:'lc', val:'avg', date:'date'},
+  {key:'strain', label:'Strain Gauge', arr:()=>sgData, group:'gauge', val:'val', date:'date'},
+  {key:'mat', label:'MPBX', arr:()=>matData, group:'instId', val:'avg', date:'date'},
+  {key:'trt', label:'TRT', arr:()=>trtData, group:'instId', val:'avg', date:'date'},
+  {key:'rockbolt', label:'Rock Bolt', arr:()=>rbData, group:'instId', val:'avg', date:'date'},
+  {key:'cvt', label:'CVT', arr:()=>cvtData, group:'cvtId', val:'convergence', date:'date'},
+  {key:'inc', label:'Inclinometer', arr:()=>incData, group:'bh', val:'cumul', date:'date'},
+];
+function runAnomalyScanCore(){
+  const results = [];
+  ANOMALY_TARGETS.forEach(t=>{
+    let rows; try{ rows = t.arr()||[]; }catch(e){ rows=[]; }
+    const groups = {};
+    rows.forEach(r=>{ const g=r[t.group]; if(g==null) return; (groups[g]=groups[g]||[]).push(r); });
+    Object.keys(groups).forEach(g=>{
+      const series = groups[g].slice().sort((a,b)=> new Date(a[t.date]||0) - new Date(b[t.date]||0));
+      const vals = series.map(r=>parseFloat(r[t.val])).filter(v=>!isNaN(v));
+      if(vals.length<4) return;
+      const latest = vals[vals.length-1];
+      const hist = vals.slice(0,-1).slice(-8);
+      const mean = hist.reduce((a,b)=>a+b,0)/hist.length;
+      const variance = hist.reduce((a,b)=>a+Math.pow(b-mean,2),0)/hist.length;
+      const std = Math.sqrt(variance);
+      const z = std>0 ? (latest-mean)/std : (Math.abs(latest-mean) > Math.max(0.5, Math.abs(mean)*0.15) ? 9 : 0);
+      if(Math.abs(z)>=2.5){
+        results.push({type:t.label, id:g, latest, mean, std, z, date: series[series.length-1][t.date]||'—'});
+      }
+    });
+  });
+  return results.sort((a,b)=>Math.abs(b.z)-Math.abs(a.z));
+}
+function aiRunAnomalyScan(){
+  const box = document.getElementById('aiAnomalyResults');
+  const results = runAnomalyScanCore();
+  if(!results.length){ box.innerHTML = '<div style="font-size:12px;color:#0a8a52;padding:10px">✓ Koi statistical anomaly nahi mili — sab readings normal range me hai.</div>'; return; }
+  box.innerHTML = results.map((r,i)=>`
+    <div class="ai-anomaly-card ${Math.abs(r.z)<4?'mid':''}">
+      <b>${escHtml(r.type)} — ${escHtml(String(r.id))}</b>
+      <div class="meta">Latest: ${r.latest.toFixed(2)} · Historical mean: ${r.mean.toFixed(2)} · z-score: ${r.z.toFixed(1)} · ${escHtml(String(r.date))}</div>
+      <button class="ai-btn ghost" style="width:auto;padding:6px 12px;font-size:11px" onclick="aiExplainAnomaly(${i})">Explain with AI</button>
+      <div class="ai-explain-box" id="aiExplain${i}" style="display:none"></div>
+    </div>`).join('');
+  window._aiAnomalyResults = results;
+}
+async function aiExplainAnomaly(i){
+  const r = window._aiAnomalyResults[i];
+  const box = document.getElementById('aiExplain'+i);
+  box.style.display='block';
+  box.innerHTML = '<span class="ai-loading"></span>Explain ho raha hai...';
+  try{
+    const system = 'Tum geotechnical instrumentation expert ho. Hinglish me, 3-4 sentences me batao ye anomaly kyun significant ho sakti hai aur field engineer ko kya check karna chahiye.';
+    const prompt = `Instrument: ${r.type} ${r.id}\nLatest reading: ${r.latest}\nHistorical mean: ${r.mean.toFixed(2)}, std dev: ${r.std.toFixed(2)}\nZ-score: ${r.z.toFixed(1)}\nDate: ${r.date}`;
+    const reply = await callClaude(prompt, system, 400);
+    box.textContent = reply;
+  }catch(e){ box.textContent = e.message==='NO_KEY' ? '' : ('⚠ '+e.message); }
+}
+
+// ---- TAB 4: DATA-ENTRY ASSISTANT (photo vision OCR + voice) ----
+function fileToBase64(file){
+  return new Promise((res,rej)=>{
+    const r = new FileReader();
+    r.onload = ()=> res(r.result.split(',')[1]);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+async function aiHandlePhoto(evt){
+  const file = evt.target.files[0];
+  if(!file) return;
+  const box = document.getElementById('aiPhotoResult');
+  box.innerHTML = '<div class="ai-result-box"><span class="ai-loading"></span>Photo padh raha hoon...</div>';
+  try{
+    const b64 = await fileToBase64(file);
+    const content = [
+      { type:'image', source:{ type:'base64', media_type: file.type||'image/jpeg', data: b64 } },
+      { type:'text', text:'Ye ek geotechnical instrument (load cell / MPBX / strain gauge / dial gauge / readout unit) ka photo hai. Display/dial pe jo numeric reading dikh rahi hai wo nikaalo. Sirf ek JSON object return karo, kuch aur text nahi: {"value": <number or null>, "unit": "<guessed unit or empty>", "confidence": "<high/medium/low>", "note": "<1 line note agar reading clear na ho>"}' }
+    ];
+    const reply = await callClaude(content, undefined, 300);
+    let parsed;
+    try{ parsed = JSON.parse(reply.replace(/```json|```/g,'').trim()); }
+    catch(e){ parsed = {value:null, unit:'', confidence:'low', note: reply.slice(0,150)}; }
+    box.innerHTML = `<div class="ai-result-box">
+      <div class="big">${parsed.value!=null ? parsed.value : '—'} <span style="font-size:12px;color:#667">${escHtml(parsed.unit||'')}</span></div>
+      <div style="font-size:11px;color:#667;margin-top:4px">Confidence: ${escHtml(parsed.confidence||'—')}${parsed.note?' · '+escHtml(parsed.note):''}</div>
+      <div style="font-size:10.5px;color:#8a94a6;margin-top:8px">Value ko sahi field me manually paste kar lo ya copy button use karo.</div>
+      <button class="ai-btn ghost" style="margin-top:8px" onclick="navigator.clipboard.writeText('${parsed.value!=null?parsed.value:''}');showToast('✓ Copied')">Copy Value</button>
+    </div>`;
+  }catch(e){
+    box.innerHTML = e.message==='NO_KEY' ? '' : `<div class="ai-result-box">⚠ ${escHtml(e.message)}</div>`;
+  }
+}
+
+let aiRecognition = null, aiListening = false;
+function aiToggleVoice(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const btn = document.getElementById('aiVoiceBtn');
+  const out = document.getElementById('aiVoiceResult');
+  if(!SR){ out.textContent = '⚠ Ye browser voice input support nahi karta (Chrome try karo).'; return; }
+  if(aiListening){ aiRecognition.stop(); return; }
+  aiRecognition = new SR();
+  aiRecognition.lang = 'en-IN';
+  aiRecognition.interimResults = false;
+  aiRecognition.onstart = ()=>{ aiListening=true; btn.classList.add('listening'); out.textContent='Sun raha hoon...'; };
+  aiRecognition.onend = ()=>{ aiListening=false; btn.classList.remove('listening'); };
+  aiRecognition.onerror = (e)=>{ out.textContent = '⚠ '+e.error; };
+  aiRecognition.onresult = async (e)=>{
+    const transcript = e.results[0][0].transcript;
+    out.innerHTML = `<div class="ai-result-box"><b>Suna:</b> "${escHtml(transcript)}"<div id="aiVoiceParsed" style="margin-top:8px"><span class="ai-loading"></span>Number nikaal raha hoon...</div></div>`;
+    try{
+      const system = 'User ne bola kya reading hai. Sirf ek JSON return karo: {"value": <number or null>, "unit":"<if mentioned>"}. Koi extra text nahi.';
+      const reply = await callClaude(transcript, system, 100);
+      const parsed = JSON.parse(reply.replace(/```json|```/g,'').trim());
+      document.getElementById('aiVoiceParsed').innerHTML = `<div class="big">${parsed.value!=null?parsed.value:'—'} <span style="font-size:12px;color:#667">${escHtml(parsed.unit||'')}</span></div>`;
+    }catch(err){
+      const el = document.getElementById('aiVoiceParsed');
+      if(el) el.textContent = err.message==='NO_KEY' ? 'Transcript mila, par API key set nahi hai.' : ('⚠ '+err.message);
+    }
+  };
+  aiRecognition.start();
+}
+</script>
 </body>
 </html>
