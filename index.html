@@ -6,6 +6,28 @@
 <meta name="color-scheme" content="light"/>
 <meta name="darkreader-lock"/>
 <title>A&amp;A Geotechnical Instrumentation – Dashboard v3</title>
+
+<!-- ============ SEO + SOCIAL SHARE PREVIEW TAGS ============ -->
+<!-- 1) Meta description — Google search result me ye line dikhti hai -->
+<meta name="description" content="A&amp;A Geotechnical Instrumentation Monitoring Dashboard — real-time load cell, strain gauge, MPBX, CVT, inclinometer aur rock bolt load cell data for GKPSP Powerhouse Cavern instrumentation."/>
+
+<!-- 2) Open Graph tags — WhatsApp, LinkedIn, Facebook in tags se preview banate hai -->
+<meta property="og:type" content="website"/>
+<meta property="og:site_name" content="A&amp;A Geotechnical Instrumentation"/>
+<meta property="og:title" content="A&amp;A Geotechnical Instrumentation – Dashboard v3"/>
+<meta property="og:description" content="Real-time geotechnical instrumentation monitoring — Load Cell, Strain Gauge, MPBX, CVT, Inclinometer, Rock Bolt & Bench Convergence tracking for GKPSP Powerhouse Cavern."/>
+<meta property="og:url" content="https://mdaa345.github.io/A-A-Geotechnical-instrument-Solution/"/>
+<!-- 👇 YAHAN APNI IMAGE KA FULL URL DAALO (1200x630px recommended, .png/.jpg) -->
+<meta property="og:image" content="https://mdaa345.github.io/A-A-Geotechnical-instrument-Solution/preview-image.png"/>
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="630"/>
+
+<!-- 3) Twitter/X Card tags — X pe share karne pe bhi preview dikhega -->
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="A&amp;A Geotechnical Instrumentation – Dashboard v3"/>
+<meta name="twitter:description" content="Real-time geotechnical instrumentation monitoring — Load Cell, Strain Gauge, MPBX, CVT, Inclinometer, Rock Bolt & Bench Convergence tracking for GKPSP Powerhouse Cavern."/>
+<meta name="twitter:image" content="https://mdaa345.github.io/A-A-Geotechnical-instrument-Solution/preview-image.png"/>
+<!-- ============ END SEO + SOCIAL SHARE TAGS ============ -->
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@300;400;600;800&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <!-- Firebase (Realtime Database) — compat build so it works with plain <script> tags below -->
@@ -8975,7 +8997,7 @@ mmRenderAll();
 // ================================================================
 // FREE provider — Google AI Studio (Gemini). No credit card required.
 // Get a key at https://aistudio.google.com → "Get API key".
-const AI_MODEL = 'gemini-3.5-flash-lite';
+const AI_MODEL = 'gemini-2.5-flash';
 const AI_KEY_LS = 'aagims_gemini_key';
 
 function toggleAIPanel(){ document.getElementById('aiPanel').classList.toggle('open'); }
