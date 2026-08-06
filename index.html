@@ -491,13 +491,25 @@ canvas{display:block}
    Scoped under .sap-shell so the rest of the (dark) dashboard is
    completely untouched. Palette intentionally mimics SAP Fiori.
 ================================================================ */
-.sap-shell{
+.sap-shell, .sap-modal-bg{
+  /* These SAP-Fiori palette variables used to live ONLY on .sap-shell.
+     Problem: the Upload-Drawing / New-Material / Movement / Indent
+     modals are placed at the END of <body>, completely OUTSIDE any
+     .sap-shell wrapper, so var(--sap-panel), var(--sap-txt) etc. were
+     undefined there — the modal panel had no background and the
+     title/label text had no color, making the "Upload Instrument
+     Drawing" heading and the whole modal basically invisible against
+     the dark backdrop. Defining the same variables on .sap-modal-bg
+     too fixes every SAP-style modal regardless of where it sits in
+     the DOM, without touching anything else. */
   --sap-bg:#eef2f7;--sap-panel:#ffffff;--sap-border:#d7dde5;--sap-border2:#e8ecf1;
   --sap-txt:#1c2733;--sap-txt2:#5b6b79;--sap-txt3:#8794a1;
   --sap-blue:#0a6ed1;--sap-blue-dim:#e8f1fc;--sap-navy:#354a5f;
   --sap-green:#107e3e;--sap-green-dim:#e6f4ea;
   --sap-orange:#e9730c;--sap-orange-dim:#fdf1e4;
   --sap-red:#bb0000;--sap-red-dim:#fbe9e9;
+}
+.sap-shell{
   background:var(--sap-bg);color:var(--sap-txt);font-family:var(--sans);
   margin:-18px -20px;padding:20px;min-height:calc(100vh - 74px);
 }
