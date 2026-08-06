@@ -1157,7 +1157,6 @@ canvas{display:block}
     <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('cvtDataModal')">Cancel</button><button class="btn btn-p" onclick="saveCVTData()">Save Reading</button></div>
   </div>
 </div>
-</div>
 
 <!-- ========== CVT IMPORT FROM EXCEL MODAL ========== -->
 <div class="modal-bg" id="cvtImportModal">
@@ -2343,6 +2342,8 @@ canvas{display:block}
         <div class="kpi-card i"><div class="kpi-label">Strain Gauge Records</div><div class="kpi-val i" id="rptSG">0</div></div>
         <div class="kpi-card"><div class="kpi-label">Inclinometer Records</div><div class="kpi-val" id="rptInc">0</div></div>
         <div class="kpi-card" style="--kc:var(--info)"><div class="kpi-label">CVT Records</div><div class="kpi-val" id="rptCVT" style="color:#a78bfa">0</div></div>
+        <div class="kpi-card"><div class="kpi-label">MAT Records</div><div class="kpi-val" id="rptMAT">0</div></div>
+        <div class="kpi-card"><div class="kpi-label">TRT Records</div><div class="kpi-val" id="rptTRT">0</div></div>
       </div>
       <div class="panel">
         <div class="ph"><span class="pt">Export Options</span></div>
@@ -3108,18 +3109,47 @@ function fileToDataURL(file){
 // to storing the file directly as a base64 data URL — so uploads keep
 // working for the user even without fixing the Cloudinary account,
 // as long as the file isn't too large for that fallback.
-async function fbUploadFile(file, folder){
+// After a Cloudinary upload "succeeds" the HTTP call can still return a
+// secure_url that Cloudinary itself refuses to actually serve — this is a
+// known Cloudinary account-security restriction on unsigned PDF/ZIP
+// delivery (upload works, viewing/downloading later 401s). That is exactly
+// what shows up to the user as the browser's native "Failed to load PDF
+// document" error when they click View. So immediately after upload we
+// fetch the returned URL back to confirm it is actually deliverable; if
+// not, we silently fall back to storing the file locally instead of
+// leaving a dead link in the database.
+async function verifyUrlDeliverable(url){
   try{
-    return await cloudinaryUploadFile(file, folder);
-  }catch(cloudErr){
-    console.warn('Cloudinary upload failed, falling back to local storage:', cloudErr.message);
-    const FALLBACK_LIMIT = 4*1024*1024; // 4 MB — base64 + DB overhead
+    const res = await fetch(url, { method:'GET', cache:'no-store' });
+    return res.ok;
+  }catch(_){
+    // Network/CORS error while *checking* isn't proof the URL is broken —
+    // don't punish a valid upload just because the verification fetch
+    // itself couldn't run. Assume OK in that case.
+    return true;
+  }
+}
+async function fbUploadFile(file, folder){
+  const FALLBACK_LIMIT = 8*1024*1024; // 8 MB — base64 + DB overhead
+  async function localFallback(reason){
+    console.warn('Falling back to local storage:', reason);
     if(file.size > FALLBACK_LIMIT){
-      throw new Error(`Cloudinary upload failed (${cloudErr.message}) and file is too large (>4 MB) for local fallback storage.`);
+      throw new Error(`${reason} and file is too large (>8 MB) for local fallback storage.`);
     }
     const dataUrl = await fileToDataURL(file);
     return { url: dataUrl, path: 'local:'+genId(), fileType: file.type||'', fileName: file.name };
   }
+  let uploaded;
+  try{
+    uploaded = await cloudinaryUploadFile(file, folder);
+  }catch(cloudErr){
+    return await localFallback('Cloudinary upload failed ('+cloudErr.message+')');
+  }
+  const deliverable = await verifyUrlDeliverable(uploaded.url);
+  if(!deliverable){
+    return await localFallback('Cloudinary accepted the upload but is blocking delivery of this file type (likely the account\'s unsigned PDF/ZIP delivery restriction)');
+  }
+  return uploaded;
 }
 function fbSetStatusBadge(text, color){
   // Map the bright "signal" color callers pass in to a darker, readable
@@ -7935,6 +7965,7 @@ function closeSapModal(id){
   document.getElementById(id).classList.remove('open');
   if(id==='drwModal'){ pendingDrwFile=null; document.getElementById('drwFile').value=''; document.getElementById('drwFileChip').innerHTML=''; document.getElementById('drwUploadTxt').textContent='Click to choose a file'; }
   if(id==='indModal'){ pendingIndFile=null; document.getElementById('indFile').value=''; document.getElementById('indFileChip').innerHTML=''; document.getElementById('indUploadTxt').textContent='Click to choose a file'; }
+  if(id==='fileViewerModal'){ document.getElementById('fvBody').innerHTML=''; }
 }
 document.querySelectorAll('.sap-modal-bg').forEach(m=>m.addEventListener('click',e=>{ if(e.target===m) m.classList.remove('open'); }));
 
@@ -7996,6 +8027,60 @@ function deleteDrawing(id){
   showToast('Drawing deleted');
 }
 function isImageFile(d){ return (d.fileType&&d.fileType.startsWith('image/')) || /\.(png|jpe?g|gif|webp)$/i.test(d.fileName||''); }
+function isPdfRecord(d){ return (d.fileType==='application/pdf') || /\.pdf$/i.test(d.fileName||''); }
+
+// ---------------- IN-APP FILE VIEWER (Drawings + Indent docs) ----------------
+// Why this exists instead of a plain <a target="_blank">: on Android
+// Chrome, top-level navigation to a data: URL (our local-fallback storage
+// format) is blocked outright, and if a Cloudinary "raw" PDF URL is
+// blocked by the account's delivery restrictions the browser's native PDF
+// viewer shows a bare "Failed to load PDF document" error with no way to
+// recover. Rendering the file inside an <iframe>/<img> in our own modal
+// works around both cases, and gives a clear fallback message + Download
+// button instead of a dead-end browser error screen.
+function viewDrawingFile(id){
+  const d = drawingsData.find(x=>x.id===id);
+  if(!d){ showToast('⚠ Drawing not found', 3000, 'warn'); return; }
+  viewFile(d.fileUrl, d.title||d.fileName||'Drawing', d.fileType, isPdfRecord(d));
+}
+function viewIndentFile(id){
+  const d = indentData.find(x=>x.id===id);
+  if(!d){ showToast('⚠ Document not found', 3000, 'warn'); return; }
+  viewFile(d.fileUrl, d.fileName||('Indent '+d.indentNo), d.fileType, isPdfRecord(d));
+}
+function viewFile(url, title, fileType, isPdf){
+  if(!url){ showToast('⚠ No file to preview', 3000, 'warn'); return; }
+  const isImg = (fileType&&fileType.startsWith('image/')) || /\.(png|jpe?g|gif|webp)$/i.test(title||'');
+  document.getElementById('fvTitle').textContent = title || 'Preview';
+  const body = document.getElementById('fvBody');
+  const warn = document.getElementById('fvWarn');
+  warn.style.display='none'; warn.textContent='';
+  document.getElementById('fvOpenTab').href = url;
+  document.getElementById('fvDownload').href = url;
+  document.getElementById('fvDownload').setAttribute('download', title||'file');
+  body.innerHTML = '<div style="padding:40px;color:#8a94a6;font-size:12px">Loading preview…</div>';
+
+  if(isImg){
+    body.innerHTML = `<img src="${url}" style="max-width:100%;max-height:80vh;object-fit:contain" alt="${escHtml(title)}"/>`;
+  } else {
+    // PDF (or unknown type) — embed in an iframe scoped to this modal so
+    // data: URLs never have to go through top-level navigation, and so a
+    // blocked/broken host shows its error inside the box, not as a dead tab.
+    body.innerHTML = `<iframe id="fvFrame" src="${url}" style="width:100%;height:78vh;border:0;background:#fff"></iframe>`;
+    // data: URLs don't fire onerror reliably; for remote (http) URLs we can
+    // proactively check deliverability and show a clear message instead of
+    // leaving the user staring at a blank/broken iframe.
+    if(/^https?:/i.test(url)){
+      fetch(url, {method:'GET', cache:'no-store'}).then(res=>{
+        if(!res.ok){
+          warn.style.display='block';
+          warn.textContent = `⚠ This file's host returned an error (HTTP ${res.status}) and won't display here. This usually means the storage account is blocking delivery of this file type. Use "Open in New Tab" or "Download" below, or re-upload the file to store it locally in the app.`;
+        }
+      }).catch(()=>{ /* CORS-blocked check — not conclusive, stay silent */ });
+    }
+  }
+  openSapModal('fileViewerModal');
+}
 function renderDrawings(){
   const grid=document.getElementById('drwGrid'); if(!grid) return;
   const typeFilter=document.getElementById('drwTypeFilter').value;
@@ -8017,7 +8102,7 @@ function renderDrawings(){
         <div class="sap-drawing-meta">${fmtDT(d.uploadedAt)}</div>
       </div>
       <div class="sap-drawing-actions">
-        <a class="sap-btn sap-btn-sm" style="flex:1;text-align:center" href="${d.fileUrl}" target="_blank" rel="noopener">View</a>
+        <a class="sap-btn sap-btn-sm" style="flex:1;text-align:center" href="javascript:void(0)" onclick="viewDrawingFile('${d.id}')">View</a>
         <button class="sap-btn sap-btn-sm sap-btn-danger-o" onclick="deleteDrawing('${d.id}')">Delete</button>
       </div>
     </div>`).join('');
@@ -8250,7 +8335,7 @@ function renderIndents(){
           ${['Pending','Approved','Received','Closed'].map(s=>`<option ${s===d.status?'selected':''}>${s}</option>`).join('')}
         </select>
       </td>
-      <td>${d.fileUrl?`<a class="sap-btn sap-btn-sm" href="${d.fileUrl}" target="_blank" rel="noopener">View</a>`:'<span style="color:var(--sap-txt3);font-size:11px">No file</span>'}</td>
+      <td>${d.fileUrl?`<a class="sap-btn sap-btn-sm" href="javascript:void(0)" onclick="viewIndentFile('${d.id}')">View</a>`:'<span style="color:var(--sap-txt3);font-size:11px">No file</span>'}</td>
       <td><button class="sap-btn sap-btn-sm sap-btn-danger-o" onclick="deleteIndent('${d.id}')">Delete</button></td>
     </tr>`).join('');
   const badge=document.getElementById('inventoryNavBadge');
@@ -8660,6 +8745,20 @@ window.addEventListener('load',()=>{
     <div class="sap-modal-foot">
       <button class="sap-btn" onclick="closeSapModal('drwModal')">Cancel</button>
       <button class="sap-btn sap-btn-primary" id="drwSaveBtn" onclick="saveDrawing()">Upload &amp; Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== FILE VIEWER MODAL (Drawings / Indent docs) ========== -->
+<div class="sap-modal-bg" id="fileViewerModal">
+  <div class="sap-modal" style="width:820px;max-width:94vw;max-height:92vh;display:flex;flex-direction:column">
+    <div class="sap-modal-title"><span id="fvTitle">Preview</span><button class="sap-modal-close" onclick="closeSapModal('fileViewerModal')">×</button></div>
+    <div id="fvBody" style="flex:1;min-height:60vh;overflow:auto;background:#f3f5f8;border-radius:8px;display:flex;align-items:center;justify-content:center;position:relative"></div>
+    <div id="fvWarn" style="display:none;margin-top:10px;padding:10px 12px;border-radius:6px;background:#fff7ed;border:1px solid #fdba74;color:#9a3412;font-size:12px;line-height:1.5"></div>
+    <div class="sap-modal-foot">
+      <a class="sap-btn" id="fvOpenTab" href="#" target="_blank" rel="noopener">Open in New Tab</a>
+      <a class="sap-btn" id="fvDownload" href="#" download="">Download</a>
+      <button class="sap-btn sap-btn-primary" onclick="closeSapModal('fileViewerModal')">Close</button>
     </div>
   </div>
 </div>
